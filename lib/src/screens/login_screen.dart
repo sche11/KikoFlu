@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../services/kikoeru_api_service.dart';
 import '../utils/server_utils.dart';
 import '../utils/snackbar_util.dart';
+import '../../l10n/app_localizations.dart';
 import '../widgets/scrollable_appbar.dart';
 import 'main_screen.dart';
 
@@ -97,12 +98,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (!_isLogin) {
       if (username.length < 5) {
-        SnackBarUtil.showError(context, '用户名不能少于5个字符');
+        SnackBarUtil.showError(context, S.of(context).usernameMinLength);
         setState(() => _isLoading = false);
         return;
       }
       if (password.length < 5) {
-        SnackBarUtil.showError(context, '密码不能少于5个字符');
+        SnackBarUtil.showError(context, S.of(context).passwordMinLength);
         setState(() => _isLoading = false);
         return;
       }
@@ -124,7 +125,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (widget.isAddingAccount) {
           // Adding account mode - just go back
           Navigator.pop(context, true);
-          SnackBarUtil.showSuccess(context, '账户 "$username" 已添加');
+          SnackBarUtil.showSuccess(context, S.of(context).accountAdded(username));
         } else {
           // Normal login - go to main screen
           Navigator.of(context).pushAndRemoveUntil(
@@ -136,14 +137,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         final error = ref.read(authProvider).error;
         SnackBarUtil.showError(
           context,
-          error ?? (_isLogin ? '登录失败' : '注册失败'),
+          error ?? (_isLogin ? S.of(context).loginFailed : S.of(context).registerFailed),
         );
       }
     } catch (e) {
       if (mounted) {
         SnackBarUtil.showError(
           context,
-          _isLogin ? '登录失败' : '注册失败',
+          _isLogin ? S.of(context).loginFailed : S.of(context).registerFailed,
         );
       }
     }
@@ -155,7 +156,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _loginAsGuest() async {
     // 验证服务器地址
     if (_hostValue.trim().isEmpty) {
-      SnackBarUtil.showError(context, '请先输入服务器地址');
+      SnackBarUtil.showError(context, S.of(context).pleaseEnterServerAddress);
       return;
     }
 
@@ -164,23 +165,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('游客模式确认'),
-          content: const Text(
-            '您将使用公用游客账户登录。\n\n'
-            '请注意：\n'
-            '• 收藏、评论等功能会与其他游客用户共享\n'
-            '• 访问速率可能会受到限制\n'
-            '• 数据不保证安全性和持久性\n\n'
-            '建议注册专属账户以获得更好的使用体验。',
+          title: Text(S.of(context).guestModeTitle),
+          content: Text(
+            S.of(context).guestModeMessage,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+              child: Text(S.of(context).cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('继续使用游客模式'),
+              child: Text(S.of(context).continueGuestMode),
             ),
           ],
         );
@@ -207,7 +203,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (widget.isAddingAccount) {
           // Adding account mode - just go back
           Navigator.pop(context, true);
-          SnackBarUtil.showSuccess(context, '游客账户已添加');
+          SnackBarUtil.showSuccess(context, S.of(context).guestAccountAdded);
         } else {
           // Normal login - go to main screen
           Navigator.of(context).pushAndRemoveUntil(
@@ -219,12 +215,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         final error = ref.read(authProvider).error;
         SnackBarUtil.showError(
           context,
-          error ?? '游客登录失败',
+          error ?? S.of(context).guestLoginFailed,
         );
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '游客登录失败');
+        SnackBarUtil.showError(context, S.of(context).guestLoginFailed);
       }
     }
 
@@ -271,7 +267,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final result = normalized.isEmpty ? null : _latencyResults[normalized];
     final isTesting = result?.state == _LatencyState.testing;
     final statusText = normalized.isEmpty
-        ? '请输入服务器地址后测试连接'
+        ? S.of(context).enterServerAddressToTest
         : _describeLatencyResult(result, includePlaceholder: true);
     final color = normalized.isEmpty
         ? Theme.of(context).colorScheme.onSurfaceVariant
@@ -296,7 +292,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.network_ping_outlined),
-          label: Text(isTesting ? '测试中...' : '测试连接'),
+          label: Text(isTesting ? S.of(context).testing : S.of(context).testConnection),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -382,7 +378,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       final statusCode = e is DioException ? e.response?.statusCode : null;
       final message = e is DioException
-          ? (e.message ?? e.error?.toString() ?? '未知错误')
+          ? (e.message ?? e.error?.toString() ?? 'Unknown error')
           : e.toString();
 
       setState(() {
@@ -397,29 +393,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String _describeLatencyResult(_LatencyResult? result,
       {bool includePlaceholder = false}) {
+    final s = S.of(context);
     if (result == null) {
-      return includePlaceholder ? '尚未测试' : '';
+      return includePlaceholder ? s.notTestedYet : '';
     }
 
     switch (result.state) {
       case _LatencyState.idle:
-        return includePlaceholder ? '尚未测试' : '';
+        return includePlaceholder ? s.notTestedYet : '';
       case _LatencyState.testing:
-        return '测试中...';
+        return s.testing;
       case _LatencyState.success:
         final latency = result.latencyMs;
         final statusCode = result.statusCode;
         final latencyText = latency != null ? '$latency ms' : '- ms';
         final statusText = statusCode != null ? 'HTTP $statusCode' : 'HTTP -';
-        return '延迟 $latencyText ($statusText)';
+        return s.latencyResultDetail(latencyText, statusText);
       case _LatencyState.failure:
         final statusCode = result.statusCode;
         final error = result.error;
         final statusSuffix = statusCode != null ? ' (HTTP $statusCode)' : '';
         if (error != null && error.isNotEmpty) {
-          return '连接失败: ${_shortenMessage(error)}';
+          return s.connectionFailedWithDetail(_shortenMessage(error));
         }
-        return '连接失败$statusSuffix';
+        return '${s.connectionFailed}$statusSuffix';
     }
   }
 
@@ -457,8 +454,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       appBar: ScrollableAppBar(
         title: Text(widget.isAddingAccount
-            ? (_isLogin ? '添加账户' : '注册账户')
-            : (_isLogin ? '登录' : '注册')),
+            ? (_isLogin ? S.of(context).addAccount : S.of(context).registerAccount)
+            : (_isLogin ? S.of(context).login : S.of(context).register)),
         centerTitle: true,
         // Show back button in adding account mode
         automaticallyImplyLeading: widget.isAddingAccount,
@@ -585,17 +582,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       TextFormField(
         controller: _usernameController,
         autofillHints: const [AutofillHints.username],
-        decoration: const InputDecoration(
-          labelText: '用户名',
-          prefixIcon: Icon(Icons.person),
-          border: OutlineInputBorder(),
+        decoration: InputDecoration(
+          labelText: S.of(context).username,
+          prefixIcon: const Icon(Icons.person),
+          border: const OutlineInputBorder(),
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return '请输入用户名';
+            return S.of(context).pleaseEnterUsername;
           }
           if (!_isLogin && value.trim().length < 5) {
-            return '用户名至少需要5个字符';
+            return S.of(context).usernameMinLength;
           }
           return null;
         },
@@ -610,7 +607,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         autofillHints: const [AutofillHints.password],
         obscureText: _obscurePassword,
         decoration: InputDecoration(
-          labelText: '密码',
+          labelText: S.of(context).password,
           prefixIcon: const Icon(Icons.lock),
           suffixIcon: IconButton(
             icon: Icon(
@@ -626,10 +623,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return '请输入密码';
+            return S.of(context).pleaseEnterPassword;
           }
           if (!_isLogin && value.length < 5) {
-            return '密码至少需要5个字符';
+            return S.of(context).passwordMinLength;
           }
           return null;
         },
@@ -654,10 +651,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           return TextFormField(
             controller: textEditingController,
             focusNode: focusNode,
-            decoration: const InputDecoration(
-              labelText: '服务器地址',
-              prefixIcon: Icon(Icons.dns),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: S.of(context).serverAddress,
+              prefixIcon: const Icon(Icons.dns),
+              border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.url,
             onChanged: (value) {
@@ -667,7 +664,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             },
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return '请输入服务器地址';
+                return S.of(context).pleaseEnterServerAddress;
               }
               return null;
             },
@@ -696,7 +693,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : Text(_isLogin ? '登录' : '注册'),
+            : Text(_isLogin ? S.of(context).login : S.of(context).register),
       ),
 
       const SizedBox(height: 12),
@@ -706,7 +703,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         OutlinedButton.icon(
           onPressed: _isLoading ? null : _loginAsGuest,
           icon: const Icon(Icons.person_outline),
-          label: const Text('游客模式'),
+          label: Text(S.of(context).guestMode),
           style: OutlinedButton.styleFrom(
             foregroundColor: Theme.of(context).colorScheme.secondary,
           ),
@@ -718,7 +715,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       TextButton(
         onPressed: _toggleMode,
         child: Text(
-          _isLogin ? '没有账号？点击注册' : '已有账号？点击登录',
+          _isLogin ? S.of(context).noAccountTapToRegister : S.of(context).haveAccountTapToLogin,
           style: TextStyle(
             color: Theme.of(context).colorScheme.primary,
           ),

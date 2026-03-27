@@ -9,6 +9,7 @@ import '../services/translation_service.dart';
 import '../services/subtitle_library_service.dart';
 import '../utils/snackbar_util.dart';
 import '../utils/encoding_utils.dart';
+import '../../l10n/app_localizations.dart';
 import 'scrollable_appbar.dart';
 
 /// 文本预览屏幕
@@ -115,8 +116,8 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.folder_open),
-              title: const Text('保存到本地'),
-              subtitle: const Text('选择目录保存文件'),
+              title: Text(S.of(context).saveToLocal),
+              subtitle: Text(S.of(context).selectDirectoryToSaveFile),
               onTap: () {
                 Navigator.pop(context);
                 _saveToLocal();
@@ -124,8 +125,8 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.library_books),
-              title: const Text('保存到字幕库'),
-              subtitle: const Text('保存到字幕库的“已保存”目录'),
+              title: Text(S.of(context).saveToSubtitleLibrary),
+              subtitle: Text(S.of(context).saveToSubtitleLibraryDesc),
               onTap: () {
                 Navigator.pop(context);
                 _saveToSubtitleLibrary();
@@ -143,7 +144,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
     final contentToSave = _getCurrentContent();
     if (contentToSave == null || contentToSave.isEmpty) {
       if (mounted) {
-        SnackBarUtil.showWarning(context, '没有可保存的内容');
+        SnackBarUtil.showWarning(context, S.of(context).noContentToSave);
       }
       return;
     }
@@ -176,11 +177,11 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       await file.writeAsBytes(bytes);
 
       if (mounted) {
-        SnackBarUtil.showSuccess(context, '文件已保存到：$finalPath');
+        SnackBarUtil.showSuccess(context, S.of(context).fileSavedToPath(finalPath));
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '保存失败: $e');
+        SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
       }
     }
   }
@@ -190,7 +191,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
     final contentToSave = _getCurrentContent();
     if (contentToSave == null || contentToSave.isEmpty) {
       if (mounted) {
-        SnackBarUtil.showWarning(context, '没有可保存的内容');
+        SnackBarUtil.showWarning(context, S.of(context).noContentToSave);
       }
       return;
     }
@@ -238,13 +239,13 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            SnackBarUtil.showSuccess(context, '已保存到字幕库');
+            SnackBarUtil.showSuccess(context, S.of(context).savedToSubtitleLibrary);
           }
         });
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '保存失败: $e');
+        SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
       }
     }
   }
@@ -280,7 +281,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
           return;
         } else {
           setState(() {
-            _errorMessage = '本地文件不存在';
+            _errorMessage = S.of(context).localFileNotExist;
             _isLoading = false;
           });
           return;
@@ -341,7 +342,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = '加载文本失败: $e';
+        _errorMessage = S.of(context).loadTextFailed(e.toString());
         _isLoading = false;
       });
     }
@@ -352,7 +353,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
 
     setState(() {
       _isTranslating = true;
-      _translationProgress = '准备翻译...';
+      _translationProgress = S.of(context).preparingTranslation;
     });
 
     try {
@@ -361,7 +362,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
         _content!,
         onProgress: (current, total) {
           setState(() {
-            _translationProgress = '翻译中 $current/$total';
+            _translationProgress = S.of(context).translatingProgress(current, total);
           });
         },
       );
@@ -379,7 +380,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
         _translationProgress = '';
       });
       if (mounted) {
-        SnackBarUtil.showError(context, '翻译失败: $e');
+        SnackBarUtil.showError(context, S.of(context).translationFailed(e.toString()));
       }
     }
   }
@@ -402,7 +403,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                   _isEditMode = !_isEditMode;
                 });
               },
-              tooltip: _isEditMode ? '预览模式' : '编辑模式',
+              tooltip: _isEditMode ? S.of(context).previewMode : S.of(context).editMode,
             ),
           if (_content != null && _content!.isNotEmpty)
             IconButton(
@@ -432,12 +433,12 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                         _translateContent();
                       }
                     },
-              tooltip: _showTranslation ? '显示原文' : '翻译内容',
+              tooltip: _showTranslation ? S.of(context).showOriginal : S.of(context).translateContent,
             ),
           IconButton(
             icon: const Icon(Icons.download),
             onPressed: _showSaveOptions,
-            tooltip: '保存',
+            tooltip: S.of(context).save,
           ),
         ],
       ),
@@ -465,7 +466,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadTextContent,
-              child: const Text('重试'),
+              child: Text(S.of(context).retry),
             ),
           ],
         ),
@@ -516,9 +517,9 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                         fontFamily: 'monospace',
                         fontSize: 14,
                       ),
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: '编辑文本内容...',
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        hintText: S.of(context).editTextContentHint,
                       ),
                     )
                   : SelectableText(

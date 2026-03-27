@@ -8,6 +8,7 @@ import '../providers/subtitle_library_provider.dart';
 import '../screens/work_detail_screen.dart';
 import '../utils/snackbar_util.dart';
 import '../utils/string_utils.dart';
+import '../../l10n/app_localizations.dart';
 import 'tag_chip.dart';
 import 'va_chip.dart';
 import 'work_bookmark_manager.dart';
@@ -59,7 +60,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     } catch (e) {
       setState(() => _loadingProgress = false);
       if (mounted) {
-        SnackBarUtil.showError(context, '获取状态失败: $e');
+        SnackBarUtil.showError(context, S.of(context).getStatusFailed(e.toString()));
       }
     }
   }
@@ -292,7 +293,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                   // 价格
                   if (displaySettings.showPrice && widget.work.price != null)
                     Text(
-                      '${widget.work.price} 日元',
+                      S.of(context).priceInYen(widget.work.price!),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.red[700],
                             fontWeight: FontWeight.w600,
@@ -478,7 +479,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                       if (displaySettings.showPrice &&
                           widget.work.price != null)
                         Text(
-                          '${widget.work.price} 日元',
+                          S.of(context).priceInYen(widget.work.price!),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.red[700],
@@ -548,7 +549,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                       if (displaySettings.showSales &&
                           widget.work.dlCount != null)
                         Text(
-                          '售出：${widget.work.dlCount}',
+                          S.of(context).soldCount('${widget.work.dlCount}'),
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.grey[500],

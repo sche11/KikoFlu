@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/work.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../responsive_dialog.dart';
 
 /// 标签投票对话框组件
@@ -94,10 +95,10 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
           SnackBar(
             content: Text(
               newStatus == 0
-                  ? '已取消投票'
+                  ? S.of(context).voteRemoved
                   : newStatus == 1
-                      ? '已投支持票'
-                      : '已投反对票',
+                      ? S.of(context).votedUp
+                      : S.of(context).votedDown,
             ),
             duration: const Duration(seconds: 1),
             behavior: SnackBarBehavior.floating,
@@ -112,7 +113,7 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('投票失败: $e'),
+            content: Text(S.of(context).voteFailedWithError(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
@@ -137,7 +138,7 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
           _buildVoteButton(
             targetStatus: 1,
             icon: Icons.thumb_up,
-            label: '支持',
+            label: S.of(context).voteFor,
             count: _currentTag.upvote ?? 0,
             activeColor: Colors.green,
           ),
@@ -146,7 +147,7 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
           _buildVoteButton(
             targetStatus: 2,
             icon: Icons.thumb_down,
-            label: '反对',
+            label: S.of(context).voteAgainst,
             count: _currentTag.downvote ?? 0,
             activeColor: Colors.red,
           ),
@@ -158,7 +159,7 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('关闭'),
+          child: Text(S.of(context).close),
         ),
         ElevatedButton.icon(
           onPressed: () {
@@ -166,7 +167,7 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
             widget.onCopyTag();
           },
           icon: const Icon(Icons.copy, size: 18),
-          label: const Text('复制标签'),
+          label: Text(S.of(context).copyTag),
         ),
       ],
     );
@@ -222,7 +223,7 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  '已投票',
+                  S.of(context).voted,
                   style: TextStyle(
                     fontSize: 11,
                     color: activeColor,
@@ -249,6 +250,8 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
         final notifier = ref.read(blockedItemsProvider.notifier);
         final messenger = ScaffoldMessenger.of(context);
         final tagName = _currentTag.name;
+        final blockedMessage = S.of(context).tagBlockedWithName(tagName);
+        final undoLabel = S.of(context).undo;
 
         // 添加到屏蔽列表
         notifier.addTag(tagName);
@@ -257,11 +260,11 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
         messenger.clearSnackBars();
         final controller = messenger.showSnackBar(
           SnackBar(
-            content: Text('已屏蔽标签: $tagName'),
+            content: Text(blockedMessage),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
-              label: '撤销',
+              label: undoLabel,
               onPressed: () {
                 notifier.removeTag(tagName);
               },
@@ -286,7 +289,7 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
             color: Colors.grey.withOpacity(0.3),
           ),
         ),
-        child: const Row(
+        child: Row(
           children: [
             Icon(
               Icons.block,
@@ -296,7 +299,7 @@ class _TagVoteDialogState extends ConsumerState<TagVoteDialog> {
             SizedBox(width: 12),
             Expanded(
               child: Text(
-                '屏蔽此标签',
+                S.of(context).blockThisTag,
                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.red,

@@ -7,6 +7,7 @@ import '../providers/settings_provider.dart';
 import '../providers/works_provider.dart';
 import '../providers/my_reviews_provider.dart';
 import '../providers/player_buttons_provider.dart';
+import '../providers/floating_lyric_style_provider.dart';
 
 // ============================================================
 // SearchType
@@ -183,6 +184,36 @@ extension PlayerButtonTypeL10n on PlayerButtonType {
       PlayerButtonType.detail => s.viewDetail,
       PlayerButtonType.subtitleAdjustment => s.subtitleTimingAdjustment,
       PlayerButtonType.floatingLyric => s.desktopFloatingLyric,
+    };
+  }
+}
+
+// ============================================================
+// FloatingLyricStylePreset
+// ============================================================
+
+extension FloatingLyricStylePresetL10n on FloatingLyricStylePreset {
+  String localizedName(BuildContext context) {
+    final s = S.of(context);
+    return switch (this) {
+      FloatingLyricStylePreset.dynamic => s.lyricPresetDynamic,
+      FloatingLyricStylePreset.classic => s.lyricPresetClassic,
+      FloatingLyricStylePreset.modern => s.lyricPresetModern,
+      FloatingLyricStylePreset.minimal => s.lyricPresetMinimal,
+      FloatingLyricStylePreset.vibrant => s.lyricPresetVibrant,
+      FloatingLyricStylePreset.elegant => s.lyricPresetElegant,
+    };
+  }
+
+  String localizedDescription(BuildContext context) {
+    final s = S.of(context);
+    return switch (this) {
+      FloatingLyricStylePreset.dynamic => s.lyricPresetDynamicDesc,
+      FloatingLyricStylePreset.classic => s.lyricPresetClassicDesc,
+      FloatingLyricStylePreset.modern => s.lyricPresetModernDesc,
+      FloatingLyricStylePreset.minimal => s.lyricPresetMinimalDesc,
+      FloatingLyricStylePreset.vibrant => s.lyricPresetVibrantDesc,
+      FloatingLyricStylePreset.elegant => s.lyricPresetElegantDesc,
     };
   }
 }

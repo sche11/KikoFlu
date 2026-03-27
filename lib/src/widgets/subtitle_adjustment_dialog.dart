@@ -9,6 +9,7 @@ import '../providers/lyric_provider.dart';
 import '../providers/audio_provider.dart';
 import '../services/subtitle_library_service.dart';
 import '../utils/snackbar_util.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 字幕轴调整对话框
 class SubtitleAdjustmentDialog extends ConsumerStatefulWidget {
@@ -63,12 +64,12 @@ class _SubtitleAdjustmentDialogState
     try {
       final currentTrack = await ref.read(currentTrackProvider.future);
       if (currentTrack == null) {
-        throw Exception('没有正在播放的音频');
+        throw Exception(S.of(context).noAudioPlaying);
       }
 
       // 选择保存目录
       final selectedDirectory = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: '选择保存目录',
+        dialogTitle: S.of(context).selectSaveDirectory,
       );
 
       if (selectedDirectory == null) {
@@ -87,7 +88,7 @@ class _SubtitleAdjustmentDialogState
       final vttContent = lyricController.exportLyrics(format: 'vtt');
 
       if (lrcContent.isEmpty && vttContent.isEmpty) {
-        throw Exception('没有可保存的字幕内容');
+        throw Exception(S.of(context).noSubtitleContentToSave);
       }
 
       // 保存文件 (默认LRC格式)
@@ -97,12 +98,12 @@ class _SubtitleAdjustmentDialogState
 
       if (mounted) {
         Navigator.pop(context);
-        SnackBarUtil.showSuccess(context, '已保存到: $filePath',
+        SnackBarUtil.showSuccess(context, S.of(context).savedToPath(filePath),
             duration: const Duration(seconds: 3));
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '保存失败: $e');
+        SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -117,7 +118,7 @@ class _SubtitleAdjustmentDialogState
     try {
       final currentTrack = await ref.read(currentTrackProvider.future);
       if (currentTrack == null) {
-        throw Exception('没有正在播放的音频');
+        throw Exception(S.of(context).noAudioPlaying);
       }
 
       // 获取字幕库目录
@@ -138,7 +139,7 @@ class _SubtitleAdjustmentDialogState
       final lrcContent = lyricController.exportLyrics(format: 'lrc');
 
       if (lrcContent.isEmpty) {
-        throw Exception('没有可保存的字幕内容');
+        throw Exception(S.of(context).noSubtitleContentToSave);
       }
 
       // 保存到字幕库
@@ -151,11 +152,11 @@ class _SubtitleAdjustmentDialogState
 
       if (mounted) {
         Navigator.pop(context);
-        SnackBarUtil.showSuccess(context, '已保存到字幕库');
+        SnackBarUtil.showSuccess(context, S.of(context).savedToSubtitleLibrary);
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '保存失败: $e');
+        SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -173,8 +174,8 @@ class _SubtitleAdjustmentDialogState
           children: [
             ListTile(
               leading: const Icon(Icons.folder_open),
-              title: const Text('保存到本地'),
-              subtitle: const Text('选择目录保存文件'),
+              title: Text(S.of(context).saveToLocal),
+              subtitle: Text(S.of(context).selectDirectoryToSaveFile),
               onTap: () {
                 Navigator.pop(context);
                 _saveToLocal();
@@ -182,8 +183,8 @@ class _SubtitleAdjustmentDialogState
             ),
             ListTile(
               leading: const Icon(Icons.library_books),
-              title: const Text('保存到字幕库'),
-              subtitle: const Text('保存到字幕库的"已保存"目录'),
+              title: Text(S.of(context).saveToSubtitleLibrary),
+              subtitle: Text(S.of(context).saveToSubtitleLibraryDesc),
               onTap: () {
                 Navigator.pop(context);
                 _saveToLibrary();
@@ -269,7 +270,7 @@ class _SubtitleAdjustmentDialogState
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    '字幕轴调整',
+                    S.of(context).subtitleTimingAdjustment,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -364,7 +365,7 @@ class _SubtitleAdjustmentDialogState
                   child: OutlinedButton.icon(
                     onPressed: isAdjusted ? _resetOffset : null,
                     icon: const Icon(Icons.restore, size: 18),
-                    label: const Text('重置'),
+                    label: Text(S.of(context).reset),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -375,7 +376,7 @@ class _SubtitleAdjustmentDialogState
                   child: FilledButton.icon(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.check, size: 18),
-                    label: const Text('确认'),
+                    label: Text(S.of(context).confirm),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -391,7 +392,7 @@ class _SubtitleAdjustmentDialogState
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.save, size: 20),
-                  tooltip: '保存到文件',
+                  tooltip: S.of(context).saveToFile,
                   style: IconButton.styleFrom(
                     backgroundColor: isAdjusted && !_isSaving
                         ? Theme.of(context).colorScheme.primaryContainer

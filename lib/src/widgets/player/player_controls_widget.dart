@@ -12,6 +12,7 @@ import '../subtitle_adjustment_dialog.dart';
 import '../volume_control.dart';
 import 'sleep_timer_button.dart';
 import 'sleep_timer_dialog.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 播放器控制组件
 class PlayerControlsWidget extends ConsumerStatefulWidget {
@@ -75,7 +76,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
       context: context,
       barrierDismissible: !Platform.isIOS,
       builder: (context) => ResponsiveAlertDialog(
-        title: const Text('播放速度'),
+        title: Text(S.of(context).playbackSpeed),
         content: StatefulBuilder(
           builder: (context, setState) {
             return Column(
@@ -104,7 +105,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('确定'),
+            child: Text(S.of(context).confirm),
           ),
         ],
       ),
@@ -177,7 +178,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
       case PlayerButtonType.seekBackward:
         return ListTile(
           leading: const Icon(Icons.replay_10),
-          title: const Text('后退10秒'),
+          title: Text(S.of(context).backward10s),
           onTap: () {
             Navigator.pop(context);
             ref
@@ -188,7 +189,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
       case PlayerButtonType.seekForward:
         return ListTile(
           leading: const Icon(Icons.forward_10),
-          title: const Text('前进10秒'),
+          title: Text(S.of(context).forward10s),
           onTap: () {
             Navigator.pop(context);
             ref
@@ -205,7 +206,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
                 ? Theme.of(context).colorScheme.primary
                 : null,
           ),
-          title: const Text('定时'),
+          title: Text(S.of(context).sleepTimer),
           trailing: timerState.isActive && timerState.remainingTime != null
               ? Text(
                   timerState.formattedTime,
@@ -222,7 +223,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
       case PlayerButtonType.speed:
         return ListTile(
           leading: const Icon(Icons.speed),
-          title: const Text('播放速度'),
+          title: Text(S.of(context).playbackSpeed),
           trailing: Text(
             '${widget.audioState.speed.toStringAsFixed(1)}x',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -246,12 +247,12 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
                 ? Theme.of(context).colorScheme.primary
                 : null,
           ),
-          title: const Text('循环模式'),
+          title: Text(S.of(context).repeatMode),
           trailing: Text(
             switch (widget.audioState.repeatMode) {
-              LoopMode.off => '关闭',
-              LoopMode.one => '单曲',
-              LoopMode.all => '列表',
+              LoopMode.off => S.of(context).repeatOff,
+              LoopMode.one => S.of(context).repeatOne,
+              LoopMode.all => S.of(context).repeatAll,
             },
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: widget.audioState.repeatMode != LoopMode.off
@@ -281,7 +282,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
                 ? Theme.of(context).colorScheme.primary
                 : null,
           ),
-          title: const Text('添加标记'),
+          title: Text(S.of(context).addMark),
           trailing: widget.currentProgress != null
               ? Icon(
                   Icons.check_circle,
@@ -299,7 +300,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
       case PlayerButtonType.detail:
         return ListTile(
           leading: const Icon(Icons.info_outline),
-          title: const Text('查看详情'),
+          title: Text(S.of(context).viewDetail),
           onTap: () {
             Navigator.pop(context);
             if (widget.onDetailPressed != null) {
@@ -315,7 +316,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
           children: [
             ListTile(
               leading: const Icon(Icons.volume_up),
-              title: const Text('音量'),
+              title: Text(S.of(context).volume),
               trailing: Text(
                 '${(currentVolume * 100).round()}%',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -364,7 +365,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
             Icons.tune,
             color: hasOffset ? Theme.of(context).colorScheme.primary : null,
           ),
-          title: const Text('字幕轴调整'),
+          title: Text(S.of(context).subtitleTimingAdjustment),
           trailing: hasOffset
               ? Text(
                   '${lyricState.timelineOffset.inMilliseconds}ms',
@@ -391,7 +392,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
                 Icons.picture_in_picture_alt,
                 color: isEnabled ? Theme.of(context).colorScheme.primary : null,
               ),
-              title: const Text('悬浮字幕'),
+              title: Text(S.of(context).floatingSubtitle),
               trailing: Transform.scale(
                 scale: 0.8,
                 alignment: Alignment.centerRight,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../models/account.dart';
 import '../services/account_database.dart';
 import '../providers/auth_provider.dart';
@@ -40,16 +41,16 @@ class _AccountManagementScreenState
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('切换账户'),
-        content: Text('确定要切换到账户 "${account.username}" 吗?'),
+        title: Text(S.of(context).switchAccountTitle),
+        content: Text(S.of(context).switchAccountConfirm(account.username)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('确定'),
+            child: Text(S.of(context).confirm),
           ),
         ],
       ),
@@ -70,18 +71,18 @@ class _AccountManagementScreenState
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('已切换到账户: ${account.username}')),
+          SnackBar(content: Text(S.of(context).switchedToAccount(account.username))),
         );
         await _loadAccounts();
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('切换失败,请检查账户信息')),
+          SnackBar(content: Text(S.of(context).switchFailed)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('切换失败: $e')),
+          SnackBar(content: Text(S.of(context).switchFailedWithError('$e'))),
         );
       }
     }
@@ -105,7 +106,7 @@ class _AccountManagementScreenState
   Future<void> _deleteAccount(Account account) async {
     if (account.isActive) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('无法删除当前使用的账户')),
+        SnackBar(content: Text(S.of(context).cannotDeleteActiveAccount)),
       );
       return;
     }
@@ -113,19 +114,19 @@ class _AccountManagementScreenState
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除账户'),
-        content: Text('确定要删除账户 "${account.username}" 吗?此操作无法撤销。'),
+        title: Text(S.of(context).deleteAccount),
+        content: Text(S.of(context).deleteAccountConfirm(account.username)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('删除'),
+            child: Text(S.of(context).delete),
           ),
         ],
       ),
@@ -137,14 +138,14 @@ class _AccountManagementScreenState
       await AccountDatabase.instance.deleteAccount(account.id!);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('账户已删除')),
+          SnackBar(content: Text(S.of(context).accountDeleted)),
         );
       }
       await _loadAccounts();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('删除失败: $e')),
+          SnackBar(content: Text(S.of(context).deletionFailedWithError('$e'))),
         );
       }
     }
@@ -153,8 +154,8 @@ class _AccountManagementScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('账户管理', style: TextStyle(fontSize: 18)),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).accountManagement, style: const TextStyle(fontSize: 18)),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -170,12 +171,12 @@ class _AccountManagementScreenState
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '暂无账户',
+                        S.of(context).noAccounts,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '点击右下角按钮添加账户',
+                        S.of(context).tapToAddAccount,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Theme.of(context).colorScheme.outline,
                             ),
@@ -222,7 +223,7 @@ class _AccountManagementScreenState
                             Text(account.host),
                             if (account.isActive)
                               Text(
-                                '当前账户',
+                                S.of(context).currentAccount,
                                 style: TextStyle(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontSize: 12,
@@ -233,25 +234,25 @@ class _AccountManagementScreenState
                         trailing: PopupMenuButton(
                           itemBuilder: (context) => [
                             if (!account.isActive)
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'switch',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.swap_horiz),
-                                    SizedBox(width: 8),
-                                    Text('切换'),
+                                    const Icon(Icons.swap_horiz),
+                                    const SizedBox(width: 8),
+                                    Text(S.of(context).switchAction),
                                   ],
                                 ),
                               ),
                             if (!account.isActive)
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'delete',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.delete, color: Colors.red),
-                                    SizedBox(width: 8),
-                                    Text('删除',
-                                        style: TextStyle(color: Colors.red)),
+                                    const Icon(Icons.delete, color: Colors.red),
+                                    const SizedBox(width: 8),
+                                    Text(S.of(context).delete,
+                                        style: const TextStyle(color: Colors.red)),
                                   ],
                                 ),
                               ),

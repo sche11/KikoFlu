@@ -923,10 +923,11 @@ class SEn extends S {
 
   @override
   String get tagSubmitSuccess =>
-      'Tags submitted, waiting for server to process';
+      'Tags submitted successfully, awaiting server processing';
 
   @override
-  String get bindEmailFirst => 'Please bind your email at www.asmr.one first';
+  String get bindEmailFirst =>
+      'Please go to www.asmr.one to bind your email first';
 
   @override
   String selectedNTags(int count) {
@@ -963,8 +964,8 @@ class SEn extends S {
   }
 
   @override
-  String pageNOfTotal(int page, int total) {
-    return 'Page $page/$total';
+  String pageNOfTotal(int current, int total) {
+    return 'Page $current / $total';
   }
 
   @override
@@ -1184,7 +1185,7 @@ class SEn extends S {
   String get llmTestFailed => 'Test failed';
 
   @override
-  String get subtitleTimingAdjustment => 'Subtitle Timing';
+  String get subtitleTimingAdjustment => 'Subtitle Timing Adjustment';
 
   @override
   String get playerLyricStyle => 'Player Lyrics Style';
@@ -1301,7 +1302,7 @@ class SEn extends S {
   String get imageSaved => 'Image saved';
 
   @override
-  String get saveImageFailed => 'Failed to save image';
+  String get saveImageFailed => 'Save failed';
 
   @override
   String get logout => 'Logout';
@@ -1328,7 +1329,7 @@ class SEn extends S {
 
   @override
   String ratingsCount(int count) {
-    return '$count ratings';
+    return '$count ratings total';
   }
 
   @override
@@ -1781,7 +1782,7 @@ class SEn extends S {
 
   @override
   String totalNItems(int count) {
-    return '$count total';
+    return '$count items total';
   }
 
   @override
@@ -1933,5 +1934,1072 @@ class SEn extends S {
   @override
   String pageExcludedNWorks(int count) {
     return 'This page excluded $count works';
+  }
+
+  @override
+  String get noSubtitlesAvailable => 'No subtitles available';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
+  String get backToCover => 'Back to cover';
+
+  @override
+  String get lyricHintTapCover => 'Tap cover or title to enter subtitle view';
+
+  @override
+  String get floatingSubtitle => 'Floating Subtitle';
+
+  @override
+  String get appendMode => 'Append Mode';
+
+  @override
+  String get appendModeStatusOn => 'Append Mode: On';
+
+  @override
+  String get appendModeStatusOff => 'Append Mode: Off';
+
+  @override
+  String get playlistEmpty => 'Playlist is empty';
+
+  @override
+  String get appendModeEnabled => 'Append Mode Enabled';
+
+  @override
+  String get appendModeHint =>
+      'Audio tapped next will be appended to the end of the current playlist instead of replacing it.\nDuplicate tracks won\'t be added.';
+
+  @override
+  String get gotIt => 'Got it';
+
+  @override
+  String nMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String nHours(int count) {
+    return '$count hr';
+  }
+
+  @override
+  String get titleLabel => 'Title';
+
+  @override
+  String get rjNumberLabel => 'RJ Number';
+
+  @override
+  String get tapToViewRatingDetail => 'Tap to view rating details';
+
+  @override
+  String priceInYen(int price) {
+    return '$price Yen';
+  }
+
+  @override
+  String soldCount(String count) {
+    return 'Sold: $count';
+  }
+
+  @override
+  String get circleAndVaSection => 'Circle | Voice Actors';
+
+  @override
+  String get subtitleBadge => 'Subtitle';
+
+  @override
+  String get otherEditions => 'Other Editions';
+
+  @override
+  String tenThousandSuffix(String count) {
+    return '${count}k';
+  }
+
+  @override
+  String get packingWork => 'Packing work...';
+
+  @override
+  String get workDirectoryNotExist => 'Work directory does not exist';
+
+  @override
+  String get packingFailed => 'Packing failed';
+
+  @override
+  String exportSuccess(String path) {
+    return 'Export successful: $path';
+  }
+
+  @override
+  String exportFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String get exportAsZip => 'Export as ZIP';
+
+  @override
+  String get offlineBadge => 'Offline';
+
+  @override
+  String loadFilesFailed(String error) {
+    return 'Failed to load files: $error';
+  }
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get noPlayableAudioFiles => 'No playable audio files found';
+
+  @override
+  String cannotFindAudioFile(String title) {
+    return 'Cannot find audio file: $title';
+  }
+
+  @override
+  String nowPlayingNOfTotal(String title, int current, int total) {
+    return 'Now playing: $title ($current/$total)';
+  }
+
+  @override
+  String get noAudioCannotLoadSubtitle =>
+      'No audio playing, cannot load subtitle';
+
+  @override
+  String get loadSubtitle => 'Load Subtitle';
+
+  @override
+  String get loadSubtitleConfirm =>
+      'Load this file as subtitle for the current audio?';
+
+  @override
+  String get subtitleFile => 'Subtitle file';
+
+  @override
+  String get currentAudio => 'Current audio';
+
+  @override
+  String get subtitleAutoRestoreNote =>
+      'Subtitle will auto-restore to default matching when switching audio';
+
+  @override
+  String get confirmLoad => 'Confirm Load';
+
+  @override
+  String get loadingSubtitle => 'Loading subtitle...';
+
+  @override
+  String subtitleLoadSuccess(String title) {
+    return 'Subtitle loaded: $title';
+  }
+
+  @override
+  String subtitleLoadFailed(String error) {
+    return 'Subtitle load failed: $error';
+  }
+
+  @override
+  String get cannotPreviewImageMissingInfo =>
+      'Cannot preview image: missing required info';
+
+  @override
+  String get cannotFindImageFile => 'Cannot find image file';
+
+  @override
+  String get cannotPreviewTextMissingInfo =>
+      'Cannot preview text: missing required info';
+
+  @override
+  String get cannotPreviewPdfMissingInfo =>
+      'Cannot preview PDF: missing required info';
+
+  @override
+  String get cannotPlayVideoMissingId => 'Cannot play video: missing file ID';
+
+  @override
+  String get cannotPlayVideoMissingParams =>
+      'Cannot play video: missing required parameters';
+
+  @override
+  String get cannotPlayDirectly => 'Cannot play directly';
+
+  @override
+  String get noVideoPlayerFound =>
+      'No supported video player found on this device.';
+
+  @override
+  String get youCan => 'You can:';
+
+  @override
+  String get copyLinkToExternalPlayer =>
+      '1. Copy the link to an external player (e.g. MX Player, VLC)';
+
+  @override
+  String get openInBrowserOption => '2. Open in browser';
+
+  @override
+  String playVideoError(String error) {
+    return 'Error playing video: $error';
+  }
+
+  @override
+  String get noFiles => 'No files';
+
+  @override
+  String get resourceFiles => 'Resource Files';
+
+  @override
+  String resourceFilesTranslated(int count) {
+    return 'Resource Files (translated $count items)';
+  }
+
+  @override
+  String get translationOriginal => 'Orig';
+
+  @override
+  String get translationTranslated => 'Trans';
+
+  @override
+  String copiedName(String title) {
+    return 'Copied name: $title';
+  }
+
+  @override
+  String translationComplete(int count) {
+    return 'Translation complete: $count items';
+  }
+
+  @override
+  String get noContentToTranslate => 'No content to translate';
+
+  @override
+  String get preparingTranslation => 'Preparing translation...';
+
+  @override
+  String translatingProgress(int current, int total) {
+    return 'Translating $current/$total';
+  }
+
+  @override
+  String nItems(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get loadAsSubtitle => 'Load as subtitle';
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String openVideoFileError(String error) {
+    return 'Error opening video file: $error';
+  }
+
+  @override
+  String cannotOpenVideoFile(String message) {
+    return 'Cannot open video file: $message';
+  }
+
+  @override
+  String get noFileTreeInfo => 'No file tree information';
+
+  @override
+  String get workFolderNotExist => 'Work folder does not exist';
+
+  @override
+  String get cannotPlayAudioMissingId => 'Cannot play audio: missing file ID';
+
+  @override
+  String get audioFileNotExist => 'Audio file does not exist';
+
+  @override
+  String get noPreviewableImages => 'No previewable images found';
+
+  @override
+  String get cannotPreviewTextMissingId =>
+      'Cannot preview text: missing file ID';
+
+  @override
+  String get cannotFindFilePath => 'Cannot find file path';
+
+  @override
+  String fileNotExist(String title) {
+    return 'File does not exist: $title';
+  }
+
+  @override
+  String get cannotPreviewPdfMissingId => 'Cannot preview PDF: missing file ID';
+
+  @override
+  String get videoFileNotExist => 'Video file does not exist';
+
+  @override
+  String get cannotOpenVideo => 'Cannot open video';
+
+  @override
+  String errorInfo(String message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get installVideoPlayerApp =>
+      'Please install a video player app (e.g. VLC, MX Player)';
+
+  @override
+  String get filePathLabel => 'File path:';
+
+  @override
+  String get noDownloadedFiles => 'No downloaded files';
+
+  @override
+  String get offlineFiles => 'Offline Files';
+
+  @override
+  String unsupportedFileType(String title) {
+    return 'This file type is not supported: $title';
+  }
+
+  @override
+  String get deleteFilePrompt => 'Are you sure you want to delete this file?';
+
+  @override
+  String deletedItem(String title) {
+    return 'Deleted: $title';
+  }
+
+  @override
+  String get selectAtLeastOneFile => 'Please select at least one file';
+
+  @override
+  String addedNFilesToDownloadQueue(int count) {
+    return 'Added $count files to download queue';
+  }
+
+  @override
+  String downloadedAndSelected(int downloaded, int selected) {
+    return 'Downloaded $downloaded · Selected $selected';
+  }
+
+  @override
+  String downloadN(int count) {
+    return 'Download ($count)';
+  }
+
+  @override
+  String get checkingDownloadedFiles => 'Checking downloaded files...';
+
+  @override
+  String get noDownloadableFiles => 'No downloadable files';
+
+  @override
+  String get selectFilesToDownload => 'Select Files to Download';
+
+  @override
+  String downloadedNCount(int count) {
+    return '$count downloaded';
+  }
+
+  @override
+  String selectedNCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get pleaseEnterServerAddress => 'Please enter server address';
+
+  @override
+  String get pleaseEnterUsername => 'Please enter username';
+
+  @override
+  String get pleaseEnterPassword => 'Please enter password';
+
+  @override
+  String get notTestedYet => 'Not tested yet';
+
+  @override
+  String latencyResultDetail(String latency, String status) {
+    return 'Latency $latency ($status)';
+  }
+
+  @override
+  String connectionFailedWithDetail(String error) {
+    return 'Connection failed: $error';
+  }
+
+  @override
+  String get noAccountTapToRegister => 'No account? Tap to register';
+
+  @override
+  String get haveAccountTapToLogin => 'Have an account? Tap to login';
+
+  @override
+  String get cannotDeleteActiveAccount =>
+      'Cannot delete the currently active account';
+
+  @override
+  String get selectAccount => 'Select Account';
+
+  @override
+  String get noSavedAccounts => 'No saved accounts';
+
+  @override
+  String get addAccountToGetStarted => 'Add an account to get started';
+
+  @override
+  String get unknownHost => 'Unknown host';
+
+  @override
+  String lastUsedTime(String time) {
+    return 'Last used: $time';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count days ago';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count hours ago';
+  }
+
+  @override
+  String minutesAgo(int count) {
+    return '$count minutes ago';
+  }
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String get confirmDelete => 'Confirm Delete';
+
+  @override
+  String deleteSelectedConfirm(int count) {
+    return 'Delete $count selected items?';
+  }
+
+  @override
+  String deletedNOfTotalItems(int success, int total) {
+    return 'Deleted $success/$total items';
+  }
+
+  @override
+  String get importingSubtitleFile => 'Importing subtitle file...';
+
+  @override
+  String get preparingImport => 'Preparing import...';
+
+  @override
+  String get preparingExtract => 'Preparing to extract...';
+
+  @override
+  String get importSubtitleFile => 'Import Subtitle File';
+
+  @override
+  String get supportedSubtitleFormats =>
+      'Supports .srt, .vtt, .lrc and other subtitle formats';
+
+  @override
+  String get importFolder => 'Import Folder';
+
+  @override
+  String get importFolderDesc =>
+      'Preserves folder structure, imports only subtitle files';
+
+  @override
+  String get importArchive => 'Import Archive';
+
+  @override
+  String get importArchiveDesc =>
+      'Supports password-free ZIP archives.\nFor batch import, compress them into one archive.';
+
+  @override
+  String get subtitleLibraryGuide => 'Subtitle Library Usage Guide';
+
+  @override
+  String get subtitleLibraryFunction => 'Subtitle Library Function';
+
+  @override
+  String get subtitleLibraryFunctionDesc =>
+      'Stores imported/saved subtitle files, supports auto/manual loading during playback';
+
+  @override
+  String get subtitleAutoLoad => 'Subtitle Auto-load';
+
+  @override
+  String get subtitleAutoLoadDesc =>
+      'When playing audio, the system automatically searches for matching subtitles:';
+
+  @override
+  String get smartCategoryAndMark => 'Smart Categorization & Marking';
+
+  @override
+  String get open => 'Open';
+
+  @override
+  String get moveTo => 'Move to';
+
+  @override
+  String get rename => 'Rename';
+
+  @override
+  String get newName => 'New name';
+
+  @override
+  String get renameSuccess => 'Rename successful';
+
+  @override
+  String get renameFailed => 'Rename failed';
+
+  @override
+  String deleteItemConfirm(String title) {
+    return 'Delete \"$title\"?';
+  }
+
+  @override
+  String get deleteFolderContentsWarning =>
+      'This will delete all contents in the folder.';
+
+  @override
+  String get deleteFailed => 'Delete failed';
+
+  @override
+  String subtitleLoaded(String title) {
+    return 'Subtitle loaded: $title';
+  }
+
+  @override
+  String get moveSuccess => 'Move successful';
+
+  @override
+  String get moveFailed => 'Move failed';
+
+  @override
+  String previewFailed(String error) {
+    return 'Preview failed: $error';
+  }
+
+  @override
+  String openFailed(String error) {
+    return 'Open failed: $error';
+  }
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get subtitleLibraryEmpty => 'Subtitle library is empty';
+
+  @override
+  String get tapToImportSubtitle => 'Tap the + button to import subtitles';
+
+  @override
+  String get importSubtitle => 'Import Subtitle';
+
+  @override
+  String get sampleSubtitleContent => '♪ Sample subtitle content ♪';
+
+  @override
+  String get presetStyles => 'Preset Styles';
+
+  @override
+  String get backgroundOpacity => 'Background Opacity';
+
+  @override
+  String get colorSettings => 'Color Settings';
+
+  @override
+  String get shapeSettings => 'Shape Settings';
+
+  @override
+  String get cornerRadius => 'Corner Radius';
+
+  @override
+  String get horizontalPadding => 'Horizontal Padding';
+
+  @override
+  String get verticalPadding => 'Vertical Padding';
+
+  @override
+  String get resetStyle => 'Reset Style';
+
+  @override
+  String get resetStyleConfirm =>
+      'Are you sure you want to restore the default style?';
+
+  @override
+  String get restoreDefaultStyle => 'Restore Default Style';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String noBlockedItemsOfType(String type) {
+    return 'No blocked $type';
+  }
+
+  @override
+  String unblockedItem(String item) {
+    return 'Unblocked: $item';
+  }
+
+  @override
+  String addBlockedItem(String type) {
+    return 'Add Blocked $type';
+  }
+
+  @override
+  String blockedItemName(String type) {
+    return '$type name';
+  }
+
+  @override
+  String enterBlockedItemHint(String type) {
+    return 'Enter $type to block';
+  }
+
+  @override
+  String blockedItemAdded(String item) {
+    return 'Blocked: $item';
+  }
+
+  @override
+  String workCountLabel(int count) {
+    return 'Works: $count';
+  }
+
+  @override
+  String get miniPlayer => 'Mini Player';
+
+  @override
+  String get lineHeight => 'Line Height';
+
+  @override
+  String get portraitPlayerBelowCover => 'Portrait Player (Below Cover)';
+
+  @override
+  String get fullscreenSubtitleMode =>
+      'Fullscreen Subtitle (Portrait/Landscape)';
+
+  @override
+  String get activeSubtitleFontSize => 'Active subtitle size';
+
+  @override
+  String get inactiveSubtitleFontSize => 'Inactive subtitle size';
+
+  @override
+  String get restoreDefaultSettings => 'Restore Default Settings';
+
+  @override
+  String get guideInPrefix => 'In ';
+
+  @override
+  String get guideParsedFolder => '<Parsed>';
+
+  @override
+  String get guideFindWorkDesc =>
+      ' folder, find matching works\nSupported folder format: RJ123456';
+
+  @override
+  String get guideSavedFolder => '<Saved>';
+
+  @override
+  String get guideFindSubtitleDesc => ' folder, find individual subtitle files';
+
+  @override
+  String get guideMatchRule =>
+      'Matching rule: subtitle filename matches audio filename (with or without audio extension)';
+
+  @override
+  String get guideRecognizedWorkPrefix => 'Recognized works get a green ';
+
+  @override
+  String get guideTagSuffix => ' tag, and audio file icons get a ';
+
+  @override
+  String get guideSubtitleMatchSuffix =>
+      ' mark, indicating subtitle library match';
+
+  @override
+  String get guideAutoRecognizeRJ =>
+      'Auto-recognize RJ format on import, categorize to <Parsed>';
+
+  @override
+  String get guideAutoAddRJPrefix =>
+      'Pure numeric folders auto-add RJ prefix (e.g. 123456 → RJ123456)';
+
+  @override
+  String get unknownFile => 'Unknown file';
+
+  @override
+  String deleteWithCount(int count) {
+    return 'Delete ($count)';
+  }
+
+  @override
+  String get searchSubtitles => 'Search subtitles...';
+
+  @override
+  String nFilesWithSize(int count, String size) {
+    return '$count files • $size';
+  }
+
+  @override
+  String get rootDirectory => 'Root';
+
+  @override
+  String get goToParent => 'Go to parent';
+
+  @override
+  String moveToTarget(String name) {
+    return 'Move to: $name';
+  }
+
+  @override
+  String get noSubfoldersHere => 'No subfolders in this directory';
+
+  @override
+  String addedToPlaylist(String name) {
+    return 'Added to playlist \"$name\"';
+  }
+
+  @override
+  String removedFromPlaylist(String name) {
+    return 'Removed from playlist \"$name\"';
+  }
+
+  @override
+  String get alreadyFavorited => 'Favorited';
+
+  @override
+  String loadImageFailedWithError(String error) {
+    return 'Failed to load image\n$error';
+  }
+
+  @override
+  String get noImageAvailable => 'No image available';
+
+  @override
+  String get storagePermissionRequiredForImage =>
+      'Storage permission required to save images';
+
+  @override
+  String get savedToGallery => 'Saved to gallery';
+
+  @override
+  String get saveCoverImage => 'Save Cover Image';
+
+  @override
+  String savedToPath(String path) {
+    return 'Saved to: $path';
+  }
+
+  @override
+  String get doubleTapToZoom => 'Double-tap to zoom · Pinch to scale';
+
+  @override
+  String getStatusFailed(String error) {
+    return 'Failed to get status: $error';
+  }
+
+  @override
+  String get deleteRecord => 'Delete Record';
+
+  @override
+  String deletePlayRecordConfirm(String title) {
+    return 'Are you sure you want to delete the play record for \"$title\"?';
+  }
+
+  @override
+  String get notPlayedYet => 'Not played yet';
+
+  @override
+  String playbackFailed(String error) {
+    return 'Playback failed: $error';
+  }
+
+  @override
+  String get storagePermissionRequired => 'Storage Permission Required';
+
+  @override
+  String get storagePermissionForGalleryDesc =>
+      'Permission to access the photo gallery is required to save images. Please grant permission in settings.';
+
+  @override
+  String get goToSettings => 'Go to Settings';
+
+  @override
+  String get imageSavedToGallery => 'Image saved to gallery';
+
+  @override
+  String imageSavedToPath(String path) {
+    return 'Image saved to: $path';
+  }
+
+  @override
+  String get pullDownForNextPage => 'Pull down to go to next page';
+
+  @override
+  String get releaseForNextPage => 'Release to go to next page';
+
+  @override
+  String get jumpTo => 'Jump';
+
+  @override
+  String get goToPageTitle => 'Go to Page';
+
+  @override
+  String pageNumberRange(int max) {
+    return 'Page (1-$max)';
+  }
+
+  @override
+  String get enterPageNumber => 'Enter page number';
+
+  @override
+  String enterValidPageNumber(int max) {
+    return 'Please enter a valid page number (1-$max)';
+  }
+
+  @override
+  String get previousPage => 'Previous';
+
+  @override
+  String get nextPage => 'Next';
+
+  @override
+  String get localPdfNotExist => 'Local PDF file does not exist';
+
+  @override
+  String get cannotOpenPdf => 'Cannot open PDF file';
+
+  @override
+  String loadPdfFailed(String error) {
+    return 'Failed to load PDF: $error';
+  }
+
+  @override
+  String pdfPageOfTotal(int current, int total) {
+    return 'Page $current of $total';
+  }
+
+  @override
+  String get loadingPdf => 'Loading PDF...';
+
+  @override
+  String get pdfPathInvalid => 'PDF file path is invalid';
+
+  @override
+  String get desktopPdfPreviewNotSupported =>
+      'Desktop PDF preview is not yet supported';
+
+  @override
+  String get openWithSystemApp => 'Open with system default app';
+
+  @override
+  String renderPdfFailed(String error) {
+    return 'PDF rendering failed: $error';
+  }
+
+  @override
+  String get ratingDetails => 'Rating Details';
+
+  @override
+  String get selectSaveDirectory => 'Select Save Directory';
+
+  @override
+  String get noSubtitleContentToSave => 'No subtitle content to save';
+
+  @override
+  String get savedToSubtitleLibrary => 'Saved to subtitle library';
+
+  @override
+  String get saveToLocal => 'Save to Local';
+
+  @override
+  String get selectDirectoryToSaveFile => 'Select directory to save file';
+
+  @override
+  String get saveToSubtitleLibrary => 'Save to Subtitle Library';
+
+  @override
+  String get saveToSubtitleLibraryDesc =>
+      'Save to the \"Saved\" folder in subtitle library';
+
+  @override
+  String get saveToFile => 'Save to file';
+
+  @override
+  String get noContentToSave => 'No content to save';
+
+  @override
+  String fileSavedToPath(String path) {
+    return 'File saved to: $path';
+  }
+
+  @override
+  String get localFileNotExist => 'Local file does not exist';
+
+  @override
+  String loadTextFailed(String error) {
+    return 'Failed to load text: $error';
+  }
+
+  @override
+  String get previewMode => 'Preview Mode';
+
+  @override
+  String get editMode => 'Edit Mode';
+
+  @override
+  String get showOriginal => 'Show Original';
+
+  @override
+  String get translateContent => 'Translate Content';
+
+  @override
+  String get editTextContentHint => 'Edit text content...';
+
+  @override
+  String get bookmarkRemoved => 'Bookmark removed';
+
+  @override
+  String setProgressAndRating(String progress, int rating) {
+    return 'Set to: $progress, rating: $rating stars';
+  }
+
+  @override
+  String setProgressTo(String progress) {
+    return 'Set to: $progress';
+  }
+
+  @override
+  String ratingSetTo(int rating) {
+    return 'Rating set to: $rating stars';
+  }
+
+  @override
+  String get updated => 'Updated';
+
+  @override
+  String addTagFailed(String error) {
+    return 'Failed to add tag: $error';
+  }
+
+  @override
+  String addWithCount(int count) {
+    return 'Add ($count)';
+  }
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String nStars(int count) {
+    return '$count stars';
+  }
+
+  @override
+  String get voteRemoved => 'Vote removed';
+
+  @override
+  String get votedUp => 'Voted up';
+
+  @override
+  String get votedDown => 'Voted down';
+
+  @override
+  String voteFailedWithError(String error) {
+    return 'Vote failed: $error';
+  }
+
+  @override
+  String get voteFor => 'Support';
+
+  @override
+  String get voteAgainst => 'Against';
+
+  @override
+  String get voted => 'Voted';
+
+  @override
+  String tagBlockedWithName(String name) {
+    return 'Tag blocked: $name';
+  }
+
+  @override
+  String get subtitleParseFailedUnsupportedFormat =>
+      'Parse failed, unsupported format';
+
+  @override
+  String get lyricPresetDynamic => 'Dynamic';
+
+  @override
+  String get lyricPresetClassic => 'Classic';
+
+  @override
+  String get lyricPresetModern => 'Modern';
+
+  @override
+  String get lyricPresetMinimal => 'Minimal';
+
+  @override
+  String get lyricPresetVibrant => 'Vibrant';
+
+  @override
+  String get lyricPresetElegant => 'Elegant';
+
+  @override
+  String get lyricPresetDynamicDesc => 'Follows system theme, auto color';
+
+  @override
+  String get lyricPresetClassicDesc => 'Black background, white text, classic';
+
+  @override
+  String get lyricPresetModernDesc => 'Gradient background, stylish modern';
+
+  @override
+  String get lyricPresetMinimalDesc => 'Light transparent, simple and elegant';
+
+  @override
+  String get lyricPresetVibrantDesc => 'Vivid colors, full of energy';
+
+  @override
+  String get lyricPresetElegantDesc => 'Deep blue, refined elegance';
+
+  @override
+  String get floatingLyricLoading => '♪ Loading subtitle ♪';
+
+  @override
+  String get subtitleFileNotExist => 'File does not exist';
+
+  @override
+  String get subtitleMissingInfo => 'Missing required info';
+
+  @override
+  String get privacyDefaultTitle => 'Playing Audio';
+
+  @override
+  String get offlineModeStartup =>
+      'Network connection failed, starting in offline mode';
+
+  @override
+  String get playlistInfoNotLoaded => 'Playlist info not loaded';
+
+  @override
+  String get encodingUnrecognized =>
+      'File encoding unrecognized, cannot display content correctly';
+
+  @override
+  String editPlaylistFailed(String error) {
+    return 'Failed to edit playlist: $error';
+  }
+
+  @override
+  String unsupportedFileTypeWithTitle(String title) {
+    return 'Cannot open this file type: $title';
   }
 }

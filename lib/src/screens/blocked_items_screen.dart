@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
 import '../utils/snackbar_util.dart';
 import '../providers/auth_provider.dart';
@@ -13,12 +14,12 @@ class BlockedItemsScreen extends ConsumerWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('屏蔽设置', style: TextStyle(fontSize: 18)),
-          bottom: const TabBar(
+          title: Text(S.of(context).blockedItems, style: const TextStyle(fontSize: 18)),
+          bottom: TabBar(
             tabs: [
-              Tab(text: '标签'),
-              Tab(text: '声优'),
-              Tab(text: '社团'),
+              Tab(text: S.of(context).searchTypeTag),
+              Tab(text: S.of(context).searchTypeVa),
+              Tab(text: S.of(context).searchTypeCircle),
             ],
           ),
         ),
@@ -50,15 +51,15 @@ class _BlockedList extends ConsumerWidget {
     switch (type) {
       case _BlockedType.tag:
         items = blockedItems.tags;
-        label = '标签';
+        label = S.of(context).searchTypeTag;
         break;
       case _BlockedType.cv:
         items = blockedItems.cvs;
-        label = '声优';
+        label = S.of(context).searchTypeVa;
         break;
       case _BlockedType.circle:
         items = blockedItems.circles;
-        label = '社团';
+        label = S.of(context).searchTypeCircle;
         break;
     }
 
@@ -73,7 +74,7 @@ class _BlockedList extends ConsumerWidget {
       body: items.isEmpty
           ? Center(
               child: Text(
-                '没有屏蔽的$label',
+                S.of(context).noBlockedItemsOfType(label),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -89,7 +90,7 @@ class _BlockedList extends ConsumerWidget {
                     icon: const Icon(Icons.delete),
                     onPressed: () {
                       _removeItem(ref, type, item);
-                      SnackBarUtil.showSuccess(context, '已移除屏蔽: $item');
+                      SnackBarUtil.showSuccess(context, S.of(context).unblockedItem(item));
                     },
                   ),
                 );
@@ -190,13 +191,13 @@ class _AddItemDialogState extends ConsumerState<_AddItemDialog> {
         break;
     }
     Navigator.pop(context);
-    SnackBarUtil.showSuccess(context, '已添加屏蔽: $item');
+    SnackBarUtil.showSuccess(context, S.of(context).blockedItemAdded(item));
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('添加屏蔽${widget.label}'),
+      title: Text(S.of(context).addBlockedItem(widget.label)),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
@@ -233,8 +234,8 @@ class _AddItemDialogState extends ConsumerState<_AddItemDialog> {
                     controller: textEditingController,
                     focusNode: focusNode,
                     decoration: InputDecoration(
-                      labelText: '${widget.label}名称',
-                      hintText: '请输入要屏蔽的${widget.label}',
+                      labelText: S.of(context).blockedItemName(widget.label),
+                      hintText: S.of(context).enterBlockedItemHint(widget.label),
                       suffixIcon: _isLoading
                           ? const SizedBox(
                               width: 20,
@@ -268,7 +269,7 @@ class _AddItemDialogState extends ConsumerState<_AddItemDialog> {
                             return ListTile(
                               title: Text(option['name']),
                               subtitle: option['count'] != null
-                                  ? Text('作品数: ${option['count']}')
+                                  ? Text(S.of(context).workCountLabel(option['count'] as int))
                                   : null,
                               onTap: () {
                                 onSelected(option);
@@ -291,7 +292,7 @@ class _AddItemDialogState extends ConsumerState<_AddItemDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(S.of(context).cancel),
         ),
         TextButton(
           onPressed: () {
@@ -300,7 +301,7 @@ class _AddItemDialogState extends ConsumerState<_AddItemDialog> {
               _addItem(text);
             }
           },
-          child: const Text('添加'),
+          child: Text(S.of(context).add),
         ),
       ],
     );

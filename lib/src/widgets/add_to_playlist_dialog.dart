@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/playlist_detail_provider.dart';
 import '../providers/playlists_provider.dart';
 import '../utils/snackbar_util.dart';
+import '../../l10n/app_localizations.dart';
 import 'responsive_dialog.dart';
 
 /// 添加作品到播放列表的对话框
@@ -146,12 +147,12 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
 
         SnackBarUtil.showSuccess(
           context,
-          '已添加到播放列表「${playlist.displayName}」',
+          S.of(context).addedToPlaylist(playlist.displayName),
         );
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '添加失败: $e');
+        SnackBarUtil.showError(context, S.of(context).addFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -187,12 +188,12 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
 
         SnackBarUtil.showSuccess(
           context,
-          '已从播放列表「${playlist.displayName}」中移除',
+          S.of(context).removedFromPlaylist(playlist.displayName),
         );
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '移除失败: $e');
+        SnackBarUtil.showError(context, S.of(context).removeFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -225,7 +226,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '添加到播放列表',
+                      S.of(context).addToPlaylist,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -258,7 +259,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),
-                  tooltip: '关闭',
+                  tooltip: S.of(context).close,
                 ),
             ],
           ),
@@ -276,7 +277,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
             child: Column(
               children: [
                 Text(
-                  '加载失败: ${playlistsState.error}',
+                  S.of(context).loadFailedWithError(playlistsState.error!),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
@@ -285,7 +286,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                     ref.read(playlistsProvider.notifier).load(refresh: true);
                   },
                   icon: const Icon(Icons.refresh),
-                  label: const Text('重试'),
+                  label: Text(S.of(context).retry),
                 ),
               ],
             ),
@@ -302,7 +303,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '暂无播放列表',
+                  S.of(context).noPlaylists,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.outline,
                   ),
@@ -365,7 +366,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                   subtitle: Row(
                     children: [
                       Text(
-                        '${playlist.worksCount} 个作品',
+                        S.of(context).nWorksCount(playlist.worksCount),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       if (isInPlaylist) ...[
@@ -381,7 +382,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            '已收藏',
+                            S.of(context).alreadyFavorited,
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall
@@ -408,7 +409,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                               onPressed: _isAdding
                                   ? null
                                   : () => _removeFromPlaylist(playlist),
-                              tooltip: '从播放列表移除',
+                              tooltip: S.of(context).removeFromPlaylist,
                             )
                           : IconButton(
                               icon: Icon(
@@ -418,7 +419,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                               onPressed: _isAdding
                                   ? null
                                   : () => _addToPlaylist(playlist),
-                              tooltip: '添加到播放列表',
+                              tooltip: S.of(context).addToPlaylist,
                             ),
                   enabled: !_isAdding,
                   onTap: _isAdding
@@ -439,7 +440,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
               width: double.infinity,
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('取消'),
+                child: Text(S.of(context).cancel),
               ),
             ),
           ),

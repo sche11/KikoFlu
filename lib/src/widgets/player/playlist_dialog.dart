@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../privacy_blur_cover.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 播放列表对话框
 class PlaylistDialog extends ConsumerWidget {
@@ -42,7 +43,7 @@ class PlaylistDialog extends ConsumerWidget {
                 child: Row(
                   children: [
                     Text(
-                      '播放列表',
+                      S.of(context).playlistTitle,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -52,7 +53,7 @@ class PlaylistDialog extends ConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.only(right: 4),
                         child: Text(
-                          '追加模式',
+                          S.of(context).appendMode,
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
@@ -62,7 +63,7 @@ class PlaylistDialog extends ConsumerWidget {
                         ),
                       ),
                     IconButton(
-                      tooltip: '追加模式：${audioState.appendMode ? "开启" : "关闭"}',
+                      tooltip: audioState.appendMode ? S.of(context).appendModeStatusOn : S.of(context).appendModeStatusOff,
                       icon: Icon(
                         Icons.playlist_add,
                         color: audioState.appendMode
@@ -93,10 +94,10 @@ class PlaylistDialog extends ConsumerWidget {
                     final tracks = queueAsync.valueOrNull ?? currentQueue;
 
                     if (tracks.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Padding(
-                          padding: EdgeInsets.all(32),
-                          child: Text('播放列表为空'),
+                          padding: const EdgeInsets.all(32),
+                          child: Text(S.of(context).playlistEmpty),
                         ),
                       );
                     }
@@ -153,7 +154,7 @@ class PlaylistDialog extends ConsumerWidget {
                                     size: 18,
                                   ),
                                 IconButton(
-                                  tooltip: '移除',
+                                  tooltip: S.of(context).remove,
                                   icon: const Icon(Icons.delete_outline,
                                       size: 20),
                                   onPressed: () {
@@ -359,15 +360,14 @@ class PlaylistDialog extends ConsumerWidget {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('追加模式已开启'),
-        content: const Text(
-          '之后点击音频会追加到当前播放列表尾部，而不是替换整个列表。\n'
-          '不会重复添加同一音轨。',
+        title: Text(S.of(context).appendModeEnabled),
+        content: Text(
+          S.of(context).appendModeHint,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('知道了'),
+            child: Text(S.of(context).gotIt),
           ),
         ],
       ),

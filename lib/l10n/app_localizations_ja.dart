@@ -624,7 +624,7 @@ class SJa extends S {
   String get playlistTitle => 'プレイリスト';
 
   @override
-  String get noAudioPlaying => '再生中の音声がありません';
+  String get noAudioPlaying => '再生中のオーディオはありません';
 
   @override
   String get playbackSpeed => '再生速度';
@@ -902,13 +902,13 @@ class SJa extends S {
   }
 
   @override
-  String get selectAtLeastOneTag => '少なくとも1つのタグを選択してください';
+  String get selectAtLeastOneTag => 'タグを少なくとも1つ選択してください';
 
   @override
-  String get tagSubmitSuccess => 'タグを送信しました。サーバーで処理中です';
+  String get tagSubmitSuccess => 'タグを送信しました、サーバー処理待ち';
 
   @override
-  String get bindEmailFirst => '先にwww.asmr.oneでメールアドレスを登録してください';
+  String get bindEmailFirst => 'www.asmr.one でメールアドレスを登録してください';
 
   @override
   String selectedNTags(int count) {
@@ -945,8 +945,8 @@ class SJa extends S {
   }
 
   @override
-  String pageNOfTotal(int page, int total) {
-    return '$page/$totalページ';
+  String pageNOfTotal(int current, int total) {
+    return '$current / $total ページ';
   }
 
   @override
@@ -1281,7 +1281,7 @@ class SJa extends S {
   String get imageSaved => '画像を保存しました';
 
   @override
-  String get saveImageFailed => '画像の保存に失敗しました';
+  String get saveImageFailed => '保存失敗';
 
   @override
   String get logout => 'ログアウト';
@@ -1308,7 +1308,7 @@ class SJa extends S {
 
   @override
   String ratingsCount(int count) {
-    return '$count件の評価';
+    return '全 $count 件の評価';
   }
 
   @override
@@ -1393,7 +1393,7 @@ class SJa extends S {
 
   @override
   String operationFailedWithError(String error) {
-    return '操作に失敗: $error';
+    return '操作失敗: $error';
   }
 
   @override
@@ -1880,7 +1880,7 @@ class SJa extends S {
   String get checkNetworkOrRetry => 'ネットワーク接続を確認するか、後で再試行してください';
 
   @override
-  String get reachedEnd => '最後まで来ました〜';
+  String get reachedEnd => '最後まで読みました~';
 
   @override
   String excludedNWorks(int count) {
@@ -1889,6 +1889,1046 @@ class SJa extends S {
 
   @override
   String pageExcludedNWorks(int count) {
-    return 'このページで $count 作品を除外';
+    return 'このページで $count 作品を除外しました';
+  }
+
+  @override
+  String get noSubtitlesAvailable => '字幕がありません';
+
+  @override
+  String get unlock => 'ロック解除';
+
+  @override
+  String get backToCover => 'カバーに戻る';
+
+  @override
+  String get lyricHintTapCover => 'カバーまたはタイトルをタップして字幕画面に入る';
+
+  @override
+  String get floatingSubtitle => 'フローティング字幕';
+
+  @override
+  String get appendMode => '追加モード';
+
+  @override
+  String get appendModeStatusOn => '追加モード：オン';
+
+  @override
+  String get appendModeStatusOff => '追加モード：オフ';
+
+  @override
+  String get playlistEmpty => 'プレイリストが空です';
+
+  @override
+  String get appendModeEnabled => '追加モードが有効です';
+
+  @override
+  String get appendModeHint =>
+      '次にタップした音声は現在のプレイリストの末尾に追加されます。リスト全体を置き換えません。\n同じトラックは重複追加されません。';
+
+  @override
+  String get gotIt => '了解';
+
+  @override
+  String nMinutes(int count) {
+    return '$count分';
+  }
+
+  @override
+  String nHours(int count) {
+    return '$count時間';
+  }
+
+  @override
+  String get titleLabel => 'タイトル';
+
+  @override
+  String get rjNumberLabel => 'RJ番号';
+
+  @override
+  String get tapToViewRatingDetail => 'タップして評価詳細を表示';
+
+  @override
+  String priceInYen(int price) {
+    return '$price 円';
+  }
+
+  @override
+  String soldCount(String count) {
+    return '販売数：$count';
+  }
+
+  @override
+  String get circleAndVaSection => 'サークル | 声優';
+
+  @override
+  String get subtitleBadge => '字幕';
+
+  @override
+  String get otherEditions => '他のバージョン';
+
+  @override
+  String tenThousandSuffix(String count) {
+    return '$count万';
+  }
+
+  @override
+  String get packingWork => '作品をパッキング中...';
+
+  @override
+  String get workDirectoryNotExist => '作品ディレクトリが存在しません';
+
+  @override
+  String get packingFailed => 'パッキング失敗';
+
+  @override
+  String exportSuccess(String path) {
+    return 'エクスポート成功：$path';
+  }
+
+  @override
+  String exportFailed(String error) {
+    return 'エクスポート失敗: $error';
+  }
+
+  @override
+  String get exportAsZip => 'ZIPでエクスポート';
+
+  @override
+  String get offlineBadge => 'オフライン';
+
+  @override
+  String loadFilesFailed(String error) {
+    return 'ファイルの読み込みに失敗: $error';
+  }
+
+  @override
+  String get unknown => '不明';
+
+  @override
+  String get noPlayableAudioFiles => '再生可能な音声ファイルが見つかりません';
+
+  @override
+  String cannotFindAudioFile(String title) {
+    return '音声ファイルが見つかりません: $title';
+  }
+
+  @override
+  String nowPlayingNOfTotal(String title, int current, int total) {
+    return '再生中: $title ($current/$total)';
+  }
+
+  @override
+  String get noAudioCannotLoadSubtitle => '再生中の音声がないため、字幕を読み込めません';
+
+  @override
+  String get loadSubtitle => '字幕を読み込む';
+
+  @override
+  String get loadSubtitleConfirm => 'このファイルを現在の音声の字幕として読み込みますか？';
+
+  @override
+  String get subtitleFile => '字幕ファイル';
+
+  @override
+  String get currentAudio => '現在の音声';
+
+  @override
+  String get subtitleAutoRestoreNote => '他の音声に切り替えると、字幕はデフォルトのマッチングに自動復元されます';
+
+  @override
+  String get confirmLoad => '読み込み確定';
+
+  @override
+  String get loadingSubtitle => '字幕を読み込み中...';
+
+  @override
+  String subtitleLoadSuccess(String title) {
+    return '字幕読み込み成功：$title';
+  }
+
+  @override
+  String subtitleLoadFailed(String error) {
+    return '字幕読み込み失敗：$error';
+  }
+
+  @override
+  String get cannotPreviewImageMissingInfo => '画像をプレビューできません：必要な情報が不足';
+
+  @override
+  String get cannotFindImageFile => '画像ファイルが見つかりません';
+
+  @override
+  String get cannotPreviewTextMissingInfo => 'テキストをプレビューできません：必要な情報が不足';
+
+  @override
+  String get cannotPreviewPdfMissingInfo => 'PDFをプレビューできません：必要な情報が不足';
+
+  @override
+  String get cannotPlayVideoMissingId => '動画を再生できません：ファイルIDが不足';
+
+  @override
+  String get cannotPlayVideoMissingParams => '動画を再生できません：必要なパラメータが不足';
+
+  @override
+  String get cannotPlayDirectly => '直接再生できません';
+
+  @override
+  String get noVideoPlayerFound => '対応する動画プレーヤーが見つかりません。';
+
+  @override
+  String get youCan => '次の方法があります：';
+
+  @override
+  String get copyLinkToExternalPlayer => '1. 外部プレーヤーにリンクをコピー（MX Player、VLCなど）';
+
+  @override
+  String get openInBrowserOption => '2. ブラウザで開く';
+
+  @override
+  String playVideoError(String error) {
+    return '動画再生エラー: $error';
+  }
+
+  @override
+  String get noFiles => 'ファイルがありません';
+
+  @override
+  String get resourceFiles => 'リソースファイル';
+
+  @override
+  String resourceFilesTranslated(int count) {
+    return 'リソースファイル (翻訳済み $count 項目)';
+  }
+
+  @override
+  String get translationOriginal => '原';
+
+  @override
+  String get translationTranslated => '訳';
+
+  @override
+  String copiedName(String title) {
+    return '名前をコピー: $title';
+  }
+
+  @override
+  String translationComplete(int count) {
+    return '翻訳完了：$count 項目';
+  }
+
+  @override
+  String get noContentToTranslate => '翻訳するコンテンツがありません';
+
+  @override
+  String get preparingTranslation => '翻訳を準備中...';
+
+  @override
+  String translatingProgress(int current, int total) {
+    return '翻訳中 $current/$total';
+  }
+
+  @override
+  String nItems(int count) {
+    return '$count 項目';
+  }
+
+  @override
+  String get loadAsSubtitle => '字幕として読み込む';
+
+  @override
+  String get preview => 'プレビュー';
+
+  @override
+  String openVideoFileError(String error) {
+    return '動画ファイルを開くエラー: $error';
+  }
+
+  @override
+  String cannotOpenVideoFile(String message) {
+    return '動画ファイルを開けません: $message';
+  }
+
+  @override
+  String get noFileTreeInfo => 'ファイルツリー情報がありません';
+
+  @override
+  String get workFolderNotExist => '作品フォルダが存在しません';
+
+  @override
+  String get cannotPlayAudioMissingId => '音声を再生できません：ファイルIDが不足';
+
+  @override
+  String get audioFileNotExist => '音声ファイルが存在しません';
+
+  @override
+  String get noPreviewableImages => 'プレビュー可能な画像が見つかりません';
+
+  @override
+  String get cannotPreviewTextMissingId => 'テキストをプレビューできません：ファイルIDが不足';
+
+  @override
+  String get cannotFindFilePath => 'ファイルパスが見つかりません';
+
+  @override
+  String fileNotExist(String title) {
+    return 'ファイルが存在しません：$title';
+  }
+
+  @override
+  String get cannotPreviewPdfMissingId => 'PDFをプレビューできません：ファイルIDが不足';
+
+  @override
+  String get videoFileNotExist => '動画ファイルが存在しません';
+
+  @override
+  String get cannotOpenVideo => '動画を開けません';
+
+  @override
+  String errorInfo(String message) {
+    return 'エラー情報: $message';
+  }
+
+  @override
+  String get installVideoPlayerApp =>
+      '動画プレーヤーアプリをインストールしてください（VLC、MX Playerなど）';
+
+  @override
+  String get filePathLabel => 'ファイルパス：';
+
+  @override
+  String get noDownloadedFiles => 'ダウンロード済みファイルがありません';
+
+  @override
+  String get offlineFiles => 'オフラインファイル';
+
+  @override
+  String unsupportedFileType(String title) {
+    return 'このファイル形式は未対応です: $title';
+  }
+
+  @override
+  String get deleteFilePrompt => 'このファイルを削除しますか？';
+
+  @override
+  String deletedItem(String title) {
+    return '削除済み: $title';
+  }
+
+  @override
+  String get selectAtLeastOneFile => 'ファイルを少なくとも1つ選択してください';
+
+  @override
+  String addedNFilesToDownloadQueue(int count) {
+    return '$count ファイルをダウンロードキューに追加';
+  }
+
+  @override
+  String downloadedAndSelected(int downloaded, int selected) {
+    return 'ダウンロード済み $downloaded · 選択中 $selected';
+  }
+
+  @override
+  String downloadN(int count) {
+    return 'ダウンロード ($count)';
+  }
+
+  @override
+  String get checkingDownloadedFiles => 'ダウンロード済みファイルを確認中...';
+
+  @override
+  String get noDownloadableFiles => 'ダウンロード可能なファイルがありません';
+
+  @override
+  String get selectFilesToDownload => 'ダウンロードファイルを選択';
+
+  @override
+  String downloadedNCount(int count) {
+    return 'ダウンロード済み $count 個';
+  }
+
+  @override
+  String selectedNCount(int count) {
+    return '選択中 $count 個';
+  }
+
+  @override
+  String get pleaseEnterServerAddress => 'サーバーアドレスを入力してください';
+
+  @override
+  String get pleaseEnterUsername => 'ユーザー名を入力してください';
+
+  @override
+  String get pleaseEnterPassword => 'パスワードを入力してください';
+
+  @override
+  String get notTestedYet => '未テスト';
+
+  @override
+  String latencyResultDetail(String latency, String status) {
+    return '遅延 $latency ($status)';
+  }
+
+  @override
+  String connectionFailedWithDetail(String error) {
+    return '接続失敗: $error';
+  }
+
+  @override
+  String get noAccountTapToRegister => 'アカウントがない？タップして登録';
+
+  @override
+  String get haveAccountTapToLogin => 'アカウントをお持ちですか？タップしてログイン';
+
+  @override
+  String get cannotDeleteActiveAccount => '現在使用中のアカウントは削除できません';
+
+  @override
+  String get selectAccount => 'アカウントを選択';
+
+  @override
+  String get noSavedAccounts => '保存されたアカウントがありません';
+
+  @override
+  String get addAccountToGetStarted => 'アカウントを追加して始めましょう';
+
+  @override
+  String get unknownHost => '不明なホスト';
+
+  @override
+  String lastUsedTime(String time) {
+    return '最終使用: $time';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count日前';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count時間前';
+  }
+
+  @override
+  String minutesAgo(int count) {
+    return '$count分前';
+  }
+
+  @override
+  String get justNow => 'たった今';
+
+  @override
+  String get confirmDelete => '削除の確認';
+
+  @override
+  String deleteSelectedConfirm(int count) {
+    return '選択した $count 項目を削除しますか？';
+  }
+
+  @override
+  String deletedNOfTotalItems(int success, int total) {
+    return '$success/$total 項目を削除';
+  }
+
+  @override
+  String get importingSubtitleFile => '字幕ファイルをインポート中...';
+
+  @override
+  String get preparingImport => 'インポートを準備中...';
+
+  @override
+  String get preparingExtract => '解凍を準備中...';
+
+  @override
+  String get importSubtitleFile => '字幕ファイルをインポート';
+
+  @override
+  String get supportedSubtitleFormats => '.srt, .vtt, .lrc などの字幕形式に対応';
+
+  @override
+  String get importFolder => 'フォルダをインポート';
+
+  @override
+  String get importFolderDesc => 'フォルダ構造を保持し、字幕ファイルのみインポート';
+
+  @override
+  String get importArchive => 'アーカイブをインポート';
+
+  @override
+  String get importArchiveDesc =>
+      'パスワードなしZIPアーカイブに対応\n一括インポートする場合は1つのアーカイブにまとめてください';
+
+  @override
+  String get subtitleLibraryGuide => '字幕ライブラリ使用ガイド';
+
+  @override
+  String get subtitleLibraryFunction => '字幕ライブラリ機能';
+
+  @override
+  String get subtitleLibraryFunctionDesc =>
+      'インポート/保存した字幕ファイルを管理し、再生時の自動/手動読み込みに対応';
+
+  @override
+  String get subtitleAutoLoad => '字幕自動読み込み';
+
+  @override
+  String get subtitleAutoLoadDesc => '音声再生時、システムが自動的に字幕ライブラリからマッチする字幕を検索：';
+
+  @override
+  String get smartCategoryAndMark => 'スマート分類とマーキング';
+
+  @override
+  String get open => '開く';
+
+  @override
+  String get moveTo => '移動先';
+
+  @override
+  String get rename => '名前変更';
+
+  @override
+  String get newName => '新しい名前';
+
+  @override
+  String get renameSuccess => '名前変更成功';
+
+  @override
+  String get renameFailed => '名前変更失敗';
+
+  @override
+  String deleteItemConfirm(String title) {
+    return '「$title」を削除しますか？';
+  }
+
+  @override
+  String get deleteFolderContentsWarning => 'フォルダ内のすべてのコンテンツが削除されます。';
+
+  @override
+  String get deleteFailed => '削除失敗';
+
+  @override
+  String subtitleLoaded(String title) {
+    return '字幕を読み込みました：$title';
+  }
+
+  @override
+  String get moveSuccess => '移動成功';
+
+  @override
+  String get moveFailed => '移動失敗';
+
+  @override
+  String previewFailed(String error) {
+    return 'プレビュー失敗: $error';
+  }
+
+  @override
+  String openFailed(String error) {
+    return '開く失敗: $error';
+  }
+
+  @override
+  String get back => '戻る';
+
+  @override
+  String get subtitleLibraryEmpty => '字幕ライブラリが空です';
+
+  @override
+  String get tapToImportSubtitle => '右下の + ボタンをタップして字幕をインポート';
+
+  @override
+  String get importSubtitle => '字幕をインポート';
+
+  @override
+  String get sampleSubtitleContent => '♪ サンプル字幕コンテンツ ♪';
+
+  @override
+  String get presetStyles => 'プリセットスタイル';
+
+  @override
+  String get backgroundOpacity => '背景の不透明度';
+
+  @override
+  String get colorSettings => '色設定';
+
+  @override
+  String get shapeSettings => '形状設定';
+
+  @override
+  String get cornerRadius => '角の半径';
+
+  @override
+  String get horizontalPadding => '水平パディング';
+
+  @override
+  String get verticalPadding => '垂直パディング';
+
+  @override
+  String get resetStyle => 'スタイルをリセット';
+
+  @override
+  String get resetStyleConfirm => 'デフォルトスタイルに戻しますか？';
+
+  @override
+  String get restoreDefaultStyle => 'デフォルトスタイルに戻す';
+
+  @override
+  String get reset => 'リセット';
+
+  @override
+  String noBlockedItemsOfType(String type) {
+    return 'ブロック中の$typeはありません';
+  }
+
+  @override
+  String unblockedItem(String item) {
+    return 'ブロック解除: $item';
+  }
+
+  @override
+  String addBlockedItem(String type) {
+    return '$typeをブロックに追加';
+  }
+
+  @override
+  String blockedItemName(String type) {
+    return '$type名';
+  }
+
+  @override
+  String enterBlockedItemHint(String type) {
+    return 'ブロックする$typeを入力';
+  }
+
+  @override
+  String blockedItemAdded(String item) {
+    return 'ブロックに追加: $item';
+  }
+
+  @override
+  String workCountLabel(int count) {
+    return '作品数: $count';
+  }
+
+  @override
+  String get miniPlayer => 'ミニプレーヤー';
+
+  @override
+  String get lineHeight => '行の高さ';
+
+  @override
+  String get portraitPlayerBelowCover => '縦画面プレーヤー（カバー下）';
+
+  @override
+  String get fullscreenSubtitleMode => '全画面字幕（縦画面/横画面）';
+
+  @override
+  String get activeSubtitleFontSize => 'アクティブ字幕サイズ';
+
+  @override
+  String get inactiveSubtitleFontSize => 'その他の字幕サイズ';
+
+  @override
+  String get restoreDefaultSettings => 'デフォルト設定に戻す';
+
+  @override
+  String get guideInPrefix => '';
+
+  @override
+  String get guideParsedFolder => '<解析済み>';
+
+  @override
+  String get guideFindWorkDesc => 'フォルダで対応する作品を検索\nサポートされるフォルダ形式：RJ123456';
+
+  @override
+  String get guideSavedFolder => '<保存済み>';
+
+  @override
+  String get guideFindSubtitleDesc => 'フォルダで個別の字幕ファイルを検索';
+
+  @override
+  String get guideMatchRule => 'マッチルール：字幕ファイル名がオーディオファイル名と一致（拡張子の有無は問わない）';
+
+  @override
+  String get guideRecognizedWorkPrefix => '認識された作品には緑色の';
+
+  @override
+  String get guideTagSuffix => 'タグが追加され、オーディオファイルのアイコンにも';
+
+  @override
+  String get guideSubtitleMatchSuffix => 'マークが付き、字幕ライブラリとの一致を示します';
+
+  @override
+  String get guideAutoRecognizeRJ => 'インポート時にRJ形式を自動認識し、<解析済み>に分類';
+
+  @override
+  String get guideAutoAddRJPrefix =>
+      '数字のみのフォルダにRJプレフィックスを自動追加（例：123456 → RJ123456）';
+
+  @override
+  String get unknownFile => '不明なファイル';
+
+  @override
+  String deleteWithCount(int count) {
+    return '削除 ($count)';
+  }
+
+  @override
+  String get searchSubtitles => '字幕を検索...';
+
+  @override
+  String nFilesWithSize(int count, String size) {
+    return '$count ファイル • $size';
+  }
+
+  @override
+  String get rootDirectory => 'ルート';
+
+  @override
+  String get goToParent => '上の階層へ';
+
+  @override
+  String moveToTarget(String name) {
+    return '移動先: $name';
+  }
+
+  @override
+  String get noSubfoldersHere => 'このディレクトリにサブフォルダはありません';
+
+  @override
+  String addedToPlaylist(String name) {
+    return '「$name」に追加しました';
+  }
+
+  @override
+  String removedFromPlaylist(String name) {
+    return '「$name」から削除しました';
+  }
+
+  @override
+  String get alreadyFavorited => 'お気に入り済み';
+
+  @override
+  String loadImageFailedWithError(String error) {
+    return '画像の読み込みに失敗\n$error';
+  }
+
+  @override
+  String get noImageAvailable => '利用可能な画像はありません';
+
+  @override
+  String get storagePermissionRequiredForImage => '画像を保存するにはストレージ権限が必要です';
+
+  @override
+  String get savedToGallery => 'アルバムに保存しました';
+
+  @override
+  String get saveCoverImage => 'カバー画像を保存';
+
+  @override
+  String savedToPath(String path) {
+    return '$path に保存しました';
+  }
+
+  @override
+  String get doubleTapToZoom => 'ダブルタップで拡大 · ピンチでズーム';
+
+  @override
+  String getStatusFailed(String error) {
+    return 'ステータスの取得に失敗: $error';
+  }
+
+  @override
+  String get deleteRecord => '記録を削除';
+
+  @override
+  String deletePlayRecordConfirm(String title) {
+    return '\"$title\" の再生記録を削除しますか？';
+  }
+
+  @override
+  String get notPlayedYet => '未再生';
+
+  @override
+  String playbackFailed(String error) {
+    return '再生失敗: $error';
+  }
+
+  @override
+  String get storagePermissionRequired => 'ストレージ権限が必要';
+
+  @override
+  String get storagePermissionForGalleryDesc =>
+      '画像を保存するにはフォトアルバムへのアクセス権限が必要です。設定で権限を付与してください。';
+
+  @override
+  String get goToSettings => '設定へ';
+
+  @override
+  String get imageSavedToGallery => '画像をアルバムに保存しました';
+
+  @override
+  String imageSavedToPath(String path) {
+    return '画像を保存しました: $path';
+  }
+
+  @override
+  String get pullDownForNextPage => '下に引いて次のページへ';
+
+  @override
+  String get releaseForNextPage => '離して次のページへ';
+
+  @override
+  String get jumpTo => 'ジャンプ';
+
+  @override
+  String get goToPageTitle => 'ページへ移動';
+
+  @override
+  String pageNumberRange(int max) {
+    return 'ページ (1-$max)';
+  }
+
+  @override
+  String get enterPageNumber => 'ページ番号を入力';
+
+  @override
+  String enterValidPageNumber(int max) {
+    return '有効なページ番号を入力してください (1-$max)';
+  }
+
+  @override
+  String get previousPage => '前のページ';
+
+  @override
+  String get nextPage => '次のページ';
+
+  @override
+  String get localPdfNotExist => 'ローカルPDFファイルが存在しません';
+
+  @override
+  String get cannotOpenPdf => 'PDFファイルを開けません';
+
+  @override
+  String loadPdfFailed(String error) {
+    return 'PDFの読み込みに失敗: $error';
+  }
+
+  @override
+  String pdfPageOfTotal(int current, int total) {
+    return '$current / $total ページ';
+  }
+
+  @override
+  String get loadingPdf => 'PDFを読み込み中...';
+
+  @override
+  String get pdfPathInvalid => 'PDFファイルパスが無効です';
+
+  @override
+  String get desktopPdfPreviewNotSupported => 'デスクトップでのPDFプレビューはまだサポートされていません';
+
+  @override
+  String get openWithSystemApp => 'システムデフォルトアプリで開く';
+
+  @override
+  String renderPdfFailed(String error) {
+    return 'PDFのレンダリングに失敗: $error';
+  }
+
+  @override
+  String get ratingDetails => '評価詳細';
+
+  @override
+  String get selectSaveDirectory => '保存先を選択';
+
+  @override
+  String get noSubtitleContentToSave => '保存する字幕コンテンツがありません';
+
+  @override
+  String get savedToSubtitleLibrary => '字幕ライブラリに保存しました';
+
+  @override
+  String get saveToLocal => 'ローカルに保存';
+
+  @override
+  String get selectDirectoryToSaveFile => 'ファイルの保存先を選択';
+
+  @override
+  String get saveToSubtitleLibrary => '字幕ライブラリに保存';
+
+  @override
+  String get saveToSubtitleLibraryDesc => '字幕ライブラリの\"保存済み\"フォルダに保存';
+
+  @override
+  String get saveToFile => 'ファイルに保存';
+
+  @override
+  String get noContentToSave => '保存するコンテンツがありません';
+
+  @override
+  String fileSavedToPath(String path) {
+    return 'ファイルを保存しました：$path';
+  }
+
+  @override
+  String get localFileNotExist => 'ローカルファイルが存在しません';
+
+  @override
+  String loadTextFailed(String error) {
+    return 'テキストの読み込みに失敗: $error';
+  }
+
+  @override
+  String get previewMode => 'プレビューモード';
+
+  @override
+  String get editMode => '編集モード';
+
+  @override
+  String get showOriginal => '原文を表示';
+
+  @override
+  String get translateContent => 'コンテンツを翻訳';
+
+  @override
+  String get editTextContentHint => 'テキストを編集...';
+
+  @override
+  String get bookmarkRemoved => 'ブックマークを削除しました';
+
+  @override
+  String setProgressAndRating(String progress, int rating) {
+    return '$progressに設定、評価: $rating 星';
+  }
+
+  @override
+  String setProgressTo(String progress) {
+    return '$progressに設定';
+  }
+
+  @override
+  String ratingSetTo(int rating) {
+    return '評価を$rating星に設定';
+  }
+
+  @override
+  String get updated => '更新しました';
+
+  @override
+  String addTagFailed(String error) {
+    return 'タグの追加に失敗: $error';
+  }
+
+  @override
+  String addWithCount(int count) {
+    return '追加 ($count)';
+  }
+
+  @override
+  String get undo => '元に戻す';
+
+  @override
+  String nStars(int count) {
+    return '$count 星';
+  }
+
+  @override
+  String get voteRemoved => '投票を取り消しました';
+
+  @override
+  String get votedUp => '賛成票を投じました';
+
+  @override
+  String get votedDown => '反対票を投じました';
+
+  @override
+  String voteFailedWithError(String error) {
+    return '投票に失敗: $error';
+  }
+
+  @override
+  String get voteFor => '賛成';
+
+  @override
+  String get voteAgainst => '反対';
+
+  @override
+  String get voted => '投票済み';
+
+  @override
+  String tagBlockedWithName(String name) {
+    return 'タグをブロックしました: $name';
+  }
+
+  @override
+  String get subtitleParseFailedUnsupportedFormat => '解析失敗、サポートされていない形式';
+
+  @override
+  String get lyricPresetDynamic => 'ダイナミック';
+
+  @override
+  String get lyricPresetClassic => 'クラシック';
+
+  @override
+  String get lyricPresetModern => 'モダン';
+
+  @override
+  String get lyricPresetMinimal => 'ミニマル';
+
+  @override
+  String get lyricPresetVibrant => 'ビビッド';
+
+  @override
+  String get lyricPresetElegant => 'エレガント';
+
+  @override
+  String get lyricPresetDynamicDesc => 'システムテーマに合わせて自動配色';
+
+  @override
+  String get lyricPresetClassicDesc => '黒背景に白文字、クラシック';
+
+  @override
+  String get lyricPresetModernDesc => 'グラデーション背景、スタイリッシュ';
+
+  @override
+  String get lyricPresetMinimalDesc => '軽い透明感、シンプルで優雅';
+
+  @override
+  String get lyricPresetVibrantDesc => '鮮やかな色彩、活気あふれる';
+
+  @override
+  String get lyricPresetElegantDesc => '深いブルー、上品な雰囲気';
+
+  @override
+  String get floatingLyricLoading => '♪ 字幕を読み込み中 ♪';
+
+  @override
+  String get subtitleFileNotExist => 'ファイルが存在しません';
+
+  @override
+  String get subtitleMissingInfo => '必要な情報が不足しています';
+
+  @override
+  String get privacyDefaultTitle => 'オーディオ再生中';
+
+  @override
+  String get offlineModeStartup => 'ネットワーク接続に失敗、オフラインモードで開始';
+
+  @override
+  String get playlistInfoNotLoaded => 'プレイリスト情報が読み込まれていません';
+
+  @override
+  String get encodingUnrecognized => 'ファイルエンコーディングを認識できず、正しく表示できません';
+
+  @override
+  String editPlaylistFailed(String error) {
+    return 'プレイリストの編集に失敗: $error';
+  }
+
+  @override
+  String unsupportedFileTypeWithTitle(String title) {
+    return 'このファイルタイプは開けません: $title';
   }
 }

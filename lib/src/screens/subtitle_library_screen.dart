@@ -11,6 +11,7 @@ import '../providers/lyric_provider.dart';
 import '../widgets/responsive_dialog.dart';
 import '../utils/file_icon_utils.dart';
 import '../utils/snackbar_util.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 字幕库界面
 class SubtitleLibraryScreen extends ConsumerStatefulWidget {
@@ -103,7 +104,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('打开文件夹失败: $e'),
+          content: Text(S.of(context).openFolderFailed(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -116,17 +117,17 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除选中的 ${_selectedPaths.length} 项吗？'),
+        title: Text(S.of(context).confirmDelete),
+        content: Text(S.of(context).deleteSelectedConfirm(_selectedPaths.length)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('删除'),
+            child: Text(S.of(context).delete),
           ),
         ],
       ),
@@ -149,7 +150,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('已删除 $successCount/${_selectedPaths.length} 项'),
+        content: Text(S.of(context).deletedNOfTotalItems(successCount, _selectedPaths.length)),
         backgroundColor: successCount > 0 ? Colors.green : Colors.red,
       ),
     );
@@ -178,7 +179,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '加载失败: $e';
+        _errorMessage = S.of(context).loadFailed;
         _isLoading = false;
       });
     }
@@ -186,7 +187,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
 
   Future<void> _importFile() async {
     // 显示简单的加载对话框（单文件导入通常很快）
-    _showSimpleLoadingDialog('正在导入字幕文件...');
+    _showSimpleLoadingDialog(S.of(context).importingSubtitleFile);
 
     final result = await SubtitleLibraryService.importSubtitleFile();
 
@@ -236,7 +237,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
 
   Future<void> _importFolder() async {
     // 显示动态进度对话框
-    final updateProgress = _showProgressDialog('正在准备导入...');
+    final updateProgress = _showProgressDialog(S.of(context).preparingImport);
 
     final result = await SubtitleLibraryService.importFolder(
       onProgress: updateProgress,
@@ -268,7 +269,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
 
   Future<void> _importArchive() async {
     // 显示动态进度对话框
-    final updateProgress = _showProgressDialog('正在准备解压...');
+    final updateProgress = _showProgressDialog(S.of(context).preparingExtract);
 
     final result = await SubtitleLibraryService.importArchive(
       onProgress: updateProgress,
@@ -342,8 +343,8 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.insert_drive_file),
-              title: const Text('导入字幕文件'),
-              subtitle: const Text('支持 .srt, .vtt, .lrc 等字幕格式'),
+              title: Text(S.of(context).importSubtitleFile),
+              subtitle: Text(S.of(context).supportedSubtitleFormats),
               onTap: () {
                 Navigator.pop(context);
                 _importFile();
@@ -353,8 +354,8 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
             if (!Platform.isIOS)
               ListTile(
                 leading: const Icon(Icons.folder),
-                title: const Text('导入文件夹'),
-                subtitle: const Text('保留文件夹结构，仅导入字幕文件'),
+                title: Text(S.of(context).importFolder),
+                subtitle: Text(S.of(context).importFolderDesc),
                 onTap: () {
                   Navigator.pop(context);
                   _importFolder();
@@ -362,8 +363,8 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
               ),
             ListTile(
               leading: const Icon(Icons.archive),
-              title: const Text('导入压缩包'),
-              subtitle: const Text('支持无密码 ZIP 压缩包\n如需批量导入，将它们压缩为一个压缩包再导入'),
+              title: Text(S.of(context).importArchive),
+              subtitle: Text(S.of(context).importArchiveDesc),
               onTap: () {
                 Navigator.pop(context);
                 _importArchive();
@@ -380,9 +381,9 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
     showDialog(
       context: context,
       builder: (context) => ResponsiveAlertDialog(
-        title: const Text(
-          '字幕库使用说明',
-          style: TextStyle(fontSize: 18),
+        title: Text(
+          S.of(context).subtitleLibraryGuide,
+          style: const TextStyle(fontSize: 18),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -417,7 +418,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '字幕库功能',
+                          S.of(context).subtitleLibraryFunction,
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -425,7 +426,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '用于存放主动导入或保存的字幕文件，并在播放音频时支持自动/手动加载',
+                          S.of(context).subtitleLibraryFunctionDesc,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
@@ -463,7 +464,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '字幕自动加载',
+                          S.of(context).subtitleAutoLoad,
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -471,7 +472,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '播放音频时，系统会自动在字幕库中查找匹配的字幕文件：',
+                          S.of(context).subtitleAutoLoadDesc,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 8),
@@ -495,15 +496,15 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                             .textTheme
                                             .bodyMedium,
                                         children: [
-                                          const TextSpan(text: '在'),
-                                          const TextSpan(
-                                            text: '<已解析>',
-                                            style: TextStyle(
+                                          TextSpan(text: S.of(context).guideInPrefix),
+                                          TextSpan(
+                                            text: S.of(context).guideParsedFolder,
+                                            style: const TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
-                                          const TextSpan(
+                                          TextSpan(
                                               text:
-                                                  '文件夹下查找对应作品\n支持文件夹格式：RJ123456'),
+                                                  S.of(context).guideFindWorkDesc),
                                         ],
                                       ),
                                     ),
@@ -526,13 +527,13 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                             .textTheme
                                             .bodyMedium,
                                         children: [
-                                          const TextSpan(text: '在'),
-                                          const TextSpan(
-                                            text: '<已保存>',
-                                            style: TextStyle(
+                                          TextSpan(text: S.of(context).guideInPrefix),
+                                          TextSpan(
+                                            text: S.of(context).guideSavedFolder,
+                                            style: const TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
-                                          const TextSpan(text: '文件夹下查找单个字幕文件'),
+                                          TextSpan(text: S.of(context).guideFindSubtitleDesc),
                                         ],
                                       ),
                                     ),
@@ -550,7 +551,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      '匹配规则：字幕文件名与音频文件名相同（去除或保留音频扩展名均可）',
+                                      S.of(context).guideMatchRule,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium,
@@ -596,7 +597,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '智能分类与标记',
+                          S.of(context).smartCategoryAndMark,
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -623,7 +624,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                             .textTheme
                                             .bodyMedium,
                                         children: [
-                                          const TextSpan(text: '识别到的作品会被添加绿色'),
+                                          TextSpan(text: S.of(context).guideRecognizedWorkPrefix),
                                           WidgetSpan(
                                             alignment:
                                                 PlaceholderAlignment.middle,
@@ -645,8 +646,8 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                               ),
                                             ),
                                           ),
-                                          const TextSpan(
-                                              text: '标签 ，音频文件图标也会增加 '),
+                                          TextSpan(
+                                              text: S.of(context).guideTagSuffix),
                                           WidgetSpan(
                                             alignment:
                                                 PlaceholderAlignment.middle,
@@ -680,7 +681,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                               ),
                                             ),
                                           ),
-                                          const TextSpan(text: ' 标记，表示有字幕库匹配'),
+                                          TextSpan(text: S.of(context).guideSubtitleMatchSuffix),
                                         ],
                                       ),
                                     ),
@@ -697,7 +698,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      '导入时自动识别 RJ 格式，归类到<已解析>',
+                                      S.of(context).guideAutoRecognizeRJ,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium,
@@ -716,7 +717,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                   ),
                                   Expanded(
                                     child: Text(
-                                      '纯数字文件夹自动添加 RJ 前缀（如 123456 → RJ123456）',
+                                      S.of(context).guideAutoAddRJPrefix,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium,
@@ -739,7 +740,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('知道了'),
+            child: Text(S.of(context).gotIt),
           ),
         ],
       ),
@@ -757,7 +758,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                 FileIconUtils.isLyricFile(item['title'] ?? ''))
               ListTile(
                 leading: const Icon(Icons.subtitles, color: Colors.orange),
-                title: const Text('载入为字幕'),
+                title: Text(S.of(context).loadAsSubtitle),
                 onTap: () {
                   Navigator.pop(context);
                   _loadLyricManually(item);
@@ -766,7 +767,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
             if (item['type'] == 'text')
               ListTile(
                 leading: const Icon(Icons.visibility),
-                title: const Text('预览'),
+                title: Text(S.of(context).preview),
                 onTap: () {
                   Navigator.pop(context);
                   _previewFile(path);
@@ -774,7 +775,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
               ),
             ListTile(
               leading: const Icon(Icons.open_in_new),
-              title: const Text('打开'),
+              title: Text(S.of(context).open),
               onTap: () {
                 Navigator.pop(context);
                 _openFile(path);
@@ -782,7 +783,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.drive_file_move),
-              title: const Text('移动到'),
+              title: Text(S.of(context).moveTo),
               onTap: () {
                 Navigator.pop(context);
                 _moveItem(item);
@@ -790,7 +791,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.edit),
-              title: const Text('重命名'),
+              title: Text(S.of(context).rename),
               onTap: () {
                 Navigator.pop(context);
                 _renameItem(item);
@@ -798,7 +799,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('删除', style: TextStyle(color: Colors.red)),
+              title: Text(S.of(context).delete, style: const TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
                 _deleteItem(item);
@@ -830,7 +831,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('预览失败: $e'),
+          content: Text(S.of(context).previewFailed(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -844,7 +845,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('打开失败: $e'),
+          content: Text(S.of(context).openFailed(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -857,23 +858,23 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
     final newName = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('重命名'),
+        title: Text(S.of(context).rename),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: '新名称',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: S.of(context).newName,
+            border: const OutlineInputBorder(),
           ),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('确定'),
+            child: Text(S.of(context).confirm),
           ),
         ],
       ),
@@ -897,7 +898,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('重命名成功'),
+                content: Text(S.of(context).renameSuccess),
                 backgroundColor: Colors.green,
               ),
             );
@@ -908,7 +909,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('重命名失败'),
+            content: Text(S.of(context).renameFailed),
             backgroundColor: Colors.red,
           ),
         );
@@ -920,18 +921,18 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
+        title: Text(S.of(context).confirmDelete),
         content: Text(
-            '确定要删除 "${item['title']}" 吗？${item['type'] == 'folder' ? '\n\n此操作将删除文件夹内的所有内容。' : ''}'),
+            '${S.of(context).deleteItemConfirm(item['title'])}${item['type'] == 'folder' ? '\n\n${S.of(context).deleteFolderContentsWarning}' : ''}'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('删除'),
+            child: Text(S.of(context).delete),
           ),
         ],
       ),
@@ -953,7 +954,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('删除成功'),
+                content: Text(S.of(context).deleteSuccess),
                 backgroundColor: Colors.green,
               ),
             );
@@ -964,7 +965,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('删除失败'),
+            content: Text(S.of(context).deleteFailed),
             backgroundColor: Colors.red,
           ),
         );
@@ -974,7 +975,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
 
   // 手动加载字幕
   Future<void> _loadLyricManually(Map<String, dynamic> item) async {
-    final title = item['title'] ?? '未知文件';
+    final title = item['title'] ?? S.of(context).unknownFile;
     final path = item['path'] as String;
 
     // 检查当前是否有播放中的音频
@@ -984,8 +985,8 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
     if (currentTrack == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('当前没有播放的音频，无法加载字幕'),
+          SnackBar(
+            content: Text(S.of(context).noAudioCannotLoadSubtitle),
             backgroundColor: Colors.orange,
             duration: Duration(seconds: 2),
           ),
@@ -1006,7 +1007,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
               size: 24,
             ),
             const SizedBox(width: 12),
-            const Text('加载字幕'),
+            Text(S.of(context).loadSubtitle),
           ],
         ),
         content: SingleChildScrollView(
@@ -1015,7 +1016,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '确定要将以下文件加载为当前音频的字幕吗？',
+                S.of(context).loadSubtitleConfirm,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -1041,7 +1042,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '字幕文件',
+                          S.of(context).subtitleFile,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1068,7 +1069,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '当前音频',
+                          S.of(context).currentAudio,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1108,7 +1109,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '切换到其他音频时,字幕将自动恢复为默认匹配方式',
+                        S.of(context).subtitleAutoRestoreNote,
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context)
@@ -1126,11 +1127,11 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('确定加载'),
+            child: Text(S.of(context).confirmLoad),
           ),
         ],
       ),
@@ -1140,10 +1141,10 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
 
     // 显示加载中提示
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Row(
           children: [
-            SizedBox(
+            const SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
@@ -1151,8 +1152,8 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ),
-            SizedBox(width: 12),
-            Text('正在加载字幕...'),
+            const SizedBox(width: 12),
+            Text(S.of(context).loadingSubtitle),
           ],
         ),
         duration: Duration(seconds: 2),
@@ -1173,7 +1174,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('字幕已加载：$title'),
+                  child: Text(S.of(context).subtitleLoadSuccess(title)),
                 ),
               ],
             ),
@@ -1186,7 +1187,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('加载字幕失败: $e'),
+            content: Text(S.of(context).subtitleLoadFailed(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -1226,7 +1227,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('移动成功'),
+                content: Text(S.of(context).moveSuccess),
                 backgroundColor: Colors.green,
               ),
             );
@@ -1237,7 +1238,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('移动失败'),
+            content: Text(S.of(context).moveFailed),
             backgroundColor: Colors.red,
           ),
         );
@@ -1353,7 +1354,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         onPressed: () => _loadLyricManually(item),
                         icon: const Icon(Icons.subtitles),
                         color: Colors.orange,
-                        tooltip: '加载为字幕',
+                        tooltip: S.of(context).loadAsSubtitle,
                         iconSize: 20,
                         padding: EdgeInsets.zero,
                         constraints:
@@ -1363,7 +1364,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         onPressed: () => _previewFile(path),
                         icon: const Icon(Icons.visibility),
                         color: Colors.blue,
-                        tooltip: '预览',
+                        tooltip: S.of(context).preview,
                         iconSize: 20,
                         padding: EdgeInsets.zero,
                         constraints:
@@ -1373,7 +1374,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                   )
                 else if (isFolder)
                   Text(
-                    '${(item['children'] as List?)?.length ?? 0} 项',
+                    S.of(context).nItems((item['children'] as List?)?.length ?? 0),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -1448,7 +1449,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: _showImportOptions,
-          tooltip: '导入字幕',
+          tooltip: S.of(context).importSubtitle,
           child: const Icon(Icons.add),
         ),
         body: Column(
@@ -1480,7 +1481,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         const Icon(Icons.arrow_back, size: 20),
                         const SizedBox(width: 16),
                         Text(
-                          '返回',
+                          S.of(context).back,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
@@ -1505,7 +1506,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: _loadFiles,
-                                child: const Text('重试'),
+                                child: Text(S.of(context).retry),
                               ),
                             ],
                           ),
@@ -1524,7 +1525,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    '字幕库为空',
+                                    S.of(context).subtitleLibraryEmpty,
                                     style: TextStyle(
                                       fontSize: 18,
                                       color: Theme.of(context)
@@ -1534,7 +1535,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    '点击右下角 + 按钮导入字幕',
+                                    S.of(context).tapToImportSubtitle,
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Theme.of(context)
@@ -1676,7 +1677,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           child: Text(
-            '字幕库',
+            S.of(context).subtitleLibrary,
             style: TextStyle(
               fontSize: 13,
               color: Theme.of(context).colorScheme.primary,
@@ -1776,11 +1777,11 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                     constraints:
                         const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: _toggleSelectionMode,
-                    tooltip: '退出选择',
+                    tooltip: S.of(context).exitSelection,
                   ),
                 ),
                 Text(
-                  '已选择 ${_selectedPaths.length} 项',
+                  S.of(context).selectedCount(_selectedPaths.length),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const Spacer(),
@@ -1793,7 +1794,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                   constraints:
                       const BoxConstraints(minWidth: 40, minHeight: 40),
                   onPressed: _selectedPaths.isEmpty ? _selectAll : _deselectAll,
-                  tooltip: _selectedPaths.isEmpty ? '全选' : '取消全选',
+                  tooltip: _selectedPaths.isEmpty ? S.of(context).selectAll : S.of(context).deselectAll,
                 ),
                 if (_selectedPaths.isNotEmpty)
                   IconButton(
@@ -1803,7 +1804,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                     constraints:
                         const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: _deleteSelectedItems,
-                    tooltip: '删除 (${_selectedPaths.length})',
+                    tooltip: S.of(context).deleteWithCount(_selectedPaths.length),
                     color: Theme.of(context).colorScheme.error,
                   ),
                 SizedBox(width: horizontalPadding - 8),
@@ -1829,8 +1830,8 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                   child: TextField(
                     controller: _searchController,
                     autofocus: true,
-                    decoration: const InputDecoration(
-                      hintText: '搜索字幕...',
+                    decoration: InputDecoration(
+                      hintText: S.of(context).searchSubtitles,
                       border: InputBorder.none,
                     ),
                     onChanged: (value) {
@@ -1863,7 +1864,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                 children: [
                   TextButton.icon(
                     icon: const Icon(Icons.refresh, size: 20),
-                    label: const Text('重载'),
+                    label: Text(S.of(context).reload),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 10),
@@ -1877,7 +1878,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                   if (Platform.isWindows || Platform.isMacOS)
                     TextButton.icon(
                       icon: const Icon(Icons.folder_open, size: 20),
-                      label: const Text('打开文件夹'),
+                      label: Text(S.of(context).openFolder),
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 10),
@@ -1895,7 +1896,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         _isSearching = true;
                       });
                     },
-                    tooltip: '搜索',
+                    tooltip: S.of(context).search,
                     padding: EdgeInsets.zero,
                     constraints:
                         const BoxConstraints(minWidth: 36, minHeight: 36),
@@ -1903,7 +1904,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                   IconButton(
                     icon: const Icon(Icons.checklist),
                     onPressed: _toggleSelectionMode,
-                    tooltip: '选择',
+                    tooltip: S.of(context).select,
                     padding: EdgeInsets.zero,
                     constraints:
                         const BoxConstraints(minWidth: 36, minHeight: 36),
@@ -1917,7 +1918,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                     padding: EdgeInsets.zero,
                     constraints:
                         const BoxConstraints(minWidth: 36, minHeight: 36),
-                    tooltip: '字幕库使用说明',
+                    tooltip: S.of(context).subtitleLibraryGuide,
                     onPressed: _showLibraryInfoDialog,
                   ),
                   if (_stats != null)
@@ -1931,7 +1932,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        '${_stats!.totalFiles} 个文件 • ${_stats!.sizeFormatted}',
+                        S.of(context).nFilesWithSize(_stats!.totalFiles, _stats!.sizeFormatted),
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -2005,9 +2006,9 @@ class _FolderBrowserDialogState extends State<_FolderBrowserDialog> {
     return _pathStack.last;
   }
 
-  String get _currentDisplayName {
+  String _currentDisplayName(BuildContext context) {
     if (_pathStack.isEmpty) {
-      return '根目录';
+      return S.of(context).rootDirectory;
     }
     final name = _pathStack.last.split(Platform.pathSeparator).last;
     // 限制最多10个字符
@@ -2067,11 +2068,11 @@ class _FolderBrowserDialogState extends State<_FolderBrowserDialog> {
             IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: _navigateBack,
-              tooltip: '返回上级',
+              tooltip: S.of(context).goToParent,
             ),
           Expanded(
             child: Text(
-              '移动到: $_currentDisplayName',
+              S.of(context).moveToTarget(_currentDisplayName(context)),
               style: const TextStyle(fontSize: 16),
             ),
           ),
@@ -2087,10 +2088,10 @@ class _FolderBrowserDialogState extends State<_FolderBrowserDialog> {
                   // 子文件夹列表
                   Expanded(
                     child: _currentFolders.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Text(
-                              '此目录下没有子文件夹',
-                              style: TextStyle(color: Colors.grey),
+                              S.of(context).noSubfoldersHere,
+                              style: const TextStyle(color: Colors.grey),
                             ),
                           )
                         : ListView.builder(
@@ -2116,13 +2117,13 @@ class _FolderBrowserDialogState extends State<_FolderBrowserDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(S.of(context).cancel),
         ),
         Flexible(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.check_circle, size: 18),
             label: Text(
-              _currentDisplayName,
+              _currentDisplayName(context),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),

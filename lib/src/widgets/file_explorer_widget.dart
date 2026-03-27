@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 
+import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
 import '../models/audio_track.dart';
 import '../models/download_task.dart';
@@ -120,7 +121,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '加载文件失败: $e';
+        _errorMessage = '${S.of(context).loadFilesFailed(e.toString())}';
         _isLoading = false;
       });
     }
@@ -565,7 +566,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     // 获取音频文件信息
     final hash = audioFile['hash'];
-    final title = audioFile['title'] ?? audioFile['name'] ?? '未知';
+    final title = audioFile['title'] ?? audioFile['name'] ?? S.of(context).unknown;
 
     // 获取当前作品的完整文件树（用于字幕查找）
     try {
@@ -586,7 +587,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
     if (currentIndex == -1) {
       _showSnackBar(
         SnackBar(
-          content: Text('无法找到音频文件: $title'),
+          content: Text(S.of(context).cannotFindAudioFile(title)),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),
@@ -600,7 +601,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     for (final file in audioFiles) {
       final fileHash = file['hash'];
-      final fileTitle = file['title'] ?? file['name'] ?? '未知';
+      final fileTitle = file['title'] ?? file['name'] ?? S.of(context).unknown;
 
       // 优先级: 本地下载文件 → 缓存文件 → 网络URL
       String audioUrl = '';
@@ -700,10 +701,10 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     if (audioTracks.isEmpty) {
       _showSnackBar(
-        const SnackBar(
-          content: Text('没有找到可播放的音频文件'),
+        SnackBar(
+          content: Text(S.of(context).noPlayableAudioFiles),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
@@ -729,7 +730,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
     // 显示提示
     _showSnackBar(
       SnackBar(
-        content: Text('正在播放: $title (${startIndex + 1}/${audioTracks.length})'),
+        content: Text(S.of(context).nowPlayingNOfTotal(title, startIndex + 1, audioTracks.length)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -784,7 +785,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
   // 手动加载字幕
   Future<void> _loadLyricManually(dynamic file) async {
-    final title = file['title'] ?? file['name'] ?? '未知文件';
+    final title = file['title'] ?? file['name'] ?? S.of(context).unknown;
 
     // 检查当前是否有播放中的音频
     final currentTrackAsync = ref.read(currentTrackProvider);
@@ -793,10 +794,10 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
     if (currentTrack == null) {
       if (mounted) {
         _showSnackBar(
-          const SnackBar(
-            content: Text('当前没有播放的音频，无法加载字幕'),
+          SnackBar(
+            content: Text(S.of(context).noAudioCannotLoadSubtitle),
             backgroundColor: Colors.orange,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -815,7 +816,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
               size: 24,
             ),
             const SizedBox(width: 12),
-            const Text('加载字幕'),
+            Text(S.of(context).loadSubtitle),
           ],
         ),
         content: SingleChildScrollView(
@@ -824,7 +825,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '确定要将以下文件加载为当前音频的字幕吗？',
+                S.of(context).loadSubtitleConfirm,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -850,7 +851,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '字幕文件',
+                          S.of(context).subtitleFile,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -877,7 +878,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '当前音频',
+                          S.of(context).currentAudio,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -917,7 +918,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '切换到其他音频时,字幕将自动恢复为默认匹配方式',
+                        S.of(context).subtitleAutoRestoreNote,
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context)
@@ -935,11 +936,11 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('确定加载'),
+            child: Text(S.of(context).confirmLoad),
           ),
         ],
       ),
@@ -949,7 +950,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     // 显示加载中提示
     _showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Row(
           children: [
             SizedBox(
@@ -961,10 +962,10 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
               ),
             ),
             SizedBox(width: 12),
-            Text('正在加载字幕...'),
+            Text(S.of(context).loadingSubtitle),
           ],
         ),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
 
@@ -983,7 +984,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('字幕加载成功：$title'),
+                  child: Text(S.of(context).subtitleLoadSuccess(title)),
                 ),
               ],
             ),
@@ -1001,7 +1002,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('字幕加载失败：$e'),
+                  child: Text(S.of(context).subtitleLoadFailed(e.toString())),
                 ),
               ],
             ),
@@ -1020,8 +1021,8 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     if (host.isEmpty) {
       _showSnackBar(
-        const SnackBar(
-          content: Text('无法预览图片：缺少必要信息'),
+              SnackBar(
+          content: Text(S.of(context).cannotPreviewImageMissingInfo),
           backgroundColor: Colors.red,
         ),
       );
@@ -1040,8 +1041,8 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     if (currentIndex == -1) {
       _showSnackBar(
-        const SnackBar(
-          content: Text('无法找到图片文件'),
+        SnackBar(
+          content: Text(S.of(context).cannotFindImageFile),
           backgroundColor: Colors.red,
         ),
       );
@@ -1053,7 +1054,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     for (final f in imageFiles) {
       final hash = f['hash'] ?? '';
-      final title = f['title'] ?? f['name'] ?? '未知图片';
+      final title = f['title'] ?? f['name'] ?? S.of(context).unknown;
       String imageUrl;
 
       // 1. 先检查是否已下载到本地
@@ -1126,12 +1127,12 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
     final host = authState.host ?? '';
     final token = authState.token ?? '';
     final hash = file['hash'];
-    final title = file['title'] ?? file['name'] ?? '未知文本';
+    final title = file['title'] ?? file['name'] ?? S.of(context).unknown;
 
     if (hash == null || host.isEmpty) {
       _showSnackBar(
-        const SnackBar(
-          content: Text('无法预览文本：缺少必要信息'),
+        SnackBar(
+          content: Text(S.of(context).cannotPreviewTextMissingInfo),
           backgroundColor: Colors.red,
         ),
       );
@@ -1194,12 +1195,12 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
     final host = authState.host ?? '';
     final token = authState.token ?? '';
     final hash = file['hash'];
-    final title = file['title'] ?? file['name'] ?? '未知PDF';
+    final title = file['title'] ?? file['name'] ?? S.of(context).unknown;
 
     if (hash == null || host.isEmpty) {
       _showSnackBar(
-        const SnackBar(
-          content: Text('无法预览PDF：缺少必要信息'),
+        SnackBar(
+          content: Text(S.of(context).cannotPreviewPdfMissingInfo),
           backgroundColor: Colors.red,
         ),
       );
@@ -1266,8 +1267,8 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
     if (hash.isEmpty) {
       if (mounted) {
         _showSnackBar(
-          const SnackBar(
-            content: Text('无法播放视频：缺少文件标识'),
+          SnackBar(
+            content: Text(S.of(context).cannotPlayVideoMissingId),
             backgroundColor: Colors.red,
           ),
         );
@@ -1299,7 +1300,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
               if (mounted) {
                 _showSnackBar(
                   SnackBar(
-                    content: Text('无法打开视频文件: ${result.message}'),
+                    content: Text(S.of(context).cannotOpenVideoFile(result.message)),
                     backgroundColor: Colors.orange,
                   ),
                 );
@@ -1309,7 +1310,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
             if (mounted) {
               _showSnackBar(
                 SnackBar(
-                  content: Text('打开视频文件时出错: $e'),
+                  content: Text(S.of(context).openVideoFileError(e.toString())),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -1321,8 +1322,8 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
           if (host.isEmpty || token.isEmpty) {
             if (mounted) {
               _showSnackBar(
-                const SnackBar(
-                  content: Text('无法播放视频：缺少必要参数'),
+                SnackBar(
+                  content: Text(S.of(context).cannotPlayVideoMissingParams),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -1342,8 +1343,8 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
         if (host.isEmpty || token.isEmpty) {
           if (mounted) {
             _showSnackBar(
-              const SnackBar(
-                content: Text('无法播放视频：缺少必要参数'),
+              SnackBar(
+                content: Text(S.of(context).cannotPlayVideoMissingParams),
                 backgroundColor: Colors.red,
               ),
             );
@@ -1363,8 +1364,8 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
       if (host.isEmpty || token.isEmpty) {
         if (mounted) {
           _showSnackBar(
-            const SnackBar(
-              content: Text('无法播放视频：缺少必要参数'),
+            SnackBar(
+              content: Text(S.of(context).cannotPlayVideoMissingParams),
               backgroundColor: Colors.red,
             ),
           );
@@ -1405,17 +1406,17 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
           showDialog(
             context: context,
             builder: (context) => ResponsiveAlertDialog(
-              title: const Text('无法直接播放'),
+              title: Text(S.of(context).cannotPlayDirectly),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('系统无法找到支持的视频播放器。'),
+                    Text(S.of(context).noVideoPlayerFound),
                     const SizedBox(height: 12),
-                    const Text('您可以：'),
-                    const Text('1. 复制链接到外部播放器（如MX Player、VLC）'),
-                    const Text('2. 在浏览器中打开'),
+                    Text(S.of(context).youCan),
+                    Text(S.of(context).copyLinkToExternalPlayer),
+                    Text(S.of(context).openInBrowserOption),
                     const SizedBox(height: 12),
                     SelectableText(
                       uriString,
@@ -1427,7 +1428,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('关闭'),
+                  child: Text(S.of(context).close),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -1435,7 +1436,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                     // 在浏览器中打开
                     await launchUrl(uri, mode: LaunchMode.platformDefault);
                   },
-                  child: const Text('在浏览器中打开'),
+                  child: Text(S.of(context).openInBrowserOption),
                 ),
               ],
             ),
@@ -1446,7 +1447,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
       if (mounted) {
         _showSnackBar(
           SnackBar(
-            content: Text('播放视频时出错: $e'),
+            content: Text(S.of(context).playVideoError(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -1482,7 +1483,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadWorkTree,
-              child: const Text('重试'),
+              child: Text(S.of(context).retry),
             ),
           ],
         ),
@@ -1490,15 +1491,15 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
     }
 
     if (_rootFiles.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.folder_open, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              '没有文件',
-              style: TextStyle(color: Colors.grey),
+              S.of(context).noFiles,
+              style: const TextStyle(color: Colors.grey),
             ),
           ],
         ),
@@ -1526,8 +1527,8 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                 Expanded(
                   child: Text(
                     _showTranslation
-                        ? '资源文件 (已翻译 ${_translationCache.length} 项)'
-                        : '资源文件',
+                        ? S.of(context).resourceFilesTranslated(_translationCache.length)
+                        : S.of(context).resourceFiles,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -1583,7 +1584,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                           if (!_isTranslating) ...[
                             const SizedBox(width: 4),
                             Text(
-                              _showTranslation ? '原' : '译',
+                              _showTranslation ? S.of(context).translationOriginal : S.of(context).translationTranslated,
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
@@ -1643,7 +1644,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     for (final item in items) {
       final type = item['type'] ?? '';
-      final originalTitle = item['title'] ?? item['name'] ?? '未知文件';
+      final originalTitle = item['title'] ?? item['name'] ?? S.of(context).unknown;
       final title = _getDisplayName(originalTitle); // 使用翻译后的名称
       final isFolder = type == 'folder';
       final children = item['children'] as List<dynamic>?;
@@ -1664,7 +1665,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
           },
           onLongPress: () {
             Clipboard.setData(ClipboardData(text: title));
-            SnackBarUtil.showSuccess(context, '已复制名称: $title');
+            SnackBarUtil.showSuccess(context, S.of(context).copiedName(title));
           },
           child: Padding(
             padding: EdgeInsets.only(
@@ -1802,7 +1803,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                           onPressed: () => _loadLyricManually(item),
                           icon: const Icon(Icons.subtitles),
                           color: Colors.orange,
-                          tooltip: '加载为字幕',
+                          tooltip: S.of(context).loadAsSubtitle,
                           iconSize: 20,
                         ),
                       IconButton(
@@ -1817,14 +1818,14 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
                         },
                         icon: const Icon(Icons.visibility),
                         color: Colors.blue,
-                        tooltip: '预览',
+                        tooltip: S.of(context).preview,
                         iconSize: 20,
                       ),
                     ],
                   )
                 else if (isFolder && children != null)
                   Text(
-                    '${children.length} 项',
+                    S.of(context).nItems(children.length),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -1881,7 +1882,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
     setState(() {
       _isTranslating = true;
-      _translationProgress = '准备翻译...';
+      _translationProgress = S.of(context).preparingTranslation;
     });
 
     try {
@@ -1893,9 +1894,9 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
           _isTranslating = false;
         });
         _showSnackBar(
-          const SnackBar(
-            content: Text('没有需要翻译的内容'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(S.of(context).noContentToTranslate),
+            duration: const Duration(seconds: 2),
           ),
         );
         return;
@@ -1929,7 +1930,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
       for (int i = 0; i < chunks.length; i++) {
         setState(() {
-          _translationProgress = '翻译中 ${i + 1}/${chunks.length}';
+          _translationProgress = S.of(context).translatingProgress(i + 1, chunks.length);
         });
 
         try {
@@ -1967,7 +1968,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
       _showSnackBar(
         SnackBar(
-          content: Text('翻译完成：${_translationCache.length} 个项目'),
+          content: Text(S.of(context).translationComplete(_translationCache.length)),
           backgroundColor: Colors.green,
           duration: const Duration(seconds: 2),
         ),
@@ -1980,7 +1981,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
 
       _showSnackBar(
         SnackBar(
-          content: Text('翻译失败: $e'),
+          content: Text(S.of(context).translationFailed(e.toString())),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),
@@ -2011,7 +2012,7 @@ class _FileExplorerWidgetState extends ConsumerState<FileExplorerWidget> {
     } else {
       _showSnackBar(
         SnackBar(
-          content: Text('暂不支持打开此类型文件: $title'),
+          content: Text(S.of(context).unsupportedFileTypeWithTitle(title)),
           duration: const Duration(seconds: 2),
         ),
       );

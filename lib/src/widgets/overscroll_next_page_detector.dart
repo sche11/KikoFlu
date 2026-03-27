@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 /// A widget that detects overscroll at the bottom of a ScrollView and triggers an action.
 /// It provides a visual "stretch" feedback and a text prompt.
@@ -7,8 +8,8 @@ class OverscrollNextPageDetector extends StatefulWidget {
   final VoidCallback? onNextPage;
   final bool hasNextPage;
   final bool isLoading;
-  final String promptText;
-  final String releaseText;
+  final String? promptText;
+  final String? releaseText;
   final double triggerThreshold;
 
   const OverscrollNextPageDetector({
@@ -17,8 +18,8 @@ class OverscrollNextPageDetector extends StatefulWidget {
     this.onNextPage,
     this.hasNextPage = false,
     this.isLoading = false,
-    this.promptText = '继续下拉跳转下一页',
-    this.releaseText = '释放跳转下一页',
+    this.promptText,
+    this.releaseText,
     this.triggerThreshold = 100.0,
   });
 
@@ -75,7 +76,9 @@ class _OverscrollNextPageDetectorState
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      _isTriggered ? widget.releaseText : widget.promptText,
+                      _isTriggered
+                          ? (widget.releaseText ?? S.of(context).releaseForNextPage)
+                          : (widget.promptText ?? S.of(context).pullDownForNextPage),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
 
 class RatingDetailPopup extends StatelessWidget {
@@ -47,7 +48,7 @@ class RatingDetailPopup extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '评分详情',
+                S.of(context).ratingDetails,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -79,7 +80,7 @@ class RatingDetailPopup extends StatelessWidget {
                 ],
               ),
               Text(
-                '共 $totalCount 个评分',
+                S.of(context).ratingsCount(totalCount),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                     ),

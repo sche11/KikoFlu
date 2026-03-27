@@ -7,6 +7,7 @@ import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
 
+import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
 import '../providers/auth_provider.dart';
 import '../services/translation_service.dart';
@@ -85,7 +86,7 @@ class _OfflineWorkDetailScreenState
           _isTranslating = false;
         });
 
-        SnackBarUtil.showError(context, '翻译失败: $e');
+        SnackBarUtil.showError(context, S.of(context).translationFailed(e.toString()));
       }
     }
   }
@@ -95,7 +96,7 @@ class _OfflineWorkDetailScreenState
     Clipboard.setData(ClipboardData(text: text));
     SnackBarUtil.showSuccess(
       context,
-      '已复制$label: $text',
+      S.of(context).copiedToClipboard(label, text),
       duration: const Duration(seconds: 1),
     );
   }
@@ -116,7 +117,7 @@ class _OfflineWorkDetailScreenState
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                const Text('正在打包作品...'),
+                Text(S.of(context).packingWork),
               ],
             ),
           ),
@@ -134,7 +135,7 @@ class _OfflineWorkDetailScreenState
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              SnackBarUtil.showError(context, '作品目录不存在');
+              SnackBarUtil.showError(context, S.of(context).workDirectoryNotExist);
             }
           });
         }
@@ -155,7 +156,7 @@ class _OfflineWorkDetailScreenState
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              SnackBarUtil.showError(context, '打包失败');
+              SnackBarUtil.showError(context, S.of(context).packingFailed);
             }
           });
         }
@@ -185,7 +186,7 @@ class _OfflineWorkDetailScreenState
           if (mounted) {
             SnackBarUtil.showSuccess(
               context,
-              '导出成功：$savePath',
+              S.of(context).exportSuccess(savePath),
               duration: const Duration(seconds: 3),
             );
           }
@@ -203,7 +204,7 @@ class _OfflineWorkDetailScreenState
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            SnackBarUtil.showError(context, '导出失败: $e');
+            SnackBarUtil.showError(context, S.of(context).exportFailed(e.toString()));
           }
         });
       }
@@ -272,13 +273,13 @@ class _OfflineWorkDetailScreenState
             actions: [
               IconButton(
                 icon: const Icon(Icons.archive_outlined),
-                tooltip: '导出为ZIP',
+                tooltip: S.of(context).exportAsZip,
                 onPressed: _exportWork,
               ),
             ],
             title: GestureDetector(
               onLongPress: () =>
-                  _copyToClipboard(formatRJCode(widget.work.id), 'RJ号'),
+                  _copyToClipboard(formatRJCode(widget.work.id), S.of(context).rjNumberLabel),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -299,14 +300,14 @@ class _OfflineWorkDetailScreenState
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(color: Colors.orange, width: 1),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.offline_bolt,
+                          const Icon(Icons.offline_bolt,
                               size: 12, color: Colors.orange),
-                          SizedBox(width: 2),
+                          const SizedBox(width: 2),
                           Text(
-                            '离线',
+                            S.of(context).offlineBadge,
                             style: TextStyle(
                               fontSize: 10,
                               color: Colors.orange,
@@ -407,7 +408,7 @@ class _OfflineWorkDetailScreenState
               _showTranslation && _translatedTitle != null
                   ? _translatedTitle!
                   : work.title,
-              '标题',
+              S.of(context).titleLabel,
             ),
             child: Text.rich(
               TextSpan(
@@ -468,7 +469,7 @@ class _OfflineWorkDetailScreenState
           if ((work.name != null && work.name!.isNotEmpty) ||
               (work.vas != null && work.vas!.isNotEmpty)) ...[
             Text(
-              '社团 | 声优',
+              S.of(context).circleAndVaSection,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -487,7 +488,7 @@ class _OfflineWorkDetailScreenState
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     borderRadius: 6,
                     fontWeight: FontWeight.w500,
-                    onLongPress: () => _copyToClipboard(work.name!, '社团'),
+                    onLongPress: () => _copyToClipboard(work.name!, S.of(context).circleLabel),
                   ),
                 if (work.vas != null)
                   ...work.vas!.map((va) {
@@ -497,7 +498,7 @@ class _OfflineWorkDetailScreenState
                           horizontal: 8, vertical: 4),
                       borderRadius: 6,
                       fontWeight: FontWeight.w500,
-                      onLongPress: () => _copyToClipboard(va.name, '声优'),
+                      onLongPress: () => _copyToClipboard(va.name, S.of(context).vaLabel),
                     );
                   }).toList(),
               ],
@@ -508,7 +509,7 @@ class _OfflineWorkDetailScreenState
           // 标签信息
           if (work.tags != null && work.tags!.isNotEmpty) ...[
             Text(
-              '标签',
+              S.of(context).tagLabel,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -526,7 +527,7 @@ class _OfflineWorkDetailScreenState
                             horizontal: 8, vertical: 4),
                         borderRadius: 6,
                         fontWeight: FontWeight.w500,
-                        onLongPress: () => _copyToClipboard(tag.name, '标签'),
+                        onLongPress: () => _copyToClipboard(tag.name, S.of(context).tagLabel),
                       ))
                   .toList(),
             ),
@@ -536,7 +537,7 @@ class _OfflineWorkDetailScreenState
           // 发布日期
           if (work.release != null) ...[
             Text(
-              '发布日期',
+              S.of(context).releaseDate,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,

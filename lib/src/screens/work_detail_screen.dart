@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../utils/string_utils.dart';
+import '../../l10n/app_localizations.dart';
 
 import '../models/work.dart';
 import '../providers/auth_provider.dart';
@@ -136,7 +137,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('翻译失败: $e'),
+            content: Text(S.of(context).translationFailed(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -151,7 +152,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('已复制$label：$text'),
+          content: Text(S.of(context).copiedToClipboard(label, text)),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -183,7 +184,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
             });
           }
         },
-        onCopyTag: () => _copyToClipboard(tag.name, '标签'),
+        onCopyTag: () => _copyToClipboard(tag.name, S.of(context).tagLabel),
       ),
     );
   }
@@ -222,9 +223,9 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
 
         if (!fallbackLaunched && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('无法打开链接'),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text(S.of(context).cannotOpenLink),
+              duration: const Duration(seconds: 2),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -234,7 +235,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('打开链接失败: $e'),
+            content: Text(S.of(context).openLinkFailed(e.toString())),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red,
@@ -261,13 +262,13 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
             future: preparedWorkFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const ResponsiveAlertDialog(
+                return ResponsiveAlertDialog(
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('正在加载文件列表...'),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      Text(S.of(context).loadingFileList),
                     ],
                   ),
                 );
@@ -275,12 +276,12 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
 
               if (snapshot.hasError) {
                 return ResponsiveAlertDialog(
-                  title: const Text('加载失败'),
-                  content: Text('加载文件列表失败: ${snapshot.error}'),
+                  title: Text(S.of(context).loadFailed),
+                  content: Text(S.of(context).loadFileListFailed(snapshot.error.toString())),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('关闭'),
+                      child: Text(S.of(context).close),
                     ),
                   ],
                 );
@@ -399,7 +400,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = '加载失败: $e';
+          _errorMessage = S.of(context).loadFailedWithError(e.toString());
         });
       }
     }
@@ -432,9 +433,9 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
 
         // 显示刷新成功提示
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('刷新成功'),
-            duration: Duration(seconds: 1),
+          SnackBar(
+            content: Text(S.of(context).refreshComplete),
+            duration: const Duration(seconds: 1),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -442,12 +443,12 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = '刷新失败: $e';
+          _errorMessage = S.of(context).refreshFailed(e.toString());
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('刷新失败: $e'),
+            content: Text(S.of(context).refreshFailed(e.toString())),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.red,
@@ -522,7 +523,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
           // RJ号作为标题,支持长按复制
           title: GestureDetector(
             onLongPress: () =>
-                _copyToClipboard(formatRJCode(widget.work.id), 'RJ号'),
+                _copyToClipboard(formatRJCode(widget.work.id), S.of(context).rjNumberLabel),
             child: Text(
               formatRJCode(widget.work.id),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -538,7 +539,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
             IconButton(
               icon: const Icon(Icons.download),
               onPressed: _showFileSelectionDialog,
-              tooltip: '下载',
+              tooltip: S.of(context).download,
             ),
             // 收藏状态按钮 - 带图标和文字
             Padding(
@@ -694,7 +695,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                             ],
                           ),
                           child: Text(
-                            '字幕',
+                            S.of(context).subtitleBadge,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 11,
@@ -729,7 +730,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                   _showTranslation && _translatedTitle != null
                       ? _translatedTitle!
                       : work.title,
-                  '标题',
+                  S.of(context).titleLabel,
                 ),
                 child: Text.rich(
                   TextSpan(
@@ -831,7 +832,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                   ),
                   TextButton(
                     onPressed: _loadWorkDetail,
-                    child: const Text('重试', style: TextStyle(fontSize: 12)),
+                    child: Text(S.of(context).retry, style: const TextStyle(fontSize: 12)),
                   ),
                 ],
               ),
@@ -863,7 +864,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                         child: Tooltip(
                           message: work.rateCountDetail != null &&
                                   work.rateCountDetail!.isNotEmpty
-                              ? '点击查看评分详情'
+                              ? S.of(context).tapToViewRatingDetail
                               : '',
                           preferBelow: false,
                           child: Row(
@@ -975,7 +976,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                   // 价格信息
                   if (displaySettings.showPrice && work.price != null)
                     Text(
-                      '${work.price} 日元',
+                      S.of(context).priceInYen(work.price!),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.red[700],
                             fontWeight: FontWeight.w600,
@@ -1010,7 +1011,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                       work.dlCount != null &&
                       work.dlCount! > 0)
                     Text(
-                      '售出：${_formatNumber(work.dlCount!)}',
+                      S.of(context).soldCount(_formatNumber(context, work.dlCount!)),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[600],
                             fontSize: 12,
@@ -1027,7 +1028,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
           if ((work.name != null && work.name!.isNotEmpty) ||
               (work.vas != null && work.vas!.isNotEmpty)) ...[
             Text(
-              '社团 | 声优',
+              S.of(context).circleAndVaSection,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -1054,7 +1055,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                           horizontal: 8, vertical: 4),
                       borderRadius: 6,
                       fontWeight: FontWeight.w500,
-                      onLongPress: () => _copyToClipboard(work.name!, '社团'),
+                      onLongPress: () => _copyToClipboard(work.name!, S.of(context).circleLabel),
                     ),
                   ),
 
@@ -1070,7 +1071,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                             horizontal: 8, vertical: 4),
                         borderRadius: 6,
                         fontWeight: FontWeight.w500,
-                        onLongPress: () => _copyToClipboard(va.name, '声优'),
+                        onLongPress: () => _copyToClipboard(va.name, S.of(context).vaLabel),
                       ),
                     );
                   }).toList(),
@@ -1079,10 +1080,10 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
             const SizedBox(height: 16),
           ],
 
-          // 标签信息
+          // 标签信息 (work_detail)
           if (work.tags != null && work.tags!.isNotEmpty) ...[
             Text(
-              '标签',
+              S.of(context).tagLabel,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -1162,7 +1163,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '添加标签',
+                      S.of(context).addTag,
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).colorScheme.primary,
@@ -1186,7 +1187,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '发布日期',
+                    S.of(context).releaseDate,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -1209,7 +1210,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
           if (work.otherLanguageEditions != null &&
               work.otherLanguageEditions!.isNotEmpty) ...[
             Text(
-              '其他版本',
+              S.of(context).otherEditions,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -1329,9 +1330,9 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
     }
   }
 
-  String _formatNumber(int number) {
+  String _formatNumber(BuildContext context, int number) {
     if (number >= 10000) {
-      return '${(number / 10000).toStringAsFixed(1)}万';
+      return S.of(context).tenThousandSuffix((number / 10000).toStringAsFixed(1));
     } else if (number >= 1000) {
       return '${(number / 1000).toStringAsFixed(1)}k';
     } else {

@@ -12,6 +12,7 @@ import '../services/cache_service.dart';
 import '../screens/work_detail_screen.dart';
 import '../utils/string_utils.dart';
 import '../providers/lyric_provider.dart';
+import '../../l10n/app_localizations.dart';
 import 'privacy_blur_cover.dart';
 
 class HistoryWorkCard extends ConsumerWidget {
@@ -50,19 +51,19 @@ class HistoryWorkCard extends ConsumerWidget {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('删除记录'),
-              content: Text('确定要删除 "${work.title}" 的播放记录吗？'),
+              title: Text(S.of(context).deleteRecord),
+              content: Text(S.of(context).deletePlayRecordConfirm(work.title)),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('取消'),
+                  child: Text(S.of(context).cancel),
                 ),
                 TextButton(
                   onPressed: () {
                     ref.read(historyProvider.notifier).remove(work.id);
                     Navigator.pop(context);
                   },
-                  child: const Text('删除'),
+                  child: Text(S.of(context).delete),
                 ),
               ],
             ),
@@ -226,7 +227,7 @@ class HistoryWorkCard extends ConsumerWidget {
                     )
                   else
                     Text(
-                      '尚未播放',
+                      S.of(context).notPlayedYet,
                       style: TextStyle(
                         fontSize: 11,
                         color: Theme.of(context).colorScheme.outline,
@@ -293,7 +294,7 @@ class HistoryWorkCard extends ConsumerWidget {
           print('Failed to resume playback: $e');
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('播放失败: $e')),
+              SnackBar(content: Text(S.of(context).playbackFailed(e.toString()))),
             );
           }
         }
@@ -395,7 +396,7 @@ class HistoryWorkCard extends ConsumerWidget {
 
     for (final file in audioFiles) {
       final fileHash = file['hash'];
-      final fileTitle = file['title'] ?? file['name'] ?? '未知';
+      final fileTitle = file['title'] ?? file['name'] ?? S.of(context).unknown;
 
       // 优先级: 本地下载文件 → 缓存文件 → 网络URL
       String audioUrl = '';
@@ -480,7 +481,7 @@ class HistoryWorkCard extends ConsumerWidget {
         print('Failed to resume playback: $e');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('播放失败: $e')),
+            SnackBar(content: Text(S.of(context).playbackFailed(e.toString()))),
           );
         }
       }

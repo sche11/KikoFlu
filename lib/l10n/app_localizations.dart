@@ -1791,13 +1791,13 @@ abstract class S {
   /// No description provided for @tagSubmitSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Tags submitted, waiting for server to process'**
+  /// **'Tags submitted successfully, awaiting server processing'**
   String get tagSubmitSuccess;
 
   /// No description provided for @bindEmailFirst.
   ///
   /// In en, this message translates to:
-  /// **'Please bind your email at www.asmr.one first'**
+  /// **'Please go to www.asmr.one to bind your email first'**
   String get bindEmailFirst;
 
   /// No description provided for @selectedNTags.
@@ -1863,8 +1863,8 @@ abstract class S {
   /// No description provided for @pageNOfTotal.
   ///
   /// In en, this message translates to:
-  /// **'Page {page}/{total}'**
-  String pageNOfTotal(int page, int total);
+  /// **'Page {current} / {total}'**
+  String pageNOfTotal(int current, int total);
 
   /// No description provided for @translateTitle.
   ///
@@ -2289,7 +2289,7 @@ abstract class S {
   /// No description provided for @subtitleTimingAdjustment.
   ///
   /// In en, this message translates to:
-  /// **'Subtitle Timing'**
+  /// **'Subtitle Timing Adjustment'**
   String get subtitleTimingAdjustment;
 
   /// No description provided for @playerLyricStyle.
@@ -2523,7 +2523,7 @@ abstract class S {
   /// No description provided for @saveImageFailed.
   ///
   /// In en, this message translates to:
-  /// **'Failed to save image'**
+  /// **'Save failed'**
   String get saveImageFailed;
 
   /// No description provided for @logout.
@@ -2571,7 +2571,7 @@ abstract class S {
   /// No description provided for @ratingsCount.
   ///
   /// In en, this message translates to:
-  /// **'{count} ratings'**
+  /// **'{count} ratings total'**
   String ratingsCount(int count);
 
   /// No description provided for @myReviews.
@@ -3321,7 +3321,7 @@ abstract class S {
   /// No description provided for @totalNItems.
   ///
   /// In en, this message translates to:
-  /// **'{count} total'**
+  /// **'{count} items total'**
   String totalNItems(int count);
 
   /// No description provided for @systemPlaylistCannotDelete.
@@ -3569,6 +3569,1770 @@ abstract class S {
   /// In en, this message translates to:
   /// **'This page excluded {count} works'**
   String pageExcludedNWorks(int count);
+
+  /// No description provided for @noSubtitlesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No subtitles available'**
+  String get noSubtitlesAvailable;
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// No description provided for @backToCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to cover'**
+  String get backToCover;
+
+  /// No description provided for @lyricHintTapCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap cover or title to enter subtitle view'**
+  String get lyricHintTapCover;
+
+  /// No description provided for @floatingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating Subtitle'**
+  String get floatingSubtitle;
+
+  /// No description provided for @appendMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Append Mode'**
+  String get appendMode;
+
+  /// No description provided for @appendModeStatusOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Append Mode: On'**
+  String get appendModeStatusOn;
+
+  /// No description provided for @appendModeStatusOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Append Mode: Off'**
+  String get appendModeStatusOff;
+
+  /// No description provided for @playlistEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist is empty'**
+  String get playlistEmpty;
+
+  /// No description provided for @appendModeEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Append Mode Enabled'**
+  String get appendModeEnabled;
+
+  /// No description provided for @appendModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio tapped next will be appended to the end of the current playlist instead of replacing it.\nDuplicate tracks won\'t be added.'**
+  String get appendModeHint;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get gotIt;
+
+  /// No description provided for @nMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String nMinutes(int count);
+
+  /// No description provided for @nHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hr'**
+  String nHours(int count);
+
+  /// No description provided for @titleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get titleLabel;
+
+  /// No description provided for @rjNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'RJ Number'**
+  String get rjNumberLabel;
+
+  /// No description provided for @tapToViewRatingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view rating details'**
+  String get tapToViewRatingDetail;
+
+  /// No description provided for @priceInYen.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} Yen'**
+  String priceInYen(int price);
+
+  /// No description provided for @soldCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold: {count}'**
+  String soldCount(String count);
+
+  /// No description provided for @circleAndVaSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Circle | Voice Actors'**
+  String get circleAndVaSection;
+
+  /// No description provided for @subtitleBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle'**
+  String get subtitleBadge;
+
+  /// No description provided for @otherEditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Editions'**
+  String get otherEditions;
+
+  /// No description provided for @tenThousandSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}k'**
+  String tenThousandSuffix(String count);
+
+  /// No description provided for @packingWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Packing work...'**
+  String get packingWork;
+
+  /// No description provided for @workDirectoryNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'Work directory does not exist'**
+  String get workDirectoryNotExist;
+
+  /// No description provided for @packingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Packing failed'**
+  String get packingFailed;
+
+  /// No description provided for @exportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Export successful: {path}'**
+  String exportSuccess(String path);
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String exportFailed(String error);
+
+  /// No description provided for @exportAsZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as ZIP'**
+  String get exportAsZip;
+
+  /// No description provided for @offlineBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offlineBadge;
+
+  /// No description provided for @loadFilesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load files: {error}'**
+  String loadFilesFailed(String error);
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @noPlayableAudioFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'No playable audio files found'**
+  String get noPlayableAudioFiles;
+
+  /// No description provided for @cannotFindAudioFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot find audio file: {title}'**
+  String cannotFindAudioFile(String title);
+
+  /// No description provided for @nowPlayingNOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Now playing: {title} ({current}/{total})'**
+  String nowPlayingNOfTotal(String title, int current, int total);
+
+  /// No description provided for @noAudioCannotLoadSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No audio playing, cannot load subtitle'**
+  String get noAudioCannotLoadSubtitle;
+
+  /// No description provided for @loadSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Load Subtitle'**
+  String get loadSubtitle;
+
+  /// No description provided for @loadSubtitleConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Load this file as subtitle for the current audio?'**
+  String get loadSubtitleConfirm;
+
+  /// No description provided for @subtitleFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle file'**
+  String get subtitleFile;
+
+  /// No description provided for @currentAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Current audio'**
+  String get currentAudio;
+
+  /// No description provided for @subtitleAutoRestoreNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle will auto-restore to default matching when switching audio'**
+  String get subtitleAutoRestoreNote;
+
+  /// No description provided for @confirmLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Load'**
+  String get confirmLoad;
+
+  /// No description provided for @loadingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading subtitle...'**
+  String get loadingSubtitle;
+
+  /// No description provided for @subtitleLoadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle loaded: {title}'**
+  String subtitleLoadSuccess(String title);
+
+  /// No description provided for @subtitleLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle load failed: {error}'**
+  String subtitleLoadFailed(String error);
+
+  /// No description provided for @cannotPreviewImageMissingInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot preview image: missing required info'**
+  String get cannotPreviewImageMissingInfo;
+
+  /// No description provided for @cannotFindImageFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot find image file'**
+  String get cannotFindImageFile;
+
+  /// No description provided for @cannotPreviewTextMissingInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot preview text: missing required info'**
+  String get cannotPreviewTextMissingInfo;
+
+  /// No description provided for @cannotPreviewPdfMissingInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot preview PDF: missing required info'**
+  String get cannotPreviewPdfMissingInfo;
+
+  /// No description provided for @cannotPlayVideoMissingId.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot play video: missing file ID'**
+  String get cannotPlayVideoMissingId;
+
+  /// No description provided for @cannotPlayVideoMissingParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot play video: missing required parameters'**
+  String get cannotPlayVideoMissingParams;
+
+  /// No description provided for @cannotPlayDirectly.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot play directly'**
+  String get cannotPlayDirectly;
+
+  /// No description provided for @noVideoPlayerFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No supported video player found on this device.'**
+  String get noVideoPlayerFound;
+
+  /// No description provided for @youCan.
+  ///
+  /// In en, this message translates to:
+  /// **'You can:'**
+  String get youCan;
+
+  /// No description provided for @copyLinkToExternalPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Copy the link to an external player (e.g. MX Player, VLC)'**
+  String get copyLinkToExternalPlayer;
+
+  /// No description provided for @openInBrowserOption.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Open in browser'**
+  String get openInBrowserOption;
+
+  /// No description provided for @playVideoError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error playing video: {error}'**
+  String playVideoError(String error);
+
+  /// No description provided for @noFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'No files'**
+  String get noFiles;
+
+  /// No description provided for @resourceFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource Files'**
+  String get resourceFiles;
+
+  /// No description provided for @resourceFilesTranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource Files (translated {count} items)'**
+  String resourceFilesTranslated(int count);
+
+  /// No description provided for @translationOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Orig'**
+  String get translationOriginal;
+
+  /// No description provided for @translationTranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Trans'**
+  String get translationTranslated;
+
+  /// No description provided for @copiedName.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied name: {title}'**
+  String copiedName(String title);
+
+  /// No description provided for @translationComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation complete: {count} items'**
+  String translationComplete(int count);
+
+  /// No description provided for @noContentToTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'No content to translate'**
+  String get noContentToTranslate;
+
+  /// No description provided for @preparingTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing translation...'**
+  String get preparingTranslation;
+
+  /// No description provided for @translatingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating {current}/{total}'**
+  String translatingProgress(int current, int total);
+
+  /// No description provided for @nItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String nItems(int count);
+
+  /// No description provided for @loadAsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Load as subtitle'**
+  String get loadAsSubtitle;
+
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @openVideoFileError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error opening video file: {error}'**
+  String openVideoFileError(String error);
+
+  /// No description provided for @cannotOpenVideoFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot open video file: {message}'**
+  String cannotOpenVideoFile(String message);
+
+  /// No description provided for @noFileTreeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No file tree information'**
+  String get noFileTreeInfo;
+
+  /// No description provided for @workFolderNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'Work folder does not exist'**
+  String get workFolderNotExist;
+
+  /// No description provided for @cannotPlayAudioMissingId.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot play audio: missing file ID'**
+  String get cannotPlayAudioMissingId;
+
+  /// No description provided for @audioFileNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio file does not exist'**
+  String get audioFileNotExist;
+
+  /// No description provided for @noPreviewableImages.
+  ///
+  /// In en, this message translates to:
+  /// **'No previewable images found'**
+  String get noPreviewableImages;
+
+  /// No description provided for @cannotPreviewTextMissingId.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot preview text: missing file ID'**
+  String get cannotPreviewTextMissingId;
+
+  /// No description provided for @cannotFindFilePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot find file path'**
+  String get cannotFindFilePath;
+
+  /// No description provided for @fileNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'File does not exist: {title}'**
+  String fileNotExist(String title);
+
+  /// No description provided for @cannotPreviewPdfMissingId.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot preview PDF: missing file ID'**
+  String get cannotPreviewPdfMissingId;
+
+  /// No description provided for @videoFileNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'Video file does not exist'**
+  String get videoFileNotExist;
+
+  /// No description provided for @cannotOpenVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot open video'**
+  String get cannotOpenVideo;
+
+  /// No description provided for @errorInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String errorInfo(String message);
+
+  /// No description provided for @installVideoPlayerApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Please install a video player app (e.g. VLC, MX Player)'**
+  String get installVideoPlayerApp;
+
+  /// No description provided for @filePathLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'File path:'**
+  String get filePathLabel;
+
+  /// No description provided for @noDownloadedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'No downloaded files'**
+  String get noDownloadedFiles;
+
+  /// No description provided for @offlineFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Files'**
+  String get offlineFiles;
+
+  /// No description provided for @unsupportedFileType.
+  ///
+  /// In en, this message translates to:
+  /// **'This file type is not supported: {title}'**
+  String unsupportedFileType(String title);
+
+  /// No description provided for @deleteFilePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this file?'**
+  String get deleteFilePrompt;
+
+  /// No description provided for @deletedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted: {title}'**
+  String deletedItem(String title);
+
+  /// No description provided for @selectAtLeastOneFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one file'**
+  String get selectAtLeastOneFile;
+
+  /// No description provided for @addedNFilesToDownloadQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} files to download queue'**
+  String addedNFilesToDownloadQueue(int count);
+
+  /// No description provided for @downloadedAndSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded {downloaded} · Selected {selected}'**
+  String downloadedAndSelected(int downloaded, int selected);
+
+  /// No description provided for @downloadN.
+  ///
+  /// In en, this message translates to:
+  /// **'Download ({count})'**
+  String downloadN(int count);
+
+  /// No description provided for @checkingDownloadedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking downloaded files...'**
+  String get checkingDownloadedFiles;
+
+  /// No description provided for @noDownloadableFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'No downloadable files'**
+  String get noDownloadableFiles;
+
+  /// No description provided for @selectFilesToDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Files to Download'**
+  String get selectFilesToDownload;
+
+  /// No description provided for @downloadedNCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} downloaded'**
+  String downloadedNCount(int count);
+
+  /// No description provided for @selectedNCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectedNCount(int count);
+
+  /// No description provided for @pleaseEnterServerAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter server address'**
+  String get pleaseEnterServerAddress;
+
+  /// No description provided for @pleaseEnterUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter username'**
+  String get pleaseEnterUsername;
+
+  /// No description provided for @pleaseEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter password'**
+  String get pleaseEnterPassword;
+
+  /// No description provided for @notTestedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tested yet'**
+  String get notTestedYet;
+
+  /// No description provided for @latencyResultDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Latency {latency} ({status})'**
+  String latencyResultDetail(String latency, String status);
+
+  /// No description provided for @connectionFailedWithDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed: {error}'**
+  String connectionFailedWithDetail(String error);
+
+  /// No description provided for @noAccountTapToRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'No account? Tap to register'**
+  String get noAccountTapToRegister;
+
+  /// No description provided for @haveAccountTapToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Have an account? Tap to login'**
+  String get haveAccountTapToLogin;
+
+  /// No description provided for @cannotDeleteActiveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot delete the currently active account'**
+  String get cannotDeleteActiveAccount;
+
+  /// No description provided for @selectAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Account'**
+  String get selectAccount;
+
+  /// No description provided for @noSavedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved accounts'**
+  String get noSavedAccounts;
+
+  /// No description provided for @addAccountToGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an account to get started'**
+  String get addAccountToGetStarted;
+
+  /// No description provided for @unknownHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown host'**
+  String get unknownHost;
+
+  /// No description provided for @lastUsedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Last used: {time}'**
+  String lastUsedTime(String time);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String daysAgo(int count);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours ago'**
+  String hoursAgo(int count);
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes ago'**
+  String minutesAgo(int count);
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Delete'**
+  String get confirmDelete;
+
+  /// No description provided for @deleteSelectedConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} selected items?'**
+  String deleteSelectedConfirm(int count);
+
+  /// No description provided for @deletedNOfTotalItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {success}/{total} items'**
+  String deletedNOfTotalItems(int success, int total);
+
+  /// No description provided for @importingSubtitleFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing subtitle file...'**
+  String get importingSubtitleFile;
+
+  /// No description provided for @preparingImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing import...'**
+  String get preparingImport;
+
+  /// No description provided for @preparingExtract.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing to extract...'**
+  String get preparingExtract;
+
+  /// No description provided for @importSubtitleFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Subtitle File'**
+  String get importSubtitleFile;
+
+  /// No description provided for @supportedSubtitleFormats.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports .srt, .vtt, .lrc and other subtitle formats'**
+  String get supportedSubtitleFormats;
+
+  /// No description provided for @importFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Folder'**
+  String get importFolder;
+
+  /// No description provided for @importFolderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Preserves folder structure, imports only subtitle files'**
+  String get importFolderDesc;
+
+  /// No description provided for @importArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Archive'**
+  String get importArchive;
+
+  /// No description provided for @importArchiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports password-free ZIP archives.\nFor batch import, compress them into one archive.'**
+  String get importArchiveDesc;
+
+  /// No description provided for @subtitleLibraryGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle Library Usage Guide'**
+  String get subtitleLibraryGuide;
+
+  /// No description provided for @subtitleLibraryFunction.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle Library Function'**
+  String get subtitleLibraryFunction;
+
+  /// No description provided for @subtitleLibraryFunctionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Stores imported/saved subtitle files, supports auto/manual loading during playback'**
+  String get subtitleLibraryFunctionDesc;
+
+  /// No description provided for @subtitleAutoLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle Auto-load'**
+  String get subtitleAutoLoad;
+
+  /// No description provided for @subtitleAutoLoadDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When playing audio, the system automatically searches for matching subtitles:'**
+  String get subtitleAutoLoadDesc;
+
+  /// No description provided for @smartCategoryAndMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Categorization & Marking'**
+  String get smartCategoryAndMark;
+
+  /// No description provided for @open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get open;
+
+  /// No description provided for @moveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to'**
+  String get moveTo;
+
+  /// No description provided for @rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rename;
+
+  /// No description provided for @newName.
+  ///
+  /// In en, this message translates to:
+  /// **'New name'**
+  String get newName;
+
+  /// No description provided for @renameSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename successful'**
+  String get renameSuccess;
+
+  /// No description provided for @renameFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename failed'**
+  String get renameFailed;
+
+  /// No description provided for @deleteItemConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{title}\"?'**
+  String deleteItemConfirm(String title);
+
+  /// No description provided for @deleteFolderContentsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete all contents in the folder.'**
+  String get deleteFolderContentsWarning;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete failed'**
+  String get deleteFailed;
+
+  /// No description provided for @subtitleLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle loaded: {title}'**
+  String subtitleLoaded(String title);
+
+  /// No description provided for @moveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Move successful'**
+  String get moveSuccess;
+
+  /// No description provided for @moveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Move failed'**
+  String get moveFailed;
+
+  /// No description provided for @previewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview failed: {error}'**
+  String previewFailed(String error);
+
+  /// No description provided for @openFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Open failed: {error}'**
+  String openFailed(String error);
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @subtitleLibraryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle library is empty'**
+  String get subtitleLibraryEmpty;
+
+  /// No description provided for @tapToImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to import subtitles'**
+  String get tapToImportSubtitle;
+
+  /// No description provided for @importSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Subtitle'**
+  String get importSubtitle;
+
+  /// No description provided for @sampleSubtitleContent.
+  ///
+  /// In en, this message translates to:
+  /// **'♪ Sample subtitle content ♪'**
+  String get sampleSubtitleContent;
+
+  /// No description provided for @presetStyles.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset Styles'**
+  String get presetStyles;
+
+  /// No description provided for @backgroundOpacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Background Opacity'**
+  String get backgroundOpacity;
+
+  /// No description provided for @colorSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Color Settings'**
+  String get colorSettings;
+
+  /// No description provided for @shapeSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape Settings'**
+  String get shapeSettings;
+
+  /// No description provided for @cornerRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Corner Radius'**
+  String get cornerRadius;
+
+  /// No description provided for @horizontalPadding.
+  ///
+  /// In en, this message translates to:
+  /// **'Horizontal Padding'**
+  String get horizontalPadding;
+
+  /// No description provided for @verticalPadding.
+  ///
+  /// In en, this message translates to:
+  /// **'Vertical Padding'**
+  String get verticalPadding;
+
+  /// No description provided for @resetStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Style'**
+  String get resetStyle;
+
+  /// No description provided for @resetStyleConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore the default style?'**
+  String get resetStyleConfirm;
+
+  /// No description provided for @restoreDefaultStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Default Style'**
+  String get restoreDefaultStyle;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @noBlockedItemsOfType.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocked {type}'**
+  String noBlockedItemsOfType(String type);
+
+  /// No description provided for @unblockedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblocked: {item}'**
+  String unblockedItem(String item);
+
+  /// No description provided for @addBlockedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Blocked {type}'**
+  String addBlockedItem(String type);
+
+  /// No description provided for @blockedItemName.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} name'**
+  String blockedItemName(String type);
+
+  /// No description provided for @enterBlockedItemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter {type} to block'**
+  String enterBlockedItemHint(String type);
+
+  /// No description provided for @blockedItemAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked: {item}'**
+  String blockedItemAdded(String item);
+
+  /// No description provided for @workCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Works: {count}'**
+  String workCountLabel(int count);
+
+  /// No description provided for @miniPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Mini Player'**
+  String get miniPlayer;
+
+  /// No description provided for @lineHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Line Height'**
+  String get lineHeight;
+
+  /// No description provided for @portraitPlayerBelowCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait Player (Below Cover)'**
+  String get portraitPlayerBelowCover;
+
+  /// No description provided for @fullscreenSubtitleMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen Subtitle (Portrait/Landscape)'**
+  String get fullscreenSubtitleMode;
+
+  /// No description provided for @activeSubtitleFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Active subtitle size'**
+  String get activeSubtitleFontSize;
+
+  /// No description provided for @inactiveSubtitleFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive subtitle size'**
+  String get inactiveSubtitleFontSize;
+
+  /// No description provided for @restoreDefaultSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Default Settings'**
+  String get restoreDefaultSettings;
+
+  /// No description provided for @guideInPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'In '**
+  String get guideInPrefix;
+
+  /// No description provided for @guideParsedFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'<Parsed>'**
+  String get guideParsedFolder;
+
+  /// No description provided for @guideFindWorkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **' folder, find matching works\nSupported folder format: RJ123456'**
+  String get guideFindWorkDesc;
+
+  /// No description provided for @guideSavedFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'<Saved>'**
+  String get guideSavedFolder;
+
+  /// No description provided for @guideFindSubtitleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **' folder, find individual subtitle files'**
+  String get guideFindSubtitleDesc;
+
+  /// No description provided for @guideMatchRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching rule: subtitle filename matches audio filename (with or without audio extension)'**
+  String get guideMatchRule;
+
+  /// No description provided for @guideRecognizedWorkPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognized works get a green '**
+  String get guideRecognizedWorkPrefix;
+
+  /// No description provided for @guideTagSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' tag, and audio file icons get a '**
+  String get guideTagSuffix;
+
+  /// No description provided for @guideSubtitleMatchSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' mark, indicating subtitle library match'**
+  String get guideSubtitleMatchSuffix;
+
+  /// No description provided for @guideAutoRecognizeRJ.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-recognize RJ format on import, categorize to <Parsed>'**
+  String get guideAutoRecognizeRJ;
+
+  /// No description provided for @guideAutoAddRJPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Pure numeric folders auto-add RJ prefix (e.g. 123456 → RJ123456)'**
+  String get guideAutoAddRJPrefix;
+
+  /// No description provided for @unknownFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown file'**
+  String get unknownFile;
+
+  /// No description provided for @deleteWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete ({count})'**
+  String deleteWithCount(int count);
+
+  /// No description provided for @searchSubtitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Search subtitles...'**
+  String get searchSubtitles;
+
+  /// No description provided for @nFilesWithSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files • {size}'**
+  String nFilesWithSize(int count, String size);
+
+  /// No description provided for @rootDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Root'**
+  String get rootDirectory;
+
+  /// No description provided for @goToParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to parent'**
+  String get goToParent;
+
+  /// No description provided for @moveToTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to: {name}'**
+  String moveToTarget(String name);
+
+  /// No description provided for @noSubfoldersHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No subfolders in this directory'**
+  String get noSubfoldersHere;
+
+  /// No description provided for @addedToPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to playlist \"{name}\"'**
+  String addedToPlaylist(String name);
+
+  /// No description provided for @removedFromPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from playlist \"{name}\"'**
+  String removedFromPlaylist(String name);
+
+  /// No description provided for @alreadyFavorited.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorited'**
+  String get alreadyFavorited;
+
+  /// No description provided for @loadImageFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load image\n{error}'**
+  String loadImageFailedWithError(String error);
+
+  /// No description provided for @noImageAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No image available'**
+  String get noImageAvailable;
+
+  /// No description provided for @storagePermissionRequiredForImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage permission required to save images'**
+  String get storagePermissionRequiredForImage;
+
+  /// No description provided for @savedToGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to gallery'**
+  String get savedToGallery;
+
+  /// No description provided for @saveCoverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Cover Image'**
+  String get saveCoverImage;
+
+  /// No description provided for @savedToPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to: {path}'**
+  String savedToPath(String path);
+
+  /// No description provided for @doubleTapToZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-tap to zoom · Pinch to scale'**
+  String get doubleTapToZoom;
+
+  /// No description provided for @getStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to get status: {error}'**
+  String getStatusFailed(String error);
+
+  /// No description provided for @deleteRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Record'**
+  String get deleteRecord;
+
+  /// No description provided for @deletePlayRecordConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the play record for \"{title}\"?'**
+  String deletePlayRecordConfirm(String title);
+
+  /// No description provided for @notPlayedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not played yet'**
+  String get notPlayedYet;
+
+  /// No description provided for @playbackFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback failed: {error}'**
+  String playbackFailed(String error);
+
+  /// No description provided for @storagePermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Permission Required'**
+  String get storagePermissionRequired;
+
+  /// No description provided for @storagePermissionForGalleryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission to access the photo gallery is required to save images. Please grant permission in settings.'**
+  String get storagePermissionForGalleryDesc;
+
+  /// No description provided for @goToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Settings'**
+  String get goToSettings;
+
+  /// No description provided for @imageSavedToGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Image saved to gallery'**
+  String get imageSavedToGallery;
+
+  /// No description provided for @imageSavedToPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Image saved to: {path}'**
+  String imageSavedToPath(String path);
+
+  /// No description provided for @pullDownForNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull down to go to next page'**
+  String get pullDownForNextPage;
+
+  /// No description provided for @releaseForNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Release to go to next page'**
+  String get releaseForNextPage;
+
+  /// No description provided for @jumpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump'**
+  String get jumpTo;
+
+  /// No description provided for @goToPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Page'**
+  String get goToPageTitle;
+
+  /// No description provided for @pageNumberRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Page (1-{max})'**
+  String pageNumberRange(int max);
+
+  /// No description provided for @enterPageNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter page number'**
+  String get enterPageNumber;
+
+  /// No description provided for @enterValidPageNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid page number (1-{max})'**
+  String enterValidPageNumber(int max);
+
+  /// No description provided for @previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previousPage;
+
+  /// No description provided for @nextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get nextPage;
+
+  /// No description provided for @localPdfNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'Local PDF file does not exist'**
+  String get localPdfNotExist;
+
+  /// No description provided for @cannotOpenPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot open PDF file'**
+  String get cannotOpenPdf;
+
+  /// No description provided for @loadPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load PDF: {error}'**
+  String loadPdfFailed(String error);
+
+  /// No description provided for @pdfPageOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} of {total}'**
+  String pdfPageOfTotal(int current, int total);
+
+  /// No description provided for @loadingPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading PDF...'**
+  String get loadingPdf;
+
+  /// No description provided for @pdfPathInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF file path is invalid'**
+  String get pdfPathInvalid;
+
+  /// No description provided for @desktopPdfPreviewNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop PDF preview is not yet supported'**
+  String get desktopPdfPreviewNotSupported;
+
+  /// No description provided for @openWithSystemApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open with system default app'**
+  String get openWithSystemApp;
+
+  /// No description provided for @renderPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF rendering failed: {error}'**
+  String renderPdfFailed(String error);
+
+  /// No description provided for @ratingDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating Details'**
+  String get ratingDetails;
+
+  /// No description provided for @selectSaveDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Save Directory'**
+  String get selectSaveDirectory;
+
+  /// No description provided for @noSubtitleContentToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'No subtitle content to save'**
+  String get noSubtitleContentToSave;
+
+  /// No description provided for @savedToSubtitleLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to subtitle library'**
+  String get savedToSubtitleLibrary;
+
+  /// No description provided for @saveToLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Local'**
+  String get saveToLocal;
+
+  /// No description provided for @selectDirectoryToSaveFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select directory to save file'**
+  String get selectDirectoryToSaveFile;
+
+  /// No description provided for @saveToSubtitleLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Subtitle Library'**
+  String get saveToSubtitleLibrary;
+
+  /// No description provided for @saveToSubtitleLibraryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to the \"Saved\" folder in subtitle library'**
+  String get saveToSubtitleLibraryDesc;
+
+  /// No description provided for @saveToFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to file'**
+  String get saveToFile;
+
+  /// No description provided for @noContentToSave.
+  ///
+  /// In en, this message translates to:
+  /// **'No content to save'**
+  String get noContentToSave;
+
+  /// No description provided for @fileSavedToPath.
+  ///
+  /// In en, this message translates to:
+  /// **'File saved to: {path}'**
+  String fileSavedToPath(String path);
+
+  /// No description provided for @localFileNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'Local file does not exist'**
+  String get localFileNotExist;
+
+  /// No description provided for @loadTextFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load text: {error}'**
+  String loadTextFailed(String error);
+
+  /// No description provided for @previewMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Mode'**
+  String get previewMode;
+
+  /// No description provided for @editMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Mode'**
+  String get editMode;
+
+  /// No description provided for @showOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Original'**
+  String get showOriginal;
+
+  /// No description provided for @translateContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate Content'**
+  String get translateContent;
+
+  /// No description provided for @editTextContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit text content...'**
+  String get editTextContentHint;
+
+  /// No description provided for @bookmarkRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark removed'**
+  String get bookmarkRemoved;
+
+  /// No description provided for @setProgressAndRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Set to: {progress}, rating: {rating} stars'**
+  String setProgressAndRating(String progress, int rating);
+
+  /// No description provided for @setProgressTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Set to: {progress}'**
+  String setProgressTo(String progress);
+
+  /// No description provided for @ratingSetTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating set to: {rating} stars'**
+  String ratingSetTo(int rating);
+
+  /// No description provided for @updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get updated;
+
+  /// No description provided for @addTagFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add tag: {error}'**
+  String addTagFailed(String error);
+
+  /// No description provided for @addWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ({count})'**
+  String addWithCount(int count);
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @nStars.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stars'**
+  String nStars(int count);
+
+  /// No description provided for @voteRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote removed'**
+  String get voteRemoved;
+
+  /// No description provided for @votedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Voted up'**
+  String get votedUp;
+
+  /// No description provided for @votedDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Voted down'**
+  String get votedDown;
+
+  /// No description provided for @voteFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote failed: {error}'**
+  String voteFailedWithError(String error);
+
+  /// No description provided for @voteFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get voteFor;
+
+  /// No description provided for @voteAgainst.
+  ///
+  /// In en, this message translates to:
+  /// **'Against'**
+  String get voteAgainst;
+
+  /// No description provided for @voted.
+  ///
+  /// In en, this message translates to:
+  /// **'Voted'**
+  String get voted;
+
+  /// No description provided for @tagBlockedWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag blocked: {name}'**
+  String tagBlockedWithName(String name);
+
+  /// No description provided for @subtitleParseFailedUnsupportedFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Parse failed, unsupported format'**
+  String get subtitleParseFailedUnsupportedFormat;
+
+  /// No description provided for @lyricPresetDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic'**
+  String get lyricPresetDynamic;
+
+  /// No description provided for @lyricPresetClassic.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get lyricPresetClassic;
+
+  /// No description provided for @lyricPresetModern.
+  ///
+  /// In en, this message translates to:
+  /// **'Modern'**
+  String get lyricPresetModern;
+
+  /// No description provided for @lyricPresetMinimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimal'**
+  String get lyricPresetMinimal;
+
+  /// No description provided for @lyricPresetVibrant.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrant'**
+  String get lyricPresetVibrant;
+
+  /// No description provided for @lyricPresetElegant.
+  ///
+  /// In en, this message translates to:
+  /// **'Elegant'**
+  String get lyricPresetElegant;
+
+  /// No description provided for @lyricPresetDynamicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows system theme, auto color'**
+  String get lyricPresetDynamicDesc;
+
+  /// No description provided for @lyricPresetClassicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Black background, white text, classic'**
+  String get lyricPresetClassicDesc;
+
+  /// No description provided for @lyricPresetModernDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Gradient background, stylish modern'**
+  String get lyricPresetModernDesc;
+
+  /// No description provided for @lyricPresetMinimalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Light transparent, simple and elegant'**
+  String get lyricPresetMinimalDesc;
+
+  /// No description provided for @lyricPresetVibrantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Vivid colors, full of energy'**
+  String get lyricPresetVibrantDesc;
+
+  /// No description provided for @lyricPresetElegantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep blue, refined elegance'**
+  String get lyricPresetElegantDesc;
+
+  /// No description provided for @floatingLyricLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'♪ Loading subtitle ♪'**
+  String get floatingLyricLoading;
+
+  /// No description provided for @subtitleFileNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'File does not exist'**
+  String get subtitleFileNotExist;
+
+  /// No description provided for @subtitleMissingInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing required info'**
+  String get subtitleMissingInfo;
+
+  /// No description provided for @privacyDefaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing Audio'**
+  String get privacyDefaultTitle;
+
+  /// No description provided for @offlineModeStartup.
+  ///
+  /// In en, this message translates to:
+  /// **'Network connection failed, starting in offline mode'**
+  String get offlineModeStartup;
+
+  /// No description provided for @playlistInfoNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist info not loaded'**
+  String get playlistInfoNotLoaded;
+
+  /// No description provided for @encodingUnrecognized.
+  ///
+  /// In en, this message translates to:
+  /// **'File encoding unrecognized, cannot display content correctly'**
+  String get encodingUnrecognized;
+
+  /// No description provided for @editPlaylistFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to edit playlist: {error}'**
+  String editPlaylistFailed(String error);
+
+  /// No description provided for @unsupportedFileTypeWithTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot open this file type: {title}'**
+  String unsupportedFileTypeWithTitle(String title);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

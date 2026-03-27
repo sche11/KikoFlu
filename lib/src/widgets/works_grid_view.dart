@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
 import '../providers/works_provider.dart';
 import '../utils/responsive_grid_helper.dart';
@@ -101,7 +102,7 @@ class WorksGridView extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '已经到底啦~杂库~',
+                    S.of(context).reachedEnd,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 14,
@@ -161,7 +162,7 @@ class WorksGridView extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '已经到底啦~杂库~',
+                          S.of(context).reachedEnd,
                           style: TextStyle(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,

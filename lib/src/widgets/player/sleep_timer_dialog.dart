@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/audio_provider.dart';
 import '../responsive_dialog.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 定时器对话框
 class SleepTimerDialog extends ConsumerStatefulWidget {
@@ -31,7 +32,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
     final timerState = ref.watch(sleepTimerProvider);
 
     return ResponsiveAlertDialog(
-      title: const Text('定时器'),
+      title: Text(S.of(context).sleepTimerTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -55,7 +56,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      timerState.waitingForTrackEnd ? '即将停止' : '剩余时间',
+                      timerState.waitingForTrackEnd ? S.of(context).aboutToStop : S.of(context).remainingTime,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
@@ -101,7 +102,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '完整播完后停止',
+                              S.of(context).finishCurrentTrack,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -129,7 +130,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
                     context,
                     ref,
                     icon: Icons.add,
-                    label: '+5分钟',
+                    label: '+${S.of(context).nMinutes(5)}',
                     onTap: () {
                       ref
                           .read(sleepTimerProvider.notifier)
@@ -140,7 +141,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
                     context,
                     ref,
                     icon: Icons.add,
-                    label: '+10分钟',
+                    label: '+${S.of(context).nMinutes(10)}',
                     onTap: () {
                       ref
                           .read(sleepTimerProvider.notifier)
@@ -151,7 +152,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
                     context,
                     ref,
                     icon: Icons.cancel_outlined,
-                    label: '取消定时',
+                    label: S.of(context).cancelTimer,
                     color: Theme.of(context).colorScheme.error,
                     onTap: () {
                       ref.read(sleepTimerProvider.notifier).cancelTimer();
@@ -163,16 +164,16 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
               // 设置新定时器
               // 模式切换
               SegmentedButton<bool>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: false,
-                    icon: Icon(Icons.timer_outlined),
-                    label: Text('时长'),
+                    icon: const Icon(Icons.timer_outlined),
+                    label: Text(S.of(context).duration),
                   ),
                   ButtonSegment(
                     value: true,
-                    icon: Icon(Icons.schedule),
-                    label: Text('指定时间'),
+                    icon: const Icon(Icons.schedule),
+                    label: Text(S.of(context).specifyTime),
                   ),
                 ],
                 selected: {_isTimeMode},
@@ -188,7 +189,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
                 _buildTimePickerSection(context, ref),
               ] else ...[
                 Text(
-                  '选择定时时长',
+                  S.of(context).selectTimerDuration,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 16),
@@ -202,7 +203,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
+          child: Text(S.of(context).close),
         ),
       ],
     );
@@ -239,7 +240,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
             ),
             const SizedBox(width: 8),
             Text(
-              '完整播完后停止',
+              S.of(context).finishCurrentTrack,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
@@ -252,7 +253,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
     return Column(
       children: [
         Text(
-          '选择停止播放的时间',
+          S.of(context).selectStopTime,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 16),
@@ -330,7 +331,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
             Navigator.of(context).pop();
           },
           icon: const Icon(Icons.check),
-          label: const Text('确定'),
+          label: Text(S.of(context).confirm),
         ),
       ],
     );
@@ -338,12 +339,12 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
 
   Widget _buildTimeGrid(BuildContext context, WidgetRef ref) {
     final presetTimes = [
-      (const Duration(minutes: 5), '5分钟', Icons.timer),
-      (const Duration(minutes: 10), '10分钟', Icons.timer),
-      (const Duration(minutes: 15), '15分钟', Icons.bedtime_outlined),
-      (const Duration(minutes: 30), '30分钟', Icons.bedtime_outlined),
-      (const Duration(hours: 1), '1小时', Icons.bedtime),
-      (const Duration(hours: 2), '2小时', Icons.bedtime),
+      (const Duration(minutes: 5), S.of(context).nMinutes(5), Icons.timer),
+      (const Duration(minutes: 10), S.of(context).nMinutes(10), Icons.timer),
+      (const Duration(minutes: 15), S.of(context).nMinutes(15), Icons.bedtime_outlined),
+      (const Duration(minutes: 30), S.of(context).nMinutes(30), Icons.bedtime_outlined),
+      (const Duration(hours: 1), S.of(context).nHours(1), Icons.bedtime),
+      (const Duration(hours: 2), S.of(context).nHours(2), Icons.bedtime),
     ];
 
     return Wrap(

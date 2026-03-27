@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/work.dart';
 import '../../providers/auth_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../responsive_dialog.dart';
 
 /// 添加标签对话框组件
@@ -64,7 +65,7 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('加载标签失败: $e'),
+            content: Text(S.of(context).loadTagsFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -89,8 +90,8 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
   Future<void> _submitTags() async {
     if (_selectedTagIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('请至少选择一个标签'),
+        SnackBar(
+          content: Text(S.of(context).selectAtLeastOneTag),
           duration: Duration(seconds: 2),
         ),
       );
@@ -113,8 +114,8 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
         widget.onTagsAdded();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('标签提交成功，等待服务器处理'),
+          SnackBar(
+            content: Text(S.of(context).tagSubmitSuccess),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
           ),
@@ -126,12 +127,12 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
           _isSubmitting = false;
         });
 
-        String errorMessage = '添加标签失败: $e';
+        String errorMessage = S.of(context).addTagFailed(e.toString());
 
         // 检查是否需要绑定邮箱
         if (e.toString().contains('Must bind email first') ||
             e.toString().contains('vote.mustBindEmailFirst')) {
-          errorMessage = '请先前往 www.asmr.one 绑定邮箱';
+          errorMessage = S.of(context).bindEmailFirst;
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -151,7 +152,7 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
     final existingTagIds = widget.existingTags.map((tag) => tag.id).toSet();
 
     return ResponsiveAlertDialog(
-      title: const Text('添加标签'),
+      title: Text(S.of(context).addTag),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
@@ -161,7 +162,7 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: '搜索标签...',
+                hintText: S.of(context).searchTag,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -179,7 +180,7 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  '已选择 ${_selectedTagIds.length} 个标签:',
+                  S.of(context).selectedNTags(_selectedTagIds.length),
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -225,10 +226,10 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
                   maxHeight: MediaQuery.of(context).size.height * 0.4,
                 ),
                 child: _filteredTags.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.all(32),
-                          child: Text('没有找到匹配的标签'),
+                          padding: const EdgeInsets.all(32),
+                          child: Text(S.of(context).noMatchingTags),
                         ),
                       )
                     : ListView.builder(
@@ -305,7 +306,7 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
       actions: [
         TextButton(
           onPressed: _isSubmitting ? null : () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(S.of(context).cancel),
         ),
         ElevatedButton(
           onPressed: _isSubmitting ? null : _submitTags,
@@ -315,7 +316,7 @@ class _AddTagDialogState extends ConsumerState<AddTagDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Text('添加 (${_selectedTagIds.length})'),
+              : Text(S.of(context).addWithCount(_selectedTagIds.length)),
         ),
       ],
     );

@@ -13,6 +13,7 @@ import '../widgets/player/lyric_display_widget.dart';
 import '../widgets/player/playlist_dialog.dart';
 import '../widgets/work_bookmark_manager.dart';
 import 'work_detail_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 音频播放器主屏幕
 class AudioPlayerScreen extends ConsumerStatefulWidget {
@@ -252,7 +253,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
           child: IconButton(
             icon: const Icon(Icons.queue_music),
             onPressed: () => PlaylistDialog.show(context),
-            tooltip: '播放列表',
+            tooltip: S.of(context).playlistTitle,
           ),
         ),
       ],
@@ -273,7 +274,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         currentTrack.when(
           data: (track) {
             if (track == null) {
-              return const Center(child: Text('没有正在播放的音频'));
+              return Center(child: Text(S.of(context).noAudioPlaying));
             }
 
             // 加载进度信息
@@ -402,7 +403,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text('错误: $error')),
+          error: (error, stack) => Center(child: Text(S.of(context).errorWithMessage(error.toString()))),
         ),
         if (_showLyricHint) _buildLyricHintBanner(),
       ],
@@ -420,7 +421,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
     return currentTrack.when(
       data: (track) {
         if (track == null) {
-          return const Center(child: Text('没有正在播放的音频'));
+          return Center(child: Text(S.of(context).noAudioPlaying));
         }
 
         // 加载进度信息
@@ -598,7 +599,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            '暂无字幕',
+                            S.of(context).noSubtitlesAvailable,
                             style:
                                 Theme.of(context).textTheme.bodyLarge?.copyWith(
                                       color: Theme.of(context)
@@ -621,7 +622,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text('错误: $error')),
+      error: (error, stack) => Center(child: Text(S.of(context).errorWithMessage(error.toString()))),
     );
   }
 
@@ -683,7 +684,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  '解锁',
+                                  S.of(context).unlock,
                                   style: theme.textTheme.labelLarge?.copyWith(
                                     color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.bold,
@@ -720,7 +721,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                 _showLyricView = false;
               });
             },
-            tooltip: '返回封面',
+            tooltip: S.of(context).backToCover,
             child: const Icon(Icons.album),
           ),
         ),
@@ -767,7 +768,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      '点击封面或标题可以进入字幕界面',
+                      S.of(context).lyricHintTapCover,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
@@ -848,7 +849,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         Navigator.of(context).pop();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载失败: $e')),
+          SnackBar(content: Text(S.of(context).loadFailedWithError(e.toString()))),
         );
       }
     }

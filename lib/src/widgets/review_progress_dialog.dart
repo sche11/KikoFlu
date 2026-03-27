@@ -5,6 +5,7 @@ import '../providers/my_reviews_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/server_utils.dart';
 import 'add_to_playlist_dialog.dart';
+import '../../l10n/app_localizations.dart';
 import 'responsive_dialog.dart';
 
 /// 通用的收藏状态编辑对话框组件
@@ -31,7 +32,7 @@ class ReviewProgressDialog {
     required BuildContext context,
     String? currentProgress,
     int? currentRating,
-    String title = '标记作品',
+    String? title,
     bool showLoading = false,
     int? workId,
     String? workTitle,
@@ -49,6 +50,8 @@ class ReviewProgressDialog {
 
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final resolvedTitle = title ?? S.of(context).markWork;
 
     String? selectedProgress = currentProgress;
     int? selectedRating = currentRating;
@@ -75,7 +78,7 @@ class ReviewProgressDialog {
                         child: Row(
                           children: [
                             Text(
-                              title,
+                              resolvedTitle,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge
@@ -105,7 +108,7 @@ class ReviewProgressDialog {
                                         : starValue;
                                   });
                                 },
-                                tooltip: '$starValue 星',
+                                tooltip: S.of(context).nStars(starValue),
                               );
                             }),
                             const Spacer(),
@@ -121,7 +124,7 @@ class ReviewProgressDialog {
                                     workTitle: workTitle,
                                   );
                                 },
-                                tooltip: '添加到播放列表',
+                                tooltip: S.of(context).addToPlaylist,
                               ),
                             if (showLoading)
                               const Padding(
@@ -137,7 +140,7 @@ class ReviewProgressDialog {
                               icon: const Icon(Icons.close),
                               onPressed: () =>
                                   Navigator.of(dialogContext).pop(),
-                              tooltip: '关闭',
+                              tooltip: S.of(context).close,
                             ),
                           ],
                         ),
@@ -232,7 +235,7 @@ class ReviewProgressDialog {
                                                     ),
                                                     const SizedBox(width: 8),
                                                     Text(
-                                                      '移除',
+                                                      S.of(context).remove,
                                                       style: TextStyle(
                                                         color: Theme.of(context)
                                                             .colorScheme
@@ -265,7 +268,7 @@ class ReviewProgressDialog {
                             TextButton(
                               onPressed: () =>
                                   Navigator.of(dialogContext).pop(),
-                              child: const Text('取消'),
+                              child: Text(S.of(context).cancel),
                             ),
                             const SizedBox(width: 8),
                             FilledButton(
@@ -275,7 +278,7 @@ class ReviewProgressDialog {
                                   'rating': selectedRating,
                                 });
                               },
-                              child: const Text('确定'),
+                              child: Text(S.of(context).confirm),
                             ),
                           ],
                         ),
@@ -313,7 +316,7 @@ class ReviewProgressDialog {
                           Padding(
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text(
-                              title,
+                              resolvedTitle,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -351,7 +354,7 @@ class ReviewProgressDialog {
                                               : starValue;
                                     });
                                   },
-                                  tooltip: '$starValue 星',
+                                  tooltip: S.of(context).nStars(starValue),
                                 );
                               }),
                               const Spacer(),
@@ -367,7 +370,7 @@ class ReviewProgressDialog {
                                       workTitle: workTitle,
                                     );
                                   },
-                                  tooltip: '添加到播放列表',
+                                  tooltip: S.of(context).addToPlaylist,
                                 ),
                               if (showLoading)
                                 const SizedBox(
@@ -411,7 +414,7 @@ class ReviewProgressDialog {
                           color: Theme.of(context).colorScheme.error,
                         ),
                         title: Text(
-                          '移除',
+                          S.of(context).remove,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
                           ),
@@ -435,7 +438,7 @@ class ReviewProgressDialog {
                               onPressed: () {
                                 Navigator.pop(context); // 取消，不返回任何值
                               },
-                              child: const Text('取消'),
+                              child: Text(S.of(context).cancel),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -447,7 +450,7 @@ class ReviewProgressDialog {
                                   'rating': selectedRating,
                                 });
                               },
-                              child: const Text('确定'),
+                              child: Text(S.of(context).confirm),
                             ),
                           ),
                         ],

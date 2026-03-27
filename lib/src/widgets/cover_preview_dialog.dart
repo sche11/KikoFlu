@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../utils/snackbar_util.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 封面预览对话框，支持放大查看和保存图片
 class CoverPreviewDialog extends StatefulWidget {
@@ -115,7 +116,7 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
         fileName =
             'cover_${widget.identifier ?? DateTime.now().millisecondsSinceEpoch}.jpg';
       } else {
-        throw Exception('没有可用的图片');
+        throw Exception(S.of(context).noImageAvailable);
       }
 
       // 根据平台选择保存方式
@@ -126,7 +127,7 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '保存失败: $e');
+        SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -143,7 +144,7 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
         final storageStatus = await Permission.storage.request();
         if (!storageStatus.isGranted) {
           if (mounted) {
-            SnackBarUtil.showError(context, '需要存储权限才能保存图片');
+            SnackBarUtil.showError(context, S.of(context).storagePermissionRequiredForImage);
           }
           return;
         }
@@ -159,9 +160,9 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
 
     if (mounted) {
       if (result.isSuccess) {
-        SnackBarUtil.showSuccess(context, '已保存到相册');
+        SnackBarUtil.showSuccess(context, S.of(context).savedToGallery);
       } else {
-        SnackBarUtil.showError(context, '保存失败');
+        SnackBarUtil.showError(context, S.of(context).saveImageFailed);
       }
     }
   }
@@ -169,7 +170,7 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
   Future<void> _saveToFile(Uint8List bytes, String fileName) async {
     // 桌面端：让用户选择保存位置
     final result = await FilePicker.platform.saveFile(
-      dialogTitle: '保存封面图片',
+      dialogTitle: S.of(context).saveCoverImage,
       fileName: fileName,
       type: FileType.image,
       allowedExtensions: ['jpg', 'jpeg', 'png'],
@@ -179,7 +180,7 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
       final file = File(result);
       await file.writeAsBytes(bytes);
       if (mounted) {
-        SnackBarUtil.showSuccess(context, '已保存到: $result');
+        SnackBarUtil.showSuccess(context, S.of(context).savedToPath(result));
       }
     }
   }
@@ -299,7 +300,7 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
                                 )
                               : const Icon(Icons.save_alt, color: Colors.white),
                           onPressed: _isSaving ? null : _saveImage,
-                          tooltip: '保存图片',
+                          tooltip: S.of(context).saveImage,
                         ),
                       ],
                     ),
@@ -316,8 +317,8 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
                 child: SafeArea(
                   child: Container(
                     padding: const EdgeInsets.all(16),
-                    child: const Text(
-                      '双击放大 · 双指缩放',
+                    child: Text(
+                      S.of(context).doubleTapToZoom,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white70,

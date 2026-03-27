@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/work.dart';
 import '../screens/search_result_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class VaChip extends StatelessWidget {
   final Va va;
@@ -40,7 +41,7 @@ class VaChip extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SearchResultScreen(
                     keyword: va.name,
-                    searchTypeLabel: '声优',
+                    searchTypeLabel: S.of(context).searchTypeVa,
                     searchParams: {'vaId': va.id, 'vaName': va.name},
                   ),
                 ),
@@ -80,7 +81,7 @@ class VaChip extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SearchResultScreen(
                     keyword: va.name,
-                    searchTypeLabel: '声优',
+                    searchTypeLabel: S.of(context).searchTypeVa,
                     searchParams: {'vaId': va.id, 'vaName': va.name},
                   ),
                 ),
@@ -111,7 +112,7 @@ class VaChip extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SearchResultScreen(
                     keyword: va.name,
-                    searchTypeLabel: '声优',
+                    searchTypeLabel: S.of(context).searchTypeVa,
                     searchParams: {'vaId': va.id, 'vaName': va.name},
                   ),
                 ),

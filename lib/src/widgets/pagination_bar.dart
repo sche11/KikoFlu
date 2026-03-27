@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../l10n/app_localizations.dart';
 import '../utils/snackbar_util.dart';
 
 /// 通用分页控制栏组件
@@ -82,7 +83,7 @@ class _PaginationBarState extends State<PaginationBar> {
           ),
           const SizedBox(width: 8),
           Text(
-            widget.endMessage ?? '已经到底啦~杂库~',
+            widget.endMessage ?? S.of(context).reachedEnd,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
@@ -160,7 +161,7 @@ class _PaginationBarState extends State<PaginationBar> {
               ),
               const SizedBox(width: 4),
               Text(
-                '跳转',
+                S.of(context).jumpTo,
                 style: TextStyle(
                   fontSize: 13,
                   color: Theme.of(context).colorScheme.onSecondaryContainer,
@@ -180,15 +181,15 @@ class _PaginationBarState extends State<PaginationBar> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('跳转到指定页'),
+        title: Text(S.of(context).goToPageTitle),
         content: TextField(
           controller: _pageController,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
-            labelText: '页码 (1-$_maxPage)',
+            labelText: S.of(context).pageNumberRange(_maxPage),
             border: const OutlineInputBorder(),
-            hintText: '请输入页码',
+            hintText: S.of(context).enterPageNumber,
           ),
           autofocus: true,
           onSubmitted: (_) => _handleJump(context),
@@ -196,11 +197,11 @@ class _PaginationBarState extends State<PaginationBar> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => _handleJump(context),
-            child: const Text('跳转'),
+            child: Text(S.of(context).jumpTo),
           ),
         ],
       ),
@@ -211,13 +212,13 @@ class _PaginationBarState extends State<PaginationBar> {
   void _handleJump(BuildContext dialogContext) {
     final pageStr = _pageController.text.trim();
     if (pageStr.isEmpty) {
-      SnackBarUtil.showWarning(context, '请输入页码');
+      SnackBarUtil.showWarning(context, S.of(context).enterPageNumber);
       return;
     }
 
     final targetPage = int.tryParse(pageStr);
     if (targetPage == null || targetPage < 1 || targetPage > _maxPage) {
-      SnackBarUtil.showWarning(context, '请输入有效页码 (1-$_maxPage)');
+      SnackBarUtil.showWarning(context, S.of(context).enterValidPageNumber(_maxPage));
       return;
     }
 
@@ -252,7 +253,7 @@ class _PaginationBarState extends State<PaginationBar> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '第 ${widget.currentPage} / $_maxPage 页',
+                S.of(context).pageNOfTotal(widget.currentPage, _maxPage),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 13,
@@ -267,7 +268,7 @@ class _PaginationBarState extends State<PaginationBar> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  '共 ${widget.totalCount} 条',
+                  S.of(context).totalNItems(widget.totalCount),
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 11,
@@ -285,7 +286,7 @@ class _PaginationBarState extends State<PaginationBar> {
               // 上一页
               _buildPageButton(
                 icon: Icons.chevron_left,
-                label: '上一页',
+                label: S.of(context).previousPage,
                 enabled: widget.currentPage > 1 && !widget.isLoading,
                 onPressed: widget.onPreviousPage,
               ),
@@ -297,7 +298,7 @@ class _PaginationBarState extends State<PaginationBar> {
 
               // 下一页
               _buildPageButton(
-                label: '下一页',
+                label: S.of(context).nextPage,
                 icon: Icons.chevron_right,
                 enabled: widget.hasMore && !widget.isLoading,
                 iconOnRight: true,

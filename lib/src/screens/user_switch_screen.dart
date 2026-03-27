@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../models/user.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/responsive_dialog.dart';
@@ -55,19 +56,19 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
     showDialog(
       context: context,
       builder: (context) => ResponsiveAlertDialog(
-        title: const Text('删除账户'),
-        content: Text('确定要删除账户 "${user.name}" 吗？'),
+        title: Text(S.of(context).deleteAccount),
+        content: Text(S.of(context).deleteAccountConfirm(user.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _deleteUser(user);
             },
-            child: const Text('删除'),
+            child: Text(S.of(context).delete),
           ),
         ],
       ),
@@ -80,7 +81,7 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar.large(
-            title: const Text('选择账户'),
+            title: Text(S.of(context).selectAccount),
             backgroundColor: Theme.of(context).colorScheme.surface,
             actions: [
               IconButton(
@@ -114,12 +115,12 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      '没有保存的账户',
+                      S.of(context).noSavedAccounts,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '请添加一个新账户开始使用',
+                      S.of(context).addAccountToGetStarted,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
@@ -137,7 +138,7 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
                             .then((_) => _loadSavedUsers());
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text('添加账户'),
+                      label: Text(S.of(context).addAccount),
                     ),
                   ],
                 ),
@@ -174,7 +175,7 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
                         children: [
                           const SizedBox(height: 4),
                           Text(
-                            user.host ?? '未知主机',
+                            user.host ?? S.of(context).unknownHost,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -186,7 +187,7 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '最后使用: ${user.lastUpdateTime != null ? _formatDateTime(user.lastUpdateTime!) : '未知'}',
+                            S.of(context).lastUsedTime(user.lastUpdateTime != null ? _formatDateTime(context, user.lastUpdateTime!) : S.of(context).unknown),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
@@ -204,11 +205,11 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
                           }
                         },
                         itemBuilder: (context) => [
-                          const PopupMenuItem(
+                          PopupMenuItem(
                             value: 'delete',
                             child: ListTile(
-                              leading: Icon(Icons.delete),
-                              title: Text('删除账户'),
+                              leading: const Icon(Icons.delete),
+                              title: Text(S.of(context).deleteAccount),
                               contentPadding: EdgeInsets.zero,
                             ),
                           ),
@@ -225,18 +226,19 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
+  String _formatDateTime(BuildContext context, DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
+    final s = S.of(context);
 
     if (difference.inDays > 0) {
-      return '${difference.inDays}天前';
+      return s.daysAgo(difference.inDays);
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}小时前';
+      return s.hoursAgo(difference.inHours);
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}分钟前';
+      return s.minutesAgo(difference.inMinutes);
     } else {
-      return '刚刚';
+      return s.justNow;
     }
   }
 }

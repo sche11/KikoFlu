@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
 import '../services/download_service.dart';
 import '../utils/string_utils.dart';
@@ -230,7 +231,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
     final selectedFilesWithPaths = _getSelectedFilesWithPaths();
     if (selectedFilesWithPaths.isEmpty) {
       if (mounted) {
-        SnackBarUtil.showWarning(context, '请至少选择一个文件');
+        SnackBarUtil.showWarning(context, S.of(context).selectAtLeastOneFile);
       }
       return;
     }
@@ -313,7 +314,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
     if (mounted) {
       Navigator.of(context).pop();
       SnackBarUtil.showSuccess(
-          context, '已添加 ${selectedFilesWithPaths.length} 个文件到下载队列');
+          context, S.of(context).addedNFilesToDownloadQueue(selectedFilesWithPaths.length));
     }
   }
 
@@ -369,7 +370,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                           if (!_isCheckingDownloads) ...[
                             const SizedBox(height: 2),
                             Text(
-                              '已下载 ${_downloadedFiles.values.where((v) => v).length} · 已选择 ${_selectedFiles.values.where((v) => v).length}',
+                              S.of(context).downloadedAndSelected(_downloadedFiles.values.where((v) => v).length, _selectedFiles.values.where((v) => v).length),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onPrimaryContainer
                                     .withAlpha(179),
@@ -387,7 +388,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                       label: Text(
-                        '全选',
+                        S.of(context).selectAll,
                         style: TextStyle(
                           color: theme.colorScheme.onPrimaryContainer,
                         ),
@@ -405,7 +406,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                     FilledButton.icon(
                       onPressed: _startDownload,
                       icon: const Icon(Icons.download, size: 16),
-                      label: Text('下载 (${_getSelectedFiles().length})'),
+                      label: Text(S.of(context).downloadN(_getSelectedFiles().length)),
                       style: FilledButton.styleFrom(
                         backgroundColor: theme.colorScheme.onPrimaryContainer,
                         foregroundColor: theme.colorScheme.primaryContainer,
@@ -423,7 +424,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                       color: theme.colorScheme.onPrimaryContainer,
                       padding: const EdgeInsets.all(8),
                       constraints: const BoxConstraints(),
-                      tooltip: '关闭',
+                      tooltip: S.of(context).close,
                     ),
                   ],
                 ),
@@ -434,20 +435,20 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
               // 文件列表：最大化显示空间
               Flexible(
                 child: _isCheckingDownloads
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 16),
-                            Text('正在检查已下载文件...'),
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(S.of(context).checkingDownloadedFiles),
                           ],
                         ),
                       )
                     : widget.work.children == null ||
                             widget.work.children!.isEmpty
-                        ? const Center(
-                            child: Text('没有可下载的文件'),
+                        ? Center(
+                            child: Text(S.of(context).noDownloadableFiles),
                           )
                         : ListView(
                             children:
@@ -491,7 +492,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '选择下载文件',
+                          S.of(context).selectFilesToDownload,
                           style: theme.textTheme.titleLarge?.copyWith(
                             color: theme.colorScheme.onPrimaryContainer,
                           ),
@@ -533,13 +534,13 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                 children: [
                   TextButton.icon(
                     icon: const Icon(Icons.select_all, size: 18),
-                    label: const Text('全选'),
+                    label: Text(S.of(context).selectAll),
                     onPressed: _toggleSelectAll,
                   ),
                   const Spacer(),
                   if (!_isCheckingDownloads) ...[
                     Text(
-                      '已下载 ${_downloadedFiles.values.where((v) => v).length} 个',
+                      S.of(context).downloadedNCount(_downloadedFiles.values.where((v) => v).length),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.green[700],
                       ),
@@ -552,7 +553,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      '已选择 ${_selectedFiles.values.where((v) => v).length} 个',
+                      S.of(context).selectedNCount(_selectedFiles.values.where((v) => v).length),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withAlpha(153),
                       ),
@@ -565,20 +566,20 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
             // File List
             Flexible(
               child: _isCheckingDownloads
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text('正在检查已下载文件...'),
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Text(S.of(context).checkingDownloadedFiles),
                         ],
                       ),
                     )
                   : widget.work.children == null ||
                           widget.work.children!.isEmpty
-                      ? const Center(
-                          child: Text('没有可下载的文件'),
+                      ? Center(
+                          child: Text(S.of(context).noDownloadableFiles),
                         )
                       : ListView(
                           shrinkWrap: true,
@@ -597,13 +598,13 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
+                    child: Text(S.of(context).cancel),
                   ),
                   const SizedBox(width: 8),
                   FilledButton.icon(
                     onPressed: _startDownload,
                     icon: const Icon(Icons.download),
-                    label: Text('下载 (${_getSelectedFiles().length})'),
+                    label: Text(S.of(context).downloadN(_getSelectedFiles().length)),
                   ),
                 ],
               ),
@@ -761,7 +762,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  '已下载',
+                                  S.of(context).downloaded,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: Colors.green[700],
                                     fontSize: 11,

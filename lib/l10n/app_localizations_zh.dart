@@ -943,8 +943,8 @@ class SZh extends S {
   }
 
   @override
-  String pageNOfTotal(int page, int total) {
-    return '第 $page/$total 页';
+  String pageNOfTotal(int current, int total) {
+    return '第 $current / $total 页';
   }
 
   @override
@@ -1279,7 +1279,7 @@ class SZh extends S {
   String get imageSaved => '图片已保存';
 
   @override
-  String get saveImageFailed => '保存图片失败';
+  String get saveImageFailed => '保存失败';
 
   @override
   String get logout => '退出登录';
@@ -1306,7 +1306,7 @@ class SZh extends S {
 
   @override
   String ratingsCount(int count) {
-    return '$count 个评分';
+    return '共 $count 个评分';
   }
 
   @override
@@ -1736,7 +1736,7 @@ class SZh extends S {
 
   @override
   String totalNItems(int count) {
-    return '共 $count 个';
+    return '共 $count 条';
   }
 
   @override
@@ -1859,7 +1859,7 @@ class SZh extends S {
 
   @override
   String nWorksCount(int count) {
-    return '$count 作品';
+    return '$count 个作品';
   }
 
   @override
@@ -1884,6 +1884,1040 @@ class SZh extends S {
   @override
   String pageExcludedNWorks(int count) {
     return '本页已排除 $count 个作品';
+  }
+
+  @override
+  String get noSubtitlesAvailable => '暂无字幕';
+
+  @override
+  String get unlock => '解锁';
+
+  @override
+  String get backToCover => '返回封面';
+
+  @override
+  String get lyricHintTapCover => '点击封面或标题可以进入字幕界面';
+
+  @override
+  String get floatingSubtitle => '悬浮字幕';
+
+  @override
+  String get appendMode => '追加模式';
+
+  @override
+  String get appendModeStatusOn => '追加模式：开启';
+
+  @override
+  String get appendModeStatusOff => '追加模式：关闭';
+
+  @override
+  String get playlistEmpty => '播放列表为空';
+
+  @override
+  String get appendModeEnabled => '追加模式已开启';
+
+  @override
+  String get appendModeHint => '之后点击音频会追加到当前播放列表尾部，而不是替换整个列表。\n不会重复添加同一音轨。';
+
+  @override
+  String get gotIt => '知道了';
+
+  @override
+  String nMinutes(int count) {
+    return '$count分钟';
+  }
+
+  @override
+  String nHours(int count) {
+    return '$count小时';
+  }
+
+  @override
+  String get titleLabel => '标题';
+
+  @override
+  String get rjNumberLabel => 'RJ号';
+
+  @override
+  String get tapToViewRatingDetail => '点击查看评分详情';
+
+  @override
+  String priceInYen(int price) {
+    return '$price 日元';
+  }
+
+  @override
+  String soldCount(String count) {
+    return '售出：$count';
+  }
+
+  @override
+  String get circleAndVaSection => '社团 | 声优';
+
+  @override
+  String get subtitleBadge => '字幕';
+
+  @override
+  String get otherEditions => '其他版本';
+
+  @override
+  String tenThousandSuffix(String count) {
+    return '$count万';
+  }
+
+  @override
+  String get packingWork => '正在打包作品...';
+
+  @override
+  String get workDirectoryNotExist => '作品目录不存在';
+
+  @override
+  String get packingFailed => '打包失败';
+
+  @override
+  String exportSuccess(String path) {
+    return '导出成功：$path';
+  }
+
+  @override
+  String exportFailed(String error) {
+    return '导出失败: $error';
+  }
+
+  @override
+  String get exportAsZip => '导出为ZIP';
+
+  @override
+  String get offlineBadge => '离线';
+
+  @override
+  String loadFilesFailed(String error) {
+    return '加载文件失败: $error';
+  }
+
+  @override
+  String get unknown => '未知';
+
+  @override
+  String get noPlayableAudioFiles => '没有找到可播放的音频文件';
+
+  @override
+  String cannotFindAudioFile(String title) {
+    return '无法找到音频文件: $title';
+  }
+
+  @override
+  String nowPlayingNOfTotal(String title, int current, int total) {
+    return '正在播放: $title ($current/$total)';
+  }
+
+  @override
+  String get noAudioCannotLoadSubtitle => '当前没有播放的音频，无法加载字幕';
+
+  @override
+  String get loadSubtitle => '加载字幕';
+
+  @override
+  String get loadSubtitleConfirm => '确定要将以下文件加载为当前音频的字幕吗？';
+
+  @override
+  String get subtitleFile => '字幕文件';
+
+  @override
+  String get currentAudio => '当前音频';
+
+  @override
+  String get subtitleAutoRestoreNote => '切换到其他音频时，字幕将自动恢复为默认匹配方式';
+
+  @override
+  String get confirmLoad => '确定加载';
+
+  @override
+  String get loadingSubtitle => '正在加载字幕...';
+
+  @override
+  String subtitleLoadSuccess(String title) {
+    return '字幕加载成功：$title';
+  }
+
+  @override
+  String subtitleLoadFailed(String error) {
+    return '字幕加载失败：$error';
+  }
+
+  @override
+  String get cannotPreviewImageMissingInfo => '无法预览图片：缺少必要信息';
+
+  @override
+  String get cannotFindImageFile => '无法找到图片文件';
+
+  @override
+  String get cannotPreviewTextMissingInfo => '无法预览文本：缺少必要信息';
+
+  @override
+  String get cannotPreviewPdfMissingInfo => '无法预览PDF：缺少必要信息';
+
+  @override
+  String get cannotPlayVideoMissingId => '无法播放视频：缺少文件标识';
+
+  @override
+  String get cannotPlayVideoMissingParams => '无法播放视频：缺少必要参数';
+
+  @override
+  String get cannotPlayDirectly => '无法直接播放';
+
+  @override
+  String get noVideoPlayerFound => '系统无法找到支持的视频播放器。';
+
+  @override
+  String get youCan => '您可以：';
+
+  @override
+  String get copyLinkToExternalPlayer => '1. 复制链接到外部播放器（如MX Player、VLC）';
+
+  @override
+  String get openInBrowserOption => '2. 在浏览器中打开';
+
+  @override
+  String playVideoError(String error) {
+    return '播放视频时出错: $error';
+  }
+
+  @override
+  String get noFiles => '没有文件';
+
+  @override
+  String get resourceFiles => '资源文件';
+
+  @override
+  String resourceFilesTranslated(int count) {
+    return '资源文件 (已翻译 $count 项)';
+  }
+
+  @override
+  String get translationOriginal => '原';
+
+  @override
+  String get translationTranslated => '译';
+
+  @override
+  String copiedName(String title) {
+    return '已复制名称: $title';
+  }
+
+  @override
+  String translationComplete(int count) {
+    return '翻译完成：$count 个项目';
+  }
+
+  @override
+  String get noContentToTranslate => '没有需要翻译的内容';
+
+  @override
+  String get preparingTranslation => '准备翻译...';
+
+  @override
+  String translatingProgress(int current, int total) {
+    return '翻译中 $current/$total';
+  }
+
+  @override
+  String nItems(int count) {
+    return '$count 项';
+  }
+
+  @override
+  String get loadAsSubtitle => '加载为字幕';
+
+  @override
+  String get preview => '预览';
+
+  @override
+  String openVideoFileError(String error) {
+    return '打开视频文件时出错: $error';
+  }
+
+  @override
+  String cannotOpenVideoFile(String message) {
+    return '无法打开视频文件: $message';
+  }
+
+  @override
+  String get noFileTreeInfo => '没有文件树信息';
+
+  @override
+  String get workFolderNotExist => '作品文件夹不存在';
+
+  @override
+  String get cannotPlayAudioMissingId => '无法播放音频：缺少文件标识';
+
+  @override
+  String get audioFileNotExist => '音频文件不存在';
+
+  @override
+  String get noPreviewableImages => '没有找到可预览的图片';
+
+  @override
+  String get cannotPreviewTextMissingId => '无法预览文本：缺少文件标识';
+
+  @override
+  String get cannotFindFilePath => '无法找到文件路径';
+
+  @override
+  String fileNotExist(String title) {
+    return '文件不存在：$title';
+  }
+
+  @override
+  String get cannotPreviewPdfMissingId => '无法预览PDF：缺少文件标识';
+
+  @override
+  String get videoFileNotExist => '视频文件不存在';
+
+  @override
+  String get cannotOpenVideo => '无法打开视频';
+
+  @override
+  String errorInfo(String message) {
+    return '错误信息: $message';
+  }
+
+  @override
+  String get installVideoPlayerApp => '请安装视频播放器应用（如 VLC、MX Player 等）';
+
+  @override
+  String get filePathLabel => '文件路径：';
+
+  @override
+  String get noDownloadedFiles => '没有已下载的文件';
+
+  @override
+  String get offlineFiles => '离线文件';
+
+  @override
+  String unsupportedFileType(String title) {
+    return '暂不支持打开此类型文件: $title';
+  }
+
+  @override
+  String get deleteFilePrompt => '确定要删除这个文件吗？';
+
+  @override
+  String deletedItem(String title) {
+    return '已删除: $title';
+  }
+
+  @override
+  String get selectAtLeastOneFile => '请至少选择一个文件';
+
+  @override
+  String addedNFilesToDownloadQueue(int count) {
+    return '已添加 $count 个文件到下载队列';
+  }
+
+  @override
+  String downloadedAndSelected(int downloaded, int selected) {
+    return '已下载 $downloaded · 已选择 $selected';
+  }
+
+  @override
+  String downloadN(int count) {
+    return '下载 ($count)';
+  }
+
+  @override
+  String get checkingDownloadedFiles => '正在检查已下载文件...';
+
+  @override
+  String get noDownloadableFiles => '没有可下载的文件';
+
+  @override
+  String get selectFilesToDownload => '选择下载文件';
+
+  @override
+  String downloadedNCount(int count) {
+    return '已下载 $count 个';
+  }
+
+  @override
+  String selectedNCount(int count) {
+    return '已选择 $count 个';
+  }
+
+  @override
+  String get pleaseEnterServerAddress => '请先输入服务器地址';
+
+  @override
+  String get pleaseEnterUsername => '请输入用户名';
+
+  @override
+  String get pleaseEnterPassword => '请输入密码';
+
+  @override
+  String get notTestedYet => '尚未测试';
+
+  @override
+  String latencyResultDetail(String latency, String status) {
+    return '延迟 $latency ($status)';
+  }
+
+  @override
+  String connectionFailedWithDetail(String error) {
+    return '连接失败: $error';
+  }
+
+  @override
+  String get noAccountTapToRegister => '没有账号？点击注册';
+
+  @override
+  String get haveAccountTapToLogin => '已有账号？点击登录';
+
+  @override
+  String get cannotDeleteActiveAccount => '无法删除当前使用的账户';
+
+  @override
+  String get selectAccount => '选择账户';
+
+  @override
+  String get noSavedAccounts => '没有保存的账户';
+
+  @override
+  String get addAccountToGetStarted => '请添加一个新账户开始使用';
+
+  @override
+  String get unknownHost => '未知主机';
+
+  @override
+  String lastUsedTime(String time) {
+    return '最后使用: $time';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count天前';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count小时前';
+  }
+
+  @override
+  String minutesAgo(int count) {
+    return '$count分钟前';
+  }
+
+  @override
+  String get justNow => '刚刚';
+
+  @override
+  String get confirmDelete => '确认删除';
+
+  @override
+  String deleteSelectedConfirm(int count) {
+    return '确定要删除选中的 $count 项吗？';
+  }
+
+  @override
+  String deletedNOfTotalItems(int success, int total) {
+    return '已删除 $success/$total 项';
+  }
+
+  @override
+  String get importingSubtitleFile => '正在导入字幕文件...';
+
+  @override
+  String get preparingImport => '正在准备导入...';
+
+  @override
+  String get preparingExtract => '正在准备解压...';
+
+  @override
+  String get importSubtitleFile => '导入字幕文件';
+
+  @override
+  String get supportedSubtitleFormats => '支持 .srt, .vtt, .lrc 等字幕格式';
+
+  @override
+  String get importFolder => '导入文件夹';
+
+  @override
+  String get importFolderDesc => '保留文件夹结构，仅导入字幕文件';
+
+  @override
+  String get importArchive => '导入压缩包';
+
+  @override
+  String get importArchiveDesc => '支持无密码 ZIP 压缩包\n如需批量导入，将它们压缩为一个压缩包再导入';
+
+  @override
+  String get subtitleLibraryGuide => '字幕库使用说明';
+
+  @override
+  String get subtitleLibraryFunction => '字幕库功能';
+
+  @override
+  String get subtitleLibraryFunctionDesc => '用于存放主动导入或保存的字幕文件，并在播放音频时支持自动/手动加载';
+
+  @override
+  String get subtitleAutoLoad => '字幕自动加载';
+
+  @override
+  String get subtitleAutoLoadDesc => '播放音频时，系统会自动在字幕库中查找匹配的字幕文件：';
+
+  @override
+  String get smartCategoryAndMark => '智能分类与标记';
+
+  @override
+  String get open => '打开';
+
+  @override
+  String get moveTo => '移动到';
+
+  @override
+  String get rename => '重命名';
+
+  @override
+  String get newName => '新名称';
+
+  @override
+  String get renameSuccess => '重命名成功';
+
+  @override
+  String get renameFailed => '重命名失败';
+
+  @override
+  String deleteItemConfirm(String title) {
+    return '确定要删除 \"$title\" 吗？';
+  }
+
+  @override
+  String get deleteFolderContentsWarning => '此操作将删除文件夹内的所有内容。';
+
+  @override
+  String get deleteFailed => '删除失败';
+
+  @override
+  String subtitleLoaded(String title) {
+    return '字幕已加载：$title';
+  }
+
+  @override
+  String get moveSuccess => '移动成功';
+
+  @override
+  String get moveFailed => '移动失败';
+
+  @override
+  String previewFailed(String error) {
+    return '预览失败: $error';
+  }
+
+  @override
+  String openFailed(String error) {
+    return '打开失败: $error';
+  }
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get subtitleLibraryEmpty => '字幕库为空';
+
+  @override
+  String get tapToImportSubtitle => '点击右下角 + 按钮导入字幕';
+
+  @override
+  String get importSubtitle => '导入字幕';
+
+  @override
+  String get sampleSubtitleContent => '♪ 示例字幕内容 ♪';
+
+  @override
+  String get presetStyles => '预设样式';
+
+  @override
+  String get backgroundOpacity => '背景不透明度';
+
+  @override
+  String get colorSettings => '颜色设置';
+
+  @override
+  String get shapeSettings => '形状设置';
+
+  @override
+  String get cornerRadius => '圆角半径';
+
+  @override
+  String get horizontalPadding => '水平内边距';
+
+  @override
+  String get verticalPadding => '垂直内边距';
+
+  @override
+  String get resetStyle => '重置样式';
+
+  @override
+  String get resetStyleConfirm => '确定要恢复默认样式吗？';
+
+  @override
+  String get restoreDefaultStyle => '恢复默认样式';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String noBlockedItemsOfType(String type) {
+    return '没有屏蔽的$type';
+  }
+
+  @override
+  String unblockedItem(String item) {
+    return '已移除屏蔽: $item';
+  }
+
+  @override
+  String addBlockedItem(String type) {
+    return '添加屏蔽$type';
+  }
+
+  @override
+  String blockedItemName(String type) {
+    return '$type名称';
+  }
+
+  @override
+  String enterBlockedItemHint(String type) {
+    return '请输入要屏蔽的$type';
+  }
+
+  @override
+  String blockedItemAdded(String item) {
+    return '已添加屏蔽: $item';
+  }
+
+  @override
+  String workCountLabel(int count) {
+    return '作品数: $count';
+  }
+
+  @override
+  String get miniPlayer => '迷你播放器';
+
+  @override
+  String get lineHeight => '行高';
+
+  @override
+  String get portraitPlayerBelowCover => '竖屏播放器 (封面下方)';
+
+  @override
+  String get fullscreenSubtitleMode => '全屏字幕 (竖屏/横屏)';
+
+  @override
+  String get activeSubtitleFontSize => '当前字幕大小';
+
+  @override
+  String get inactiveSubtitleFontSize => '其他字幕大小';
+
+  @override
+  String get restoreDefaultSettings => '恢复默认设置';
+
+  @override
+  String get guideInPrefix => '在';
+
+  @override
+  String get guideParsedFolder => '<已解析>';
+
+  @override
+  String get guideFindWorkDesc => '文件夹下查找对应作品\n支持文件夹格式：RJ123456';
+
+  @override
+  String get guideSavedFolder => '<已保存>';
+
+  @override
+  String get guideFindSubtitleDesc => '文件夹下查找单个字幕文件';
+
+  @override
+  String get guideMatchRule => '匹配规则：字幕文件名与音频文件名相同（去除或保留音频扩展名均可）';
+
+  @override
+  String get guideRecognizedWorkPrefix => '识别到的作品会被添加绿色';
+
+  @override
+  String get guideTagSuffix => '标签 ，音频文件图标也会增加 ';
+
+  @override
+  String get guideSubtitleMatchSuffix => ' 标记，表示有字幕库匹配';
+
+  @override
+  String get guideAutoRecognizeRJ => '导入时自动识别 RJ 格式，归类到<已解析>';
+
+  @override
+  String get guideAutoAddRJPrefix => '纯数字文件夹自动添加 RJ 前缀（如 123456 → RJ123456）';
+
+  @override
+  String get unknownFile => '未知文件';
+
+  @override
+  String deleteWithCount(int count) {
+    return '删除 ($count)';
+  }
+
+  @override
+  String get searchSubtitles => '搜索字幕...';
+
+  @override
+  String nFilesWithSize(int count, String size) {
+    return '$count 个文件 • $size';
+  }
+
+  @override
+  String get rootDirectory => '根目录';
+
+  @override
+  String get goToParent => '返回上级';
+
+  @override
+  String moveToTarget(String name) {
+    return '移动到: $name';
+  }
+
+  @override
+  String get noSubfoldersHere => '此目录下没有子文件夹';
+
+  @override
+  String addedToPlaylist(String name) {
+    return '已添加到播放列表「$name」';
+  }
+
+  @override
+  String removedFromPlaylist(String name) {
+    return '已从播放列表「$name」中移除';
+  }
+
+  @override
+  String get alreadyFavorited => '已收藏';
+
+  @override
+  String loadImageFailedWithError(String error) {
+    return '加载图片失败\n$error';
+  }
+
+  @override
+  String get noImageAvailable => '没有可用的图片';
+
+  @override
+  String get storagePermissionRequiredForImage => '需要存储权限才能保存图片';
+
+  @override
+  String get savedToGallery => '已保存到相册';
+
+  @override
+  String get saveCoverImage => '保存封面图片';
+
+  @override
+  String savedToPath(String path) {
+    return '已保存到: $path';
+  }
+
+  @override
+  String get doubleTapToZoom => '双击放大 · 双指缩放';
+
+  @override
+  String getStatusFailed(String error) {
+    return '获取状态失败: $error';
+  }
+
+  @override
+  String get deleteRecord => '删除记录';
+
+  @override
+  String deletePlayRecordConfirm(String title) {
+    return '确定要删除 \"$title\" 的播放记录吗？';
+  }
+
+  @override
+  String get notPlayedYet => '尚未播放';
+
+  @override
+  String playbackFailed(String error) {
+    return '播放失败: $error';
+  }
+
+  @override
+  String get storagePermissionRequired => '需要存储权限';
+
+  @override
+  String get storagePermissionForGalleryDesc => '保存图片需要访问相册的权限。请在设置中授予权限。';
+
+  @override
+  String get goToSettings => '去设置';
+
+  @override
+  String get imageSavedToGallery => '图片已保存到相册';
+
+  @override
+  String imageSavedToPath(String path) {
+    return '图片已保存到: $path';
+  }
+
+  @override
+  String get pullDownForNextPage => '继续下拉跳转下一页';
+
+  @override
+  String get releaseForNextPage => '释放跳转下一页';
+
+  @override
+  String get jumpTo => '跳转';
+
+  @override
+  String get goToPageTitle => '跳转到指定页';
+
+  @override
+  String pageNumberRange(int max) {
+    return '页码 (1-$max)';
+  }
+
+  @override
+  String get enterPageNumber => '请输入页码';
+
+  @override
+  String enterValidPageNumber(int max) {
+    return '请输入有效页码 (1-$max)';
+  }
+
+  @override
+  String get previousPage => '上一页';
+
+  @override
+  String get nextPage => '下一页';
+
+  @override
+  String get localPdfNotExist => '本地PDF文件不存在';
+
+  @override
+  String get cannotOpenPdf => '无法打开PDF文件';
+
+  @override
+  String loadPdfFailed(String error) {
+    return '加载PDF失败: $error';
+  }
+
+  @override
+  String pdfPageOfTotal(int current, int total) {
+    return '第 $current 页 / 共 $total 页';
+  }
+
+  @override
+  String get loadingPdf => '正在加载PDF...';
+
+  @override
+  String get pdfPathInvalid => 'PDF文件路径无效';
+
+  @override
+  String get desktopPdfPreviewNotSupported => '桌面端暂不支持直接预览 PDF';
+
+  @override
+  String get openWithSystemApp => '使用系统默认应用打开';
+
+  @override
+  String renderPdfFailed(String error) {
+    return '渲染PDF失败: $error';
+  }
+
+  @override
+  String get ratingDetails => '评分详情';
+
+  @override
+  String get selectSaveDirectory => '选择保存目录';
+
+  @override
+  String get noSubtitleContentToSave => '没有可保存的字幕内容';
+
+  @override
+  String get savedToSubtitleLibrary => '已保存到字幕库';
+
+  @override
+  String get saveToLocal => '保存到本地';
+
+  @override
+  String get selectDirectoryToSaveFile => '选择目录保存文件';
+
+  @override
+  String get saveToSubtitleLibrary => '保存到字幕库';
+
+  @override
+  String get saveToSubtitleLibraryDesc => '保存到字幕库的\"已保存\"目录';
+
+  @override
+  String get saveToFile => '保存到文件';
+
+  @override
+  String get noContentToSave => '没有可保存的内容';
+
+  @override
+  String fileSavedToPath(String path) {
+    return '文件已保存到：$path';
+  }
+
+  @override
+  String get localFileNotExist => '本地文件不存在';
+
+  @override
+  String loadTextFailed(String error) {
+    return '加载文本失败: $error';
+  }
+
+  @override
+  String get previewMode => '预览模式';
+
+  @override
+  String get editMode => '编辑模式';
+
+  @override
+  String get showOriginal => '显示原文';
+
+  @override
+  String get translateContent => '翻译内容';
+
+  @override
+  String get editTextContentHint => '编辑文本内容...';
+
+  @override
+  String get bookmarkRemoved => '已移除标记';
+
+  @override
+  String setProgressAndRating(String progress, int rating) {
+    return '已设置为：$progress，评分：$rating 星';
+  }
+
+  @override
+  String setProgressTo(String progress) {
+    return '已设置为：$progress';
+  }
+
+  @override
+  String ratingSetTo(int rating) {
+    return '评分已设置为：$rating 星';
+  }
+
+  @override
+  String get updated => '已更新';
+
+  @override
+  String addTagFailed(String error) {
+    return '添加标签失败: $error';
+  }
+
+  @override
+  String addWithCount(int count) {
+    return '添加 ($count)';
+  }
+
+  @override
+  String get undo => '撤销';
+
+  @override
+  String nStars(int count) {
+    return '$count 星';
+  }
+
+  @override
+  String get voteRemoved => '已取消投票';
+
+  @override
+  String get votedUp => '已投支持票';
+
+  @override
+  String get votedDown => '已投反对票';
+
+  @override
+  String voteFailedWithError(String error) {
+    return '投票失败: $error';
+  }
+
+  @override
+  String get voteFor => '支持';
+
+  @override
+  String get voteAgainst => '反对';
+
+  @override
+  String get voted => '已投票';
+
+  @override
+  String tagBlockedWithName(String name) {
+    return '已屏蔽标签: $name';
+  }
+
+  @override
+  String get subtitleParseFailedUnsupportedFormat => '解析失败，格式不支持';
+
+  @override
+  String get lyricPresetDynamic => '动态';
+
+  @override
+  String get lyricPresetClassic => '经典';
+
+  @override
+  String get lyricPresetModern => '现代';
+
+  @override
+  String get lyricPresetMinimal => '极简';
+
+  @override
+  String get lyricPresetVibrant => '鲜艳';
+
+  @override
+  String get lyricPresetElegant => '优雅';
+
+  @override
+  String get lyricPresetDynamicDesc => '跟随系统主题，自动取色';
+
+  @override
+  String get lyricPresetClassicDesc => '黑底白字，经典耐看';
+
+  @override
+  String get lyricPresetModernDesc => '渐变背景，时尚现代';
+
+  @override
+  String get lyricPresetMinimalDesc => '轻透明，简约优雅';
+
+  @override
+  String get lyricPresetVibrantDesc => '色彩鲜明，活力四射';
+
+  @override
+  String get lyricPresetElegantDesc => '深蓝底，高雅气质';
+
+  @override
+  String get floatingLyricLoading => '♪ 加载字幕中 ♪';
+
+  @override
+  String get subtitleFileNotExist => '文件不存在';
+
+  @override
+  String get subtitleMissingInfo => '缺少必要信息';
+
+  @override
+  String get privacyDefaultTitle => '正在播放音频';
+
+  @override
+  String get offlineModeStartup => '网络连接失败，以离线模式启动';
+
+  @override
+  String get playlistInfoNotLoaded => '播放列表信息未加载';
+
+  @override
+  String get encodingUnrecognized => '文件编码无法识别，无法正确显示内容';
+
+  @override
+  String editPlaylistFailed(String error) {
+    return '编辑播放列表失败: $error';
+  }
+
+  @override
+  String unsupportedFileTypeWithTitle(String title) {
+    return '暂不支持打开此类型文件: $title';
   }
 }
 
@@ -2769,7 +3803,7 @@ class SZhHant extends SZh {
   }
 
   @override
-  String get blockThisTag => '封鎖此標籤';
+  String get blockThisTag => '屏蔽此標籤';
 
   @override
   String get copyTag => '複製標籤';
@@ -2789,7 +3823,7 @@ class SZhHant extends SZh {
   String get tagSubmitSuccess => '標籤提交成功，等待伺服器處理';
 
   @override
-  String get bindEmailFirst => '請先前往 www.asmr.one 綁定信箱';
+  String get bindEmailFirst => '請先前往 www.asmr.one 綁定電子郵件';
 
   @override
   String selectedNTags(int count) {
@@ -2797,7 +3831,7 @@ class SZhHant extends SZh {
   }
 
   @override
-  String get noMatchingTags => '沒有找到符合的標籤';
+  String get noMatchingTags => '沒有找到匹配的標籤';
 
   @override
   String get loadFailedRetry => '載入失敗，點擊重試';
@@ -2826,8 +3860,8 @@ class SZhHant extends SZh {
   }
 
   @override
-  String pageNOfTotal(int page, int total) {
-    return '第 $page/$total 頁';
+  String pageNOfTotal(int current, int total) {
+    return '第 $current / $total 頁';
   }
 
   @override
@@ -3162,7 +4196,7 @@ class SZhHant extends SZh {
   String get imageSaved => '圖片已儲存';
 
   @override
-  String get saveImageFailed => '儲存圖片失敗';
+  String get saveImageFailed => '儲存失敗';
 
   @override
   String get logout => '登出';
@@ -3189,7 +4223,7 @@ class SZhHant extends SZh {
 
   @override
   String ratingsCount(int count) {
-    return '$count 個評分';
+    return '共 $count 個評分';
   }
 
   @override
@@ -3619,7 +4653,7 @@ class SZhHant extends SZh {
 
   @override
   String totalNItems(int count) {
-    return '共 $count 個';
+    return '共 $count 條';
   }
 
   @override
@@ -3742,7 +4776,7 @@ class SZhHant extends SZh {
 
   @override
   String nWorksCount(int count) {
-    return '$count 作品';
+    return '$count 個作品';
   }
 
   @override
@@ -3757,7 +4791,7 @@ class SZhHant extends SZh {
   String get checkNetworkOrRetry => '請檢查網路連線或稍後重試';
 
   @override
-  String get reachedEnd => '已經到底啦~雜庫~';
+  String get reachedEnd => '已經到底了~';
 
   @override
   String excludedNWorks(int count) {
@@ -3767,5 +4801,1039 @@ class SZhHant extends SZh {
   @override
   String pageExcludedNWorks(int count) {
     return '本頁已排除 $count 個作品';
+  }
+
+  @override
+  String get noSubtitlesAvailable => '暫無字幕';
+
+  @override
+  String get unlock => '解鎖';
+
+  @override
+  String get backToCover => '返回封面';
+
+  @override
+  String get lyricHintTapCover => '點擊封面或標題可以進入字幕介面';
+
+  @override
+  String get floatingSubtitle => '懸浮字幕';
+
+  @override
+  String get appendMode => '追加模式';
+
+  @override
+  String get appendModeStatusOn => '追加模式：開啟';
+
+  @override
+  String get appendModeStatusOff => '追加模式：關閉';
+
+  @override
+  String get playlistEmpty => '播放列表為空';
+
+  @override
+  String get appendModeEnabled => '追加模式已開啟';
+
+  @override
+  String get appendModeHint => '之後點擊音訊會追加到目前播放列表尾部，而不是替換整個列表。\n不會重複新增同一音軌。';
+
+  @override
+  String get gotIt => '知道了';
+
+  @override
+  String nMinutes(int count) {
+    return '$count分鐘';
+  }
+
+  @override
+  String nHours(int count) {
+    return '$count小時';
+  }
+
+  @override
+  String get titleLabel => '標題';
+
+  @override
+  String get rjNumberLabel => 'RJ號';
+
+  @override
+  String get tapToViewRatingDetail => '點擊查看評分詳情';
+
+  @override
+  String priceInYen(int price) {
+    return '$price 日元';
+  }
+
+  @override
+  String soldCount(String count) {
+    return '售出：$count';
+  }
+
+  @override
+  String get circleAndVaSection => '社團 | 聲優';
+
+  @override
+  String get subtitleBadge => '字幕';
+
+  @override
+  String get otherEditions => '其他版本';
+
+  @override
+  String tenThousandSuffix(String count) {
+    return '$count萬';
+  }
+
+  @override
+  String get packingWork => '正在打包作品...';
+
+  @override
+  String get workDirectoryNotExist => '作品目錄不存在';
+
+  @override
+  String get packingFailed => '打包失敗';
+
+  @override
+  String exportSuccess(String path) {
+    return '匯出成功：$path';
+  }
+
+  @override
+  String exportFailed(String error) {
+    return '匯出失敗: $error';
+  }
+
+  @override
+  String get exportAsZip => '匯出為ZIP';
+
+  @override
+  String get offlineBadge => '離線';
+
+  @override
+  String loadFilesFailed(String error) {
+    return '載入檔案失敗: $error';
+  }
+
+  @override
+  String get unknown => '未知';
+
+  @override
+  String get noPlayableAudioFiles => '沒有找到可播放的音訊檔案';
+
+  @override
+  String cannotFindAudioFile(String title) {
+    return '無法找到音訊檔案: $title';
+  }
+
+  @override
+  String nowPlayingNOfTotal(String title, int current, int total) {
+    return '正在播放: $title ($current/$total)';
+  }
+
+  @override
+  String get noAudioCannotLoadSubtitle => '目前沒有播放的音訊，無法載入字幕';
+
+  @override
+  String get loadSubtitle => '載入字幕';
+
+  @override
+  String get loadSubtitleConfirm => '確定要將以下檔案載入為目前音訊的字幕嗎？';
+
+  @override
+  String get subtitleFile => '字幕檔案';
+
+  @override
+  String get currentAudio => '目前音訊';
+
+  @override
+  String get subtitleAutoRestoreNote => '切换到其他音訊時，字幕將自動恢復為預設配對方式';
+
+  @override
+  String get confirmLoad => '確定載入';
+
+  @override
+  String get loadingSubtitle => '正在載入字幕...';
+
+  @override
+  String subtitleLoadSuccess(String title) {
+    return '字幕載入成功：$title';
+  }
+
+  @override
+  String subtitleLoadFailed(String error) {
+    return '字幕載入失敗：$error';
+  }
+
+  @override
+  String get cannotPreviewImageMissingInfo => '無法預覽圖片：缺少必要資訊';
+
+  @override
+  String get cannotFindImageFile => '無法找到圖片檔案';
+
+  @override
+  String get cannotPreviewTextMissingInfo => '無法預覽文字：缺少必要資訊';
+
+  @override
+  String get cannotPreviewPdfMissingInfo => '無法預覽PDF：缺少必要資訊';
+
+  @override
+  String get cannotPlayVideoMissingId => '無法播放影片：缺少檔案標識';
+
+  @override
+  String get cannotPlayVideoMissingParams => '無法播放影片：缺少必要參數';
+
+  @override
+  String get cannotPlayDirectly => '無法直接播放';
+
+  @override
+  String get noVideoPlayerFound => '系統無法找到支援的影片播放器。';
+
+  @override
+  String get youCan => '您可以：';
+
+  @override
+  String get copyLinkToExternalPlayer => '1. 複製連結到外部播放器（如MX Player、VLC）';
+
+  @override
+  String get openInBrowserOption => '2. 在瀏覽器中開啟';
+
+  @override
+  String playVideoError(String error) {
+    return '播放影片時出錯: $error';
+  }
+
+  @override
+  String get noFiles => '沒有檔案';
+
+  @override
+  String get resourceFiles => '資源檔案';
+
+  @override
+  String resourceFilesTranslated(int count) {
+    return '資源檔案 (已翻譯 $count 項)';
+  }
+
+  @override
+  String get translationOriginal => '原';
+
+  @override
+  String get translationTranslated => '譯';
+
+  @override
+  String copiedName(String title) {
+    return '已複製名稱: $title';
+  }
+
+  @override
+  String translationComplete(int count) {
+    return '翻譯完成：$count 個項目';
+  }
+
+  @override
+  String get noContentToTranslate => '沒有需要翻譯的內容';
+
+  @override
+  String get preparingTranslation => '準備翻譯...';
+
+  @override
+  String translatingProgress(int current, int total) {
+    return '翻譯中 $current/$total';
+  }
+
+  @override
+  String nItems(int count) {
+    return '$count 項';
+  }
+
+  @override
+  String get loadAsSubtitle => '載入為字幕';
+
+  @override
+  String get preview => '預覽';
+
+  @override
+  String openVideoFileError(String error) {
+    return '開啟影片檔案時出錯: $error';
+  }
+
+  @override
+  String cannotOpenVideoFile(String message) {
+    return '無法開啟影片檔案: $message';
+  }
+
+  @override
+  String get noFileTreeInfo => '沒有檔案樹資訊';
+
+  @override
+  String get workFolderNotExist => '作品資料夾不存在';
+
+  @override
+  String get cannotPlayAudioMissingId => '無法播放音訊：缺少檔案標識';
+
+  @override
+  String get audioFileNotExist => '音訊檔案不存在';
+
+  @override
+  String get noPreviewableImages => '沒有找到可預覽的圖片';
+
+  @override
+  String get cannotPreviewTextMissingId => '無法預覽文字：缺少檔案標識';
+
+  @override
+  String get cannotFindFilePath => '無法找到檔案路徑';
+
+  @override
+  String fileNotExist(String title) {
+    return '檔案不存在：$title';
+  }
+
+  @override
+  String get cannotPreviewPdfMissingId => '無法預覽PDF：缺少檔案標識';
+
+  @override
+  String get videoFileNotExist => '影片檔案不存在';
+
+  @override
+  String get cannotOpenVideo => '無法開啟影片';
+
+  @override
+  String errorInfo(String message) {
+    return '錯誤資訊: $message';
+  }
+
+  @override
+  String get installVideoPlayerApp => '請安裝影片播放器應用程式（如 VLC、MX Player 等）';
+
+  @override
+  String get filePathLabel => '檔案路徑：';
+
+  @override
+  String get noDownloadedFiles => '沒有已下載的檔案';
+
+  @override
+  String get offlineFiles => '離線檔案';
+
+  @override
+  String unsupportedFileType(String title) {
+    return '暫不支援開啟此類型檔案: $title';
+  }
+
+  @override
+  String get deleteFilePrompt => '確定要刪除這個檔案嗎？';
+
+  @override
+  String deletedItem(String title) {
+    return '已刪除: $title';
+  }
+
+  @override
+  String get selectAtLeastOneFile => '請至少選擇一個檔案';
+
+  @override
+  String addedNFilesToDownloadQueue(int count) {
+    return '已新增 $count 個檔案到下載佇列';
+  }
+
+  @override
+  String downloadedAndSelected(int downloaded, int selected) {
+    return '已下載 $downloaded · 已選擇 $selected';
+  }
+
+  @override
+  String downloadN(int count) {
+    return '下載 ($count)';
+  }
+
+  @override
+  String get checkingDownloadedFiles => '正在檢查已下載檔案...';
+
+  @override
+  String get noDownloadableFiles => '沒有可下載的檔案';
+
+  @override
+  String get selectFilesToDownload => '選擇下載檔案';
+
+  @override
+  String downloadedNCount(int count) {
+    return '已下載 $count 個';
+  }
+
+  @override
+  String selectedNCount(int count) {
+    return '已選擇 $count 個';
+  }
+
+  @override
+  String get pleaseEnterServerAddress => '請先輸入伺服器位址';
+
+  @override
+  String get pleaseEnterUsername => '請輸入使用者名稱';
+
+  @override
+  String get pleaseEnterPassword => '請輸入密碼';
+
+  @override
+  String get notTestedYet => '尚未測試';
+
+  @override
+  String latencyResultDetail(String latency, String status) {
+    return '延遲 $latency ($status)';
+  }
+
+  @override
+  String connectionFailedWithDetail(String error) {
+    return '連線失敗: $error';
+  }
+
+  @override
+  String get noAccountTapToRegister => '沒有帳號？點擊註冊';
+
+  @override
+  String get haveAccountTapToLogin => '已有帳號？點擊登入';
+
+  @override
+  String get cannotDeleteActiveAccount => '無法刪除目前使用的帳戶';
+
+  @override
+  String get selectAccount => '選擇帳戶';
+
+  @override
+  String get noSavedAccounts => '沒有儲存的帳戶';
+
+  @override
+  String get addAccountToGetStarted => '請新增一個帳戶開始使用';
+
+  @override
+  String get unknownHost => '未知主機';
+
+  @override
+  String lastUsedTime(String time) {
+    return '最後使用: $time';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count天前';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count小時前';
+  }
+
+  @override
+  String minutesAgo(int count) {
+    return '$count分鐘前';
+  }
+
+  @override
+  String get justNow => '剛剛';
+
+  @override
+  String get confirmDelete => '確認刪除';
+
+  @override
+  String deleteSelectedConfirm(int count) {
+    return '確定要刪除選中的 $count 項嗎？';
+  }
+
+  @override
+  String deletedNOfTotalItems(int success, int total) {
+    return '已刪除 $success/$total 項';
+  }
+
+  @override
+  String get importingSubtitleFile => '正在匯入字幕檔案...';
+
+  @override
+  String get preparingImport => '正在準備匯入...';
+
+  @override
+  String get preparingExtract => '正在準備解壓...';
+
+  @override
+  String get importSubtitleFile => '匯入字幕檔案';
+
+  @override
+  String get supportedSubtitleFormats => '支援 .srt, .vtt, .lrc 等字幕格式';
+
+  @override
+  String get importFolder => '匯入資料夾';
+
+  @override
+  String get importFolderDesc => '保留資料夾結構，僅匯入字幕檔案';
+
+  @override
+  String get importArchive => '匯入壓縮檔';
+
+  @override
+  String get importArchiveDesc => '支援無密碼 ZIP 壓縮檔\n如需批量匯入，將它們壓縮為一個壓縮檔再匯入';
+
+  @override
+  String get subtitleLibraryGuide => '字幕庫使用說明';
+
+  @override
+  String get subtitleLibraryFunction => '字幕庫功能';
+
+  @override
+  String get subtitleLibraryFunctionDesc => '用於存放主動匯入或儲存的字幕檔案，並在播放音訊時支援自動/手動載入';
+
+  @override
+  String get subtitleAutoLoad => '字幕自動載入';
+
+  @override
+  String get subtitleAutoLoadDesc => '播放音訊時，系統會自動在字幕庫中查找配對的字幕檔案：';
+
+  @override
+  String get smartCategoryAndMark => '智慧分類與標記';
+
+  @override
+  String get open => '開啟';
+
+  @override
+  String get moveTo => '移動到';
+
+  @override
+  String get rename => '重新命名';
+
+  @override
+  String get newName => '新名稱';
+
+  @override
+  String get renameSuccess => '重新命名成功';
+
+  @override
+  String get renameFailed => '重新命名失敗';
+
+  @override
+  String deleteItemConfirm(String title) {
+    return '確定要刪除 \"$title\" 嗎？';
+  }
+
+  @override
+  String get deleteFolderContentsWarning => '此操作將刪除資料夾內的所有內容。';
+
+  @override
+  String get deleteFailed => '刪除失敗';
+
+  @override
+  String subtitleLoaded(String title) {
+    return '字幕已載入：$title';
+  }
+
+  @override
+  String get moveSuccess => '移動成功';
+
+  @override
+  String get moveFailed => '移動失敗';
+
+  @override
+  String previewFailed(String error) {
+    return '預覽失敗: $error';
+  }
+
+  @override
+  String openFailed(String error) {
+    return '開啟失敗: $error';
+  }
+
+  @override
+  String get back => '返回';
+
+  @override
+  String get subtitleLibraryEmpty => '字幕庫為空';
+
+  @override
+  String get tapToImportSubtitle => '點擊右下角 + 按鈕匯入字幕';
+
+  @override
+  String get importSubtitle => '匯入字幕';
+
+  @override
+  String get sampleSubtitleContent => '♪ 示例字幕內容 ♪';
+
+  @override
+  String get presetStyles => '預設樣式';
+
+  @override
+  String get backgroundOpacity => '背景不透明度';
+
+  @override
+  String get colorSettings => '顏色設定';
+
+  @override
+  String get shapeSettings => '形狀設定';
+
+  @override
+  String get cornerRadius => '圓角半徑';
+
+  @override
+  String get horizontalPadding => '水平內邊距';
+
+  @override
+  String get verticalPadding => '垂直內邊距';
+
+  @override
+  String get resetStyle => '重設樣式';
+
+  @override
+  String get resetStyleConfirm => '確定要恢復預設樣式嗎？';
+
+  @override
+  String get restoreDefaultStyle => '恢復預設樣式';
+
+  @override
+  String get reset => '重設';
+
+  @override
+  String noBlockedItemsOfType(String type) {
+    return '沒有封鎖的$type';
+  }
+
+  @override
+  String unblockedItem(String item) {
+    return '已移除封鎖: $item';
+  }
+
+  @override
+  String addBlockedItem(String type) {
+    return '新增封鎖$type';
+  }
+
+  @override
+  String blockedItemName(String type) {
+    return '$type名稱';
+  }
+
+  @override
+  String enterBlockedItemHint(String type) {
+    return '請輸入要封鎖的$type';
+  }
+
+  @override
+  String blockedItemAdded(String item) {
+    return '已新增封鎖: $item';
+  }
+
+  @override
+  String workCountLabel(int count) {
+    return '作品數: $count';
+  }
+
+  @override
+  String get miniPlayer => '迷你播放器';
+
+  @override
+  String get lineHeight => '行高';
+
+  @override
+  String get portraitPlayerBelowCover => '直屏播放器 (封面下方)';
+
+  @override
+  String get fullscreenSubtitleMode => '全螢幕字幕 (直屏/橫屏)';
+
+  @override
+  String get activeSubtitleFontSize => '目前字幕大小';
+
+  @override
+  String get inactiveSubtitleFontSize => '其他字幕大小';
+
+  @override
+  String get restoreDefaultSettings => '恢復預設設定';
+
+  @override
+  String get guideInPrefix => '在';
+
+  @override
+  String get guideParsedFolder => '<已解析>';
+
+  @override
+  String get guideFindWorkDesc => '資料夾下查找對應作品\n支援資料夾格式：RJ123456';
+
+  @override
+  String get guideSavedFolder => '<已儲存>';
+
+  @override
+  String get guideFindSubtitleDesc => '資料夾下查找單個字幕檔案';
+
+  @override
+  String get guideMatchRule => '匹配規則：字幕檔名與音訊檔名相同（去除或保留音訊副檔名均可）';
+
+  @override
+  String get guideRecognizedWorkPrefix => '識別到的作品會被新增綠色';
+
+  @override
+  String get guideTagSuffix => '標籤，音訊檔案圖示也會增加 ';
+
+  @override
+  String get guideSubtitleMatchSuffix => ' 標記，表示有字幕庫匹配';
+
+  @override
+  String get guideAutoRecognizeRJ => '匯入時自動識別 RJ 格式，歸類到<已解析>';
+
+  @override
+  String get guideAutoAddRJPrefix => '純數字資料夾自動新增 RJ 前綴（如 123456 → RJ123456）';
+
+  @override
+  String get unknownFile => '未知檔案';
+
+  @override
+  String deleteWithCount(int count) {
+    return '刪除 ($count)';
+  }
+
+  @override
+  String get searchSubtitles => '搜尋字幕...';
+
+  @override
+  String nFilesWithSize(int count, String size) {
+    return '$count 個檔案 • $size';
+  }
+
+  @override
+  String get rootDirectory => '根目錄';
+
+  @override
+  String get goToParent => '返回上級';
+
+  @override
+  String moveToTarget(String name) {
+    return '移動到: $name';
+  }
+
+  @override
+  String get noSubfoldersHere => '此目錄下沒有子資料夾';
+
+  @override
+  String addedToPlaylist(String name) {
+    return '已新增到播放清單「$name」';
+  }
+
+  @override
+  String removedFromPlaylist(String name) {
+    return '已從播放清單「$name」中移除';
+  }
+
+  @override
+  String get alreadyFavorited => '已收藏';
+
+  @override
+  String loadImageFailedWithError(String error) {
+    return '載入圖片失敗\n$error';
+  }
+
+  @override
+  String get noImageAvailable => '沒有可用的圖片';
+
+  @override
+  String get storagePermissionRequiredForImage => '需要儲存權限才能儲存圖片';
+
+  @override
+  String get savedToGallery => '已儲存到相簿';
+
+  @override
+  String get saveCoverImage => '儲存封面圖片';
+
+  @override
+  String savedToPath(String path) {
+    return '已儲存到: $path';
+  }
+
+  @override
+  String get doubleTapToZoom => '雙擊放大 · 雙指縮放';
+
+  @override
+  String getStatusFailed(String error) {
+    return '取得狀態失敗: $error';
+  }
+
+  @override
+  String get deleteRecord => '刪除記錄';
+
+  @override
+  String deletePlayRecordConfirm(String title) {
+    return '確定要刪除 \"$title\" 的播放記錄嗎？';
+  }
+
+  @override
+  String get notPlayedYet => '尚未播放';
+
+  @override
+  String playbackFailed(String error) {
+    return '播放失敗: $error';
+  }
+
+  @override
+  String get storagePermissionRequired => '需要儲存權限';
+
+  @override
+  String get storagePermissionForGalleryDesc => '儲存圖片需要存取相簿的權限。請在設定中授予權限。';
+
+  @override
+  String get goToSettings => '前往設定';
+
+  @override
+  String get imageSavedToGallery => '圖片已儲存到相簿';
+
+  @override
+  String imageSavedToPath(String path) {
+    return '圖片已儲存到: $path';
+  }
+
+  @override
+  String get pullDownForNextPage => '繼續下拉跳轉下一頁';
+
+  @override
+  String get releaseForNextPage => '釋放跳轉下一頁';
+
+  @override
+  String get jumpTo => '跳轉';
+
+  @override
+  String get goToPageTitle => '跳轉到指定頁';
+
+  @override
+  String pageNumberRange(int max) {
+    return '頁碼 (1-$max)';
+  }
+
+  @override
+  String get enterPageNumber => '請輸入頁碼';
+
+  @override
+  String enterValidPageNumber(int max) {
+    return '請輸入有效頁碼 (1-$max)';
+  }
+
+  @override
+  String get previousPage => '上一頁';
+
+  @override
+  String get nextPage => '下一頁';
+
+  @override
+  String get localPdfNotExist => '本地PDF檔案不存在';
+
+  @override
+  String get cannotOpenPdf => '無法開啟PDF檔案';
+
+  @override
+  String loadPdfFailed(String error) {
+    return '載入PDF失敗: $error';
+  }
+
+  @override
+  String pdfPageOfTotal(int current, int total) {
+    return '第 $current 頁 / 共 $total 頁';
+  }
+
+  @override
+  String get loadingPdf => '正在載入PDF...';
+
+  @override
+  String get pdfPathInvalid => 'PDF檔案路徑無效';
+
+  @override
+  String get desktopPdfPreviewNotSupported => '桌面端暫不支援直接預覽 PDF';
+
+  @override
+  String get openWithSystemApp => '使用系統預設應用開啟';
+
+  @override
+  String renderPdfFailed(String error) {
+    return '渲染PDF失敗: $error';
+  }
+
+  @override
+  String get ratingDetails => '評分詳情';
+
+  @override
+  String get selectSaveDirectory => '選擇儲存目錄';
+
+  @override
+  String get noSubtitleContentToSave => '沒有可儲存的字幕內容';
+
+  @override
+  String get savedToSubtitleLibrary => '已儲存到字幕庫';
+
+  @override
+  String get saveToLocal => '儲存到本地';
+
+  @override
+  String get selectDirectoryToSaveFile => '選擇目錄儲存檔案';
+
+  @override
+  String get saveToSubtitleLibrary => '儲存到字幕庫';
+
+  @override
+  String get saveToSubtitleLibraryDesc => '儲存到字幕庫的\"已儲存\"目錄';
+
+  @override
+  String get saveToFile => '儲存到檔案';
+
+  @override
+  String get noContentToSave => '沒有可儲存的內容';
+
+  @override
+  String fileSavedToPath(String path) {
+    return '檔案已儲存到：$path';
+  }
+
+  @override
+  String get localFileNotExist => '本地檔案不存在';
+
+  @override
+  String loadTextFailed(String error) {
+    return '載入文字失敗: $error';
+  }
+
+  @override
+  String get previewMode => '預覽模式';
+
+  @override
+  String get editMode => '編輯模式';
+
+  @override
+  String get showOriginal => '顯示原文';
+
+  @override
+  String get translateContent => '翻譯內容';
+
+  @override
+  String get editTextContentHint => '編輯文字內容...';
+
+  @override
+  String get bookmarkRemoved => '已移除標記';
+
+  @override
+  String setProgressAndRating(String progress, int rating) {
+    return '已設定為：$progress，評分：$rating 星';
+  }
+
+  @override
+  String setProgressTo(String progress) {
+    return '已設定為：$progress';
+  }
+
+  @override
+  String ratingSetTo(int rating) {
+    return '評分已設定為：$rating 星';
+  }
+
+  @override
+  String get updated => '已更新';
+
+  @override
+  String addTagFailed(String error) {
+    return '新增標籤失敗: $error';
+  }
+
+  @override
+  String addWithCount(int count) {
+    return '新增 ($count)';
+  }
+
+  @override
+  String get undo => '撤銷';
+
+  @override
+  String nStars(int count) {
+    return '$count 星';
+  }
+
+  @override
+  String get voteRemoved => '已取消投票';
+
+  @override
+  String get votedUp => '已投支持票';
+
+  @override
+  String get votedDown => '已投反對票';
+
+  @override
+  String voteFailedWithError(String error) {
+    return '投票失敗: $error';
+  }
+
+  @override
+  String get voteFor => '支持';
+
+  @override
+  String get voteAgainst => '反對';
+
+  @override
+  String get voted => '已投票';
+
+  @override
+  String tagBlockedWithName(String name) {
+    return '已屏蔽標籤: $name';
+  }
+
+  @override
+  String get subtitleParseFailedUnsupportedFormat => '解析失敗，格式不支援';
+
+  @override
+  String get lyricPresetDynamic => '動態';
+
+  @override
+  String get lyricPresetClassic => '經典';
+
+  @override
+  String get lyricPresetModern => '現代';
+
+  @override
+  String get lyricPresetMinimal => '極簡';
+
+  @override
+  String get lyricPresetVibrant => '鮮豔';
+
+  @override
+  String get lyricPresetElegant => '優雅';
+
+  @override
+  String get lyricPresetDynamicDesc => '跟隨系統主題，自動取色';
+
+  @override
+  String get lyricPresetClassicDesc => '黑底白字，經典耐看';
+
+  @override
+  String get lyricPresetModernDesc => '漸變背景，時尚現代';
+
+  @override
+  String get lyricPresetMinimalDesc => '輕透明，簡約優雅';
+
+  @override
+  String get lyricPresetVibrantDesc => '色彩鮮明，活力四射';
+
+  @override
+  String get lyricPresetElegantDesc => '深藍底，高雅氣質';
+
+  @override
+  String get floatingLyricLoading => '♪ 載入字幕中 ♪';
+
+  @override
+  String get subtitleFileNotExist => '檔案不存在';
+
+  @override
+  String get subtitleMissingInfo => '缺少必要資訊';
+
+  @override
+  String get privacyDefaultTitle => '正在播放音訊';
+
+  @override
+  String get offlineModeStartup => '網路連線失敗，以離線模式啟動';
+
+  @override
+  String get playlistInfoNotLoaded => '播放清單資訊未載入';
+
+  @override
+  String get encodingUnrecognized => '檔案編碼無法識別，無法正確顯示內容';
+
+  @override
+  String editPlaylistFailed(String error) {
+    return '編輯播放清單失敗: $error';
+  }
+
+  @override
+  String unsupportedFileTypeWithTitle(String title) {
+    return '暫不支援開啟此類型檔案: $title';
   }
 }

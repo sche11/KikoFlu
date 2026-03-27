@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../services/cache_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'scrollable_appbar.dart';
 
 /// PDF预览屏幕
@@ -78,7 +79,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
           return;
         } else {
           setState(() {
-            _errorMessage = '本地PDF文件不存在';
+            _errorMessage = S.of(context).localPdfNotExist;
             _isLoading = false;
           });
           return;
@@ -169,7 +170,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
           }
           return;
         } else {
-          throw Exception('无法打开PDF文件');
+          throw Exception(S.of(context).cannotOpenPdf);
         }
       }
 
@@ -179,7 +180,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '加载PDF失败: $e';
+        _errorMessage = S.of(context).loadPdfFailed(e.toString());
         _isLoading = false;
       });
     }
@@ -198,7 +199,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
             ),
             if (_totalPages > 0)
               Text(
-                '第 ${_currentPage + 1} 页 / 共 $_totalPages 页',
+                S.of(context).pdfPageOfTotal(_currentPage + 1, _totalPages),
                 style: const TextStyle(fontSize: 12),
               ),
           ],
@@ -211,14 +212,14 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
               onPressed: _currentPage > 0
                   ? () => _pdfViewController?.setPage(_currentPage - 1)
                   : null,
-              tooltip: '上一页',
+              tooltip: S.of(context).previousPage,
             ),
             IconButton(
               icon: const Icon(Icons.arrow_forward_ios),
               onPressed: _currentPage < _totalPages - 1
                   ? () => _pdfViewController?.setPage(_currentPage + 1)
                   : null,
-              tooltip: '下一页',
+              tooltip: S.of(context).nextPage,
             ),
           ],
         ],
@@ -229,13 +230,13 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('正在加载PDF...'),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(S.of(context).loadingPdf),
           ],
         ),
       );
@@ -262,7 +263,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadPdf,
-                child: const Text('重试'),
+                child: Text(S.of(context).retry),
               ),
             ],
           ),
@@ -271,7 +272,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
     }
 
     if (_localFilePath == null) {
-      return const Center(child: Text('PDF文件路径无效'));
+      return Center(child: Text(S.of(context).pdfPathInvalid));
     }
 
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -282,7 +283,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
             const Icon(Icons.desktop_access_disabled,
                 size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text('桌面端暂不支持直接预览 PDF'),
+            Text(S.of(context).desktopPdfPreviewNotSupported),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () async {
@@ -297,7 +298,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                 }
               },
               icon: const Icon(Icons.open_in_new),
-              label: const Text('使用系统默认应用打开'),
+              label: Text(S.of(context).openWithSystemApp),
             ),
           ],
         ),
@@ -325,7 +326,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
         });
       },
       onError: (error) {
-        setState(() => _errorMessage = '渲染PDF失败: $error');
+        setState(() => _errorMessage = S.of(context).renderPdfFailed(error.toString()));
       },
     );
   }

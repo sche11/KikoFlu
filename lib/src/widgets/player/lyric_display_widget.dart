@@ -5,6 +5,7 @@ import '../../models/lyric.dart';
 import '../../providers/audio_provider.dart';
 import '../../providers/lyric_provider.dart';
 import '../../providers/player_lyric_style_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 小字幕显示组件（在封面下方显示当前字幕）
 class LyricDisplay extends ConsumerWidget {
@@ -313,7 +314,7 @@ class _FullLyricDisplayState extends ConsumerState<FullLyricDisplay> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text('加载失败')),
+      error: (_, __) => Center(child: Text(S.of(context).loadFailed)),
     );
   }
 }

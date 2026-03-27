@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../providers/my_reviews_provider.dart';
 import '../utils/snackbar_util.dart';
+import '../../l10n/app_localizations.dart';
 import 'review_progress_dialog.dart';
 
 /// 作品标记管理器 - 封装标记状态的逻辑和UI
@@ -30,7 +31,7 @@ class WorkBookmarkManager {
       context: context,
       currentProgress: currentProgress,
       currentRating: currentRating,
-      title: '标记作品',
+      title: S.of(context).markWork,
       workId: workId,
       workTitle: workTitle,
     );
@@ -44,7 +45,7 @@ class WorkBookmarkManager {
           await apiService.deleteReview(workId);
 
           if (context.mounted) {
-            SnackBarUtil.showSuccess(context, '已移除标记');
+            SnackBarUtil.showSuccess(context, S.of(context).bookmarkRemoved);
           }
 
           // 更新状态
@@ -71,18 +72,18 @@ class WorkBookmarkManager {
             // 同时设置了进度和评分
             final filterLabel =
                 ReviewProgressDialog.getProgressLabel(newProgress);
-            message = '已设置为：$filterLabel，评分：$newRating 星';
+            message = S.of(context).setProgressAndRating(filterLabel, newRating);
           } else if (newProgress != null) {
             // 只设置了进度
             final filterLabel =
                 ReviewProgressDialog.getProgressLabel(newProgress);
-            message = '已设置为：$filterLabel';
+            message = S.of(context).setProgressTo(filterLabel);
           } else if (newRating != null) {
             // 只设置了评分
-            message = '评分已设置为：$newRating 星';
+            message = S.of(context).ratingSetTo(newRating);
           } else {
             // 都没设置（理论上不应该到这里）
-            message = '已更新';
+            message = S.of(context).updated;
           }
 
           if (context.mounted) {
@@ -99,7 +100,7 @@ class WorkBookmarkManager {
         }
       } catch (e) {
         if (context.mounted) {
-          SnackBarUtil.showError(context, '操作失败: $e');
+          SnackBarUtil.showError(context, S.of(context).operationFailedWithError(e.toString()));
         }
       }
     }

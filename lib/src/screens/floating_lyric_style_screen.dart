@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../providers/floating_lyric_style_provider.dart';
+import '../utils/l10n_extensions.dart';
 import '../widgets/scrollable_appbar.dart';
 
 class FloatingLyricStyleScreen extends ConsumerWidget {
@@ -11,8 +13,8 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
     final style = ref.watch(floatingLyricStyleProvider);
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('悬浮字幕样式', style: TextStyle(fontSize: 18)),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).floatingLyricStyle, style: const TextStyle(fontSize: 18)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -57,7 +59,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '预览',
+              S.of(context).preview,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -74,7 +76,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(style.cornerRadius),
                 ),
                 child: Text(
-                  '♪ 示例字幕内容 ♪',
+                  S.of(context).sampleSubtitleContent,
                   style: TextStyle(
                     color: style.textColor,
                     fontSize: style.fontSize,
@@ -98,7 +100,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '预设样式',
+              S.of(context).presetStyles,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -109,7 +111,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
               runSpacing: 8,
               children: FloatingLyricStylePreset.values.map((preset) {
                 return ActionChip(
-                  label: Text(preset.name),
+                  label: Text(preset.localizedName(context)),
                   onPressed: () {
                     ref
                         .read(floatingLyricStyleProvider.notifier)
@@ -136,7 +138,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '字体大小',
+                  S.of(context).fontSize,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 Text(
@@ -178,7 +180,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '背景不透明度',
+                  S.of(context).backgroundOpacity,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 Text(
@@ -217,7 +219,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '颜色设置',
+              S.of(context).colorSettings,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -225,7 +227,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             _buildColorPicker(
               context,
-              '文字颜色',
+              S.of(context).fontColor,
               style.textColor,
               [
                 Colors.white,
@@ -244,7 +246,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             _buildColorPicker(
               context,
-              '背景颜色',
+              S.of(context).backgroundColor,
               style.backgroundColor,
               [
                 Colors.black,
@@ -340,7 +342,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '形状设置',
+              S.of(context).shapeSettings,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -349,7 +351,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('圆角半径', style: Theme.of(context).textTheme.bodyMedium),
+                Text(S.of(context).cornerRadius, style: Theme.of(context).textTheme.bodyMedium),
                 Text(
                   '${style.cornerRadius.toInt()}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -375,7 +377,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('水平内边距', style: Theme.of(context).textTheme.bodyMedium),
+                Text(S.of(context).horizontalPadding, style: Theme.of(context).textTheme.bodyMedium),
                 Text(
                   '${style.paddingHorizontal.toInt()}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -401,7 +403,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('垂直内边距', style: Theme.of(context).textTheme.bodyMedium),
+                Text(S.of(context).verticalPadding, style: Theme.of(context).textTheme.bodyMedium),
                 Text(
                   '${style.paddingVertical.toInt()}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -435,26 +437,26 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('重置样式'),
-            content: const Text('确定要恢复默认样式吗？'),
+            title: Text(S.of(context).resetStyle),
+            content: Text(S.of(context).resetStyleConfirm),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(S.of(context).cancel),
               ),
               FilledButton(
                 onPressed: () {
                   ref.read(floatingLyricStyleProvider.notifier).reset();
                   Navigator.pop(context);
                 },
-                child: const Text('重置'),
+                child: Text(S.of(context).reset),
               ),
             ],
           ),
         );
       },
       icon: const Icon(Icons.restore),
-      label: const Text('恢复默认样式'),
+      label: Text(S.of(context).restoreDefaultStyle),
     );
   }
 }

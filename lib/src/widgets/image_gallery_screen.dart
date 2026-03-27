@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../utils/snackbar_util.dart';
+import '../../l10n/app_localizations.dart';
 import 'cached_image_widget.dart';
 
 /// 图片画廊屏幕，支持查看、缩放、保存图片
@@ -128,7 +129,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, '保存失败: $e');
+        SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -150,16 +151,16 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
           final shouldOpenSettings = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('需要存储权限'),
-              content: const Text('保存图片需要访问相册的权限。请在设置中授予权限。'),
+              title: Text(S.of(context).storagePermissionRequired),
+              content: Text(S.of(context).storagePermissionForGalleryDesc),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('取消'),
+                  child: Text(S.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('去设置'),
+                  child: Text(S.of(context).goToSettings),
                 ),
               ],
             ),
@@ -169,7 +170,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
             await openAppSettings();
           }
         } else {
-          SnackBarUtil.showWarning(context, '需要存储权限才能保存图片');
+          SnackBarUtil.showWarning(context, S.of(context).storagePermissionRequiredForImage);
         }
       }
       return;
@@ -184,10 +185,10 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
 
     if (mounted) {
       if (result.isSuccess) {
-        SnackBarUtil.showSuccess(context, '图片已保存到相册');
+        SnackBarUtil.showSuccess(context, S.of(context).imageSavedToGallery);
       } else {
         SnackBarUtil.showError(
-            context, '保存失败: ${result.errorMessage ?? "未知错误"}');
+            context, S.of(context).saveFailedWithError(result.errorMessage ?? S.of(context).saveImageFailed));
       }
     }
   }
@@ -208,14 +209,14 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
         await tempFile.writeAsBytes(imageBytes);
 
         final outputFile = await FilePicker.platform.saveFile(
-          dialogTitle: '保存图片',
+          dialogTitle: S.of(context).saveImage,
           fileName: fileName,
           type: FileType.image,
           bytes: Uint8List.fromList(imageBytes),
         );
 
         if (outputFile != null && mounted) {
-          SnackBarUtil.showSuccess(context, '图片已保存');
+          SnackBarUtil.showSuccess(context, S.of(context).imageSavedToGallery);
         }
 
         if (await tempFile.exists()) {
@@ -223,12 +224,12 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
         }
       } catch (e) {
         if (mounted) {
-          SnackBarUtil.showError(context, '保存失败: $e');
+          SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
         }
       }
     } else {
       final outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: '保存图片',
+        dialogTitle: S.of(context).saveImage,
         fileName: fileName,
         type: FileType.image,
       );
@@ -238,7 +239,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
         await file.writeAsBytes(imageBytes);
 
         if (mounted) {
-          SnackBarUtil.showSuccess(context, '图片已保存到: $outputFile');
+          SnackBarUtil.showSuccess(context, S.of(context).imageSavedToPath(outputFile));
         }
       }
     }
@@ -281,7 +282,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
               IconButton(
                 icon: const Icon(Icons.download),
                 onPressed: _saveImage,
-                tooltip: '保存图片',
+                tooltip: S.of(context).saveImage,
               ),
             IconButton(
               icon: const Icon(Icons.close),
@@ -345,7 +346,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
             IconButton(
               icon: const Icon(Icons.download),
               onPressed: _saveImage,
-              tooltip: '保存图片',
+              tooltip: S.of(context).saveImage,
             ),
         ],
       ),

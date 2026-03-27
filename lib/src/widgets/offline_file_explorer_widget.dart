@@ -20,6 +20,7 @@ import 'responsive_dialog.dart';
 import 'image_gallery_screen.dart';
 import 'text_preview_screen.dart';
 import 'pdf_preview_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 离线文件浏览器 - 显示已下载的文件
 /// 只显示硬盘上实际存在的文件，不显示未下载的文件
@@ -74,7 +75,7 @@ class _OfflineFileExplorerWidgetState
     if (widget.fileTree == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = '没有文件树信息';
+        _errorMessage = S.of(context).noFileTreeInfo;
       });
       return;
     }
@@ -92,7 +93,7 @@ class _OfflineFileExplorerWidgetState
       if (!await workDir.exists()) {
         setState(() {
           _isLoading = false;
-          _errorMessage = '作品文件夹不存在';
+          _errorMessage = S.of(context).workFolderNotExist;
         });
         return;
       }
@@ -114,7 +115,7 @@ class _OfflineFileExplorerWidgetState
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = '加载文件失败: $e';
+        _errorMessage = S.of(context).loadFilesFailed(e.toString());
       });
     }
   }
@@ -580,10 +581,10 @@ class _OfflineFileExplorerWidgetState
   // 播放音频文件（从本地）
   Future<void> _playAudioFile(dynamic audioFile, String parentPath) async {
     final hash = _getProperty(audioFile, 'hash');
-    final title = _getProperty(audioFile, 'title', defaultValue: '未知');
+    final title = _getProperty(audioFile, 'title', defaultValue: S.of(context).unknown);
 
     if (hash == null) {
-      SnackBarUtil.showError(context, '无法播放音频：缺少文件标识');
+      SnackBarUtil.showError(context, S.of(context).cannotPlayAudioMissingId);
       return;
     }
 
@@ -596,7 +597,7 @@ class _OfflineFileExplorerWidgetState
     final localFile = File(localPath);
 
     if (!await localFile.exists()) {
-      SnackBarUtil.showError(context, '音频文件不存在');
+      SnackBarUtil.showError(context, S.of(context).audioFileNotExist);
       return;
     }
 
@@ -618,7 +619,7 @@ class _OfflineFileExplorerWidgetState
         audioFiles.indexWhere((file) => _getProperty(file, 'hash') == hash);
 
     if (currentIndex == -1) {
-      SnackBarUtil.showError(context, '无法找到音频文件: $title');
+      SnackBarUtil.showError(context, S.of(context).cannotFindAudioFile(title));
       return;
     }
 
@@ -626,7 +627,7 @@ class _OfflineFileExplorerWidgetState
     final List<AudioTrack> audioTracks = [];
     for (final file in audioFiles) {
       final fileHash = _getProperty(file, 'hash');
-      final fileTitle = _getProperty(file, 'title', defaultValue: '未知');
+      final fileTitle = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
 
       if (fileHash == null) continue;
 
@@ -662,7 +663,7 @@ class _OfflineFileExplorerWidgetState
     }
 
     if (audioTracks.isEmpty) {
-      SnackBarUtil.showError(context, '没有找到可播放的音频文件');
+      SnackBarUtil.showError(context, S.of(context).noPlayableAudioFiles);
       return;
     }
 
@@ -677,7 +678,7 @@ class _OfflineFileExplorerWidgetState
         );
 
     SnackBarUtil.showInfo(
-        context, '正在播放: $title (${startIndex + 1}/${audioTracks.length})');
+        context, S.of(context).nowPlayingNOfTotal(title, startIndex + 1, audioTracks.length));
   }
 
   // 获取同一目录下的所有音频文件（不递归子文件夹）
@@ -731,13 +732,13 @@ class _OfflineFileExplorerWidgetState
   // 辅助方法：判断文件名是否为音频格式
   // 手动加载字幕
   Future<void> _loadLyricManually(dynamic file) async {
-    final title = _getProperty(file, 'title', defaultValue: '未知文件');
+    final title = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
 
     final currentTrackAsync = ref.read(currentTrackProvider);
     final currentTrack = currentTrackAsync.value;
 
     if (currentTrack == null) {
-      SnackBarUtil.showError(context, '当前没有播放的音频，无法加载字幕');
+      SnackBarUtil.showError(context, S.of(context).noAudioCannotLoadSubtitle);
       return;
     }
 
@@ -752,7 +753,7 @@ class _OfflineFileExplorerWidgetState
               size: 24,
             ),
             const SizedBox(width: 12),
-            const Text('加载字幕'),
+            Text(S.of(context).loadSubtitle),
           ],
         ),
         content: SingleChildScrollView(
@@ -761,7 +762,7 @@ class _OfflineFileExplorerWidgetState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '确定要将以下文件加载为当前音频的字幕吗？',
+                S.of(context).loadSubtitleConfirm,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -787,7 +788,7 @@ class _OfflineFileExplorerWidgetState
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '字幕文件',
+                          S.of(context).subtitleFile,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -814,7 +815,7 @@ class _OfflineFileExplorerWidgetState
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '当前音频',
+                          S.of(context).currentAudio,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -854,7 +855,7 @@ class _OfflineFileExplorerWidgetState
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '切换到其他音频时,字幕将自动恢复为默认匹配方式',
+                        S.of(context).subtitleAutoRestoreNote,
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context)
@@ -872,11 +873,11 @@ class _OfflineFileExplorerWidgetState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('确定加载'),
+            child: Text(S.of(context).confirmLoad),
           ),
         ],
       ),
@@ -889,9 +890,9 @@ class _OfflineFileExplorerWidgetState
             file,
             workId: widget.work.id,
           );
-      SnackBarUtil.showSuccess(context, '字幕加载成功：$title');
+      SnackBarUtil.showSuccess(context, S.of(context).subtitleLoadSuccess(title));
     } catch (e) {
-      SnackBarUtil.showError(context, '字幕加载失败：$e');
+      SnackBarUtil.showError(context, S.of(context).subtitleLoadFailed(e.toString()));
     }
   }
 
@@ -905,14 +906,14 @@ class _OfflineFileExplorerWidgetState
         (f) => _getProperty(f, 'hash') == _getProperty(file, 'hash'));
 
     if (currentIndex == -1) {
-      SnackBarUtil.showError(context, '无法找到图片文件');
+      SnackBarUtil.showError(context, S.of(context).cannotFindImageFile);
       return;
     }
 
     final List<Map<String, String>> imageItems = [];
     for (final f in imageFiles) {
       final hash = _getProperty(f, 'hash', defaultValue: '');
-      final title = _getProperty(f, 'title', defaultValue: '未知图片');
+      final title = _getProperty(f, 'title', defaultValue: S.of(context).unknown);
 
       final filePath = await _findFileFullPath(f, _localFiles, '');
       if (filePath != null) {
@@ -926,7 +927,7 @@ class _OfflineFileExplorerWidgetState
     }
 
     if (imageItems.isEmpty) {
-      SnackBarUtil.showError(context, '没有找到可预览的图片');
+      SnackBarUtil.showError(context, S.of(context).noPreviewableImages);
       return;
     }
 
@@ -993,16 +994,16 @@ class _OfflineFileExplorerWidgetState
 
   Future<void> _previewTextFile(dynamic file) async {
     final hash = _getProperty(file, 'hash');
-    final title = _getProperty(file, 'title', defaultValue: '未知文本');
+    final title = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
 
     if (hash == null) {
-      SnackBarUtil.showError(context, '无法预览文本：缺少文件标识');
+      SnackBarUtil.showError(context, S.of(context).cannotPreviewTextMissingId);
       return;
     }
 
     final filePath = await _findFileFullPath(file, _localFiles, '');
     if (filePath == null) {
-      SnackBarUtil.showError(context, '无法找到文件路径');
+      SnackBarUtil.showError(context, S.of(context).cannotFindFilePath);
       return;
     }
 
@@ -1012,7 +1013,7 @@ class _OfflineFileExplorerWidgetState
     final localFile = File(localPath);
 
     if (!await localFile.exists()) {
-      SnackBarUtil.showError(context, '文件不存在：$title');
+      SnackBarUtil.showError(context, S.of(context).fileNotExist(title));
       return;
     }
 
@@ -1031,16 +1032,16 @@ class _OfflineFileExplorerWidgetState
 
   Future<void> _previewPdfFile(dynamic file) async {
     final hash = _getProperty(file, 'hash');
-    final title = _getProperty(file, 'title', defaultValue: '未知PDF');
+    final title = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
 
     if (hash == null) {
-      SnackBarUtil.showError(context, '无法预览PDF：缺少文件标识');
+      SnackBarUtil.showError(context, S.of(context).cannotPreviewPdfMissingId);
       return;
     }
 
     final filePath = await _findFileFullPath(file, _localFiles, '');
     if (filePath == null) {
-      SnackBarUtil.showError(context, '无法找到文件路径');
+      SnackBarUtil.showError(context, S.of(context).cannotFindFilePath);
       return;
     }
 
@@ -1050,7 +1051,7 @@ class _OfflineFileExplorerWidgetState
     final localFile = File(localPath);
 
     if (!await localFile.exists()) {
-      SnackBarUtil.showError(context, '文件不存在：$title');
+      SnackBarUtil.showError(context, S.of(context).fileNotExist(title));
       return;
     }
 
@@ -1071,13 +1072,13 @@ class _OfflineFileExplorerWidgetState
     final hash = _getProperty(videoFile, 'hash');
 
     if (hash == null) {
-      SnackBarUtil.showError(context, '无法播放视频：缺少文件标识');
+      SnackBarUtil.showError(context, S.of(context).cannotPlayVideoMissingId);
       return;
     }
 
     final filePath = await _findFileFullPath(videoFile, _localFiles, '');
     if (filePath == null) {
-      SnackBarUtil.showError(context, '无法找到文件路径');
+      SnackBarUtil.showError(context, S.of(context).cannotFindFilePath);
       return;
     }
 
@@ -1087,7 +1088,7 @@ class _OfflineFileExplorerWidgetState
     final localFile = File(localPath);
 
     if (!await localFile.exists()) {
-      SnackBarUtil.showError(context, '视频文件不存在');
+      SnackBarUtil.showError(context, S.of(context).videoFileNotExist);
       return;
     }
 
@@ -1101,19 +1102,19 @@ class _OfflineFileExplorerWidgetState
           showDialog(
             context: context,
             builder: (context) => ResponsiveAlertDialog(
-              title: const Text('无法打开视频'),
+              title: Text(S.of(context).cannotOpenVideo),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('错误信息: ${result.message}'),
+                    Text(S.of(context).errorInfo(result.message)),
                     const SizedBox(height: 12),
-                    const Text('系统无法找到支持的视频播放器。'),
+                    Text(S.of(context).noVideoPlayerFound),
                     const SizedBox(height: 8),
-                    const Text('请安装视频播放器应用（如 VLC、MX Player 等）'),
+                    Text(S.of(context).installVideoPlayerApp),
                     const SizedBox(height: 12),
-                    const Text('文件路径：'),
+                    Text(S.of(context).filePathLabel),
                     SelectableText(localPath,
                         style: const TextStyle(fontSize: 12)),
                   ],
@@ -1122,7 +1123,7 @@ class _OfflineFileExplorerWidgetState
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('关闭'),
+                  child: Text(S.of(context).close),
                 ),
               ],
             ),
@@ -1130,7 +1131,7 @@ class _OfflineFileExplorerWidgetState
         }
       }
     } catch (e) {
-      SnackBarUtil.showError(context, '打开视频文件时出错: $e');
+      SnackBarUtil.showError(context, S.of(context).openVideoFileError(e.toString()));
     }
   }
 
@@ -1161,7 +1162,7 @@ class _OfflineFileExplorerWidgetState
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadLocalFiles,
-              child: const Text('重试'),
+              child: Text(S.of(context).retry),
             ),
           ],
         ),
@@ -1169,15 +1170,15 @@ class _OfflineFileExplorerWidgetState
     }
 
     if (_localFiles.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.folder_open, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              '没有已下载的文件',
-              style: TextStyle(color: Colors.grey),
+              S.of(context).noDownloadedFiles,
+              style: const TextStyle(color: Colors.grey),
             ),
           ],
         ),
@@ -1203,7 +1204,7 @@ class _OfflineFileExplorerWidgetState
               children: [
                 Expanded(
                   child: Text(
-                    '离线文件',
+                    S.of(context).offlineFiles,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -1252,7 +1253,7 @@ class _OfflineFileExplorerWidgetState
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            _showTranslation ? '原' : '译',
+                            _showTranslation ? S.of(context).translationOriginal : S.of(context).translationTranslated,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -1286,7 +1287,7 @@ class _OfflineFileExplorerWidgetState
 
     for (final item in items) {
       final type = _getProperty(item, 'type', defaultValue: '');
-      final originalTitle = _getProperty(item, 'title', defaultValue: '未知文件');
+      final originalTitle = _getProperty(item, 'title', defaultValue: S.of(context).unknown);
       final title = _getDisplayName(originalTitle); // 使用翻译后的名称
       final isFolder = type == 'folder';
       final children = _getProperty(item, 'children') as List<dynamic>?;
@@ -1313,7 +1314,7 @@ class _OfflineFileExplorerWidgetState
           },
           onLongPress: () {
             Clipboard.setData(ClipboardData(text: title));
-            SnackBarUtil.showSuccess(context, '已复制名称: $title');
+            SnackBarUtil.showSuccess(context, S.of(context).copiedName(title));
           },
           child: Padding(
             padding: EdgeInsets.only(
@@ -1424,7 +1425,7 @@ class _OfflineFileExplorerWidgetState
                           onPressed: () => _loadLyricManually(item),
                           icon: const Icon(Icons.subtitles),
                           color: Colors.orange,
-                          tooltip: '加载为字幕',
+                          tooltip: S.of(context).loadAsSubtitle,
                           iconSize: 20,
                         ),
                       // 删除按钮
@@ -1432,14 +1433,14 @@ class _OfflineFileExplorerWidgetState
                         onPressed: () => _deleteFile(item, parentPath),
                         icon: const Icon(Icons.delete_outline),
                         color: Colors.red.shade400,
-                        tooltip: '删除',
+                        tooltip: S.of(context).delete,
                         iconSize: 20,
                       ),
                     ],
                   )
                 else if (isFolder && children != null)
                   Text(
-                    '${children.length} 项',
+                    S.of(context).nItems(children.length),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -1511,25 +1512,25 @@ class _OfflineFileExplorerWidgetState
     } else if (FileIconUtils.isTextFile(file)) {
       _previewTextFile(file);
     } else {
-      SnackBarUtil.showInfo(context, '暂不支持打开此类型文件: $title');
+      SnackBarUtil.showInfo(context, S.of(context).unsupportedFileType(title));
     }
   }
 
   // 删除单个文件
   Future<void> _deleteFile(dynamic file, String parentPath) async {
-    final title = _getProperty(file, 'title', defaultValue: '未知文件');
+    final title = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
     final relativePath = parentPath.isEmpty ? title : '$parentPath/$title';
 
     // 显示确认对话框
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => ResponsiveAlertDialog(
-        title: const Text('确认删除'),
+        title: Text(S.of(context).deletionConfirmTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('确定要删除这个文件吗？'),
+            Text(S.of(context).deleteFilePrompt),
             const SizedBox(height: 12),
             Text(
               relativePath,
@@ -1543,14 +1544,14 @@ class _OfflineFileExplorerWidgetState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('删除'),
+            child: Text(S.of(context).delete),
           ),
         ],
       ),
@@ -1583,7 +1584,7 @@ class _OfflineFileExplorerWidgetState
 
       // 显示成功消息
       if (mounted) {
-        SnackBarUtil.showSuccess(context, '已删除: $title');
+        SnackBarUtil.showSuccess(context, S.of(context).deletedItem(title));
       }
     } catch (e) {
       // 关闭加载指示器
@@ -1593,7 +1594,7 @@ class _OfflineFileExplorerWidgetState
 
       // 显示错误消息
       if (mounted) {
-        SnackBarUtil.showError(context, '删除失败: $e');
+        SnackBarUtil.showError(context, S.of(context).deleteFailedWithError(e.toString()));
       }
     }
   }

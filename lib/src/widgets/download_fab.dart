@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../services/download_service.dart';
 import '../models/download_task.dart';
 import '../screens/downloads_screen.dart';
@@ -33,7 +34,7 @@ class DownloadFab extends StatelessWidget {
           label: Text('$activeCount'),
           child: FloatingActionButton(
             onPressed: () => _navigateToDownloads(context),
-            tooltip: '下载任务',
+            tooltip: S.of(context).downloadTasks,
             child: const Icon(Icons.download),
           ),
         );

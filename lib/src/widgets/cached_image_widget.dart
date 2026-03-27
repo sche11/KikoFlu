@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
 import '../services/cache_service.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 支持缓存的网络图片组件
 class CachedImageWidget extends StatefulWidget {
@@ -145,7 +146,7 @@ class _CachedImageWidgetState extends State<CachedImageWidget> {
           const Icon(Icons.error, size: 64, color: Colors.red),
           const SizedBox(height: 16),
           Text(
-            '加载图片失败\n$error',
+            S.of(context).loadImageFailedWithError(error),
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.red),
           ),

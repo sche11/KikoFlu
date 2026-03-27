@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/playlist.dart';
+import '../../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import 'privacy_blur_cover.dart';
 
@@ -174,7 +175,7 @@ class PlaylistCard extends ConsumerWidget {
                           color: theme.colorScheme.error.withOpacity(0.7),
                         ),
                         onPressed: onDelete,
-                        tooltip: '删除',
+                        tooltip: S.of(context).delete,
                       )
                     : Padding(
                         padding: const EdgeInsets.only(right: 8),

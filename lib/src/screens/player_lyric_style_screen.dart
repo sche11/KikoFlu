@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../providers/player_lyric_style_provider.dart';
 import '../widgets/scrollable_appbar.dart';
 
@@ -12,19 +13,19 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
     final notifier = ref.read(playerLyricSettingsProvider.notifier);
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('播放器字幕样式'),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).playerLyricStyle),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _buildSection(
             context,
-            title: '迷你播放器',
+            title: S.of(context).miniPlayer,
             children: [
               _buildSlider(
                 context,
-                label: '字体大小',
+                label: S.of(context).fontSize,
                 value: settings.miniFontSize,
                 min: 8,
                 max: 20,
@@ -32,7 +33,7 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
               ),
               _buildSlider(
                 context,
-                label: '行高',
+                label: S.of(context).lineHeight,
                 value: settings.miniLineHeight,
                 min: 0.8,
                 max: 2.0,
@@ -44,11 +45,11 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           _buildSection(
             context,
-            title: '竖屏播放器 (封面下方)',
+            title: S.of(context).portraitPlayerBelowCover,
             children: [
               _buildSlider(
                 context,
-                label: '字体大小',
+                label: S.of(context).fontSize,
                 value: settings.smallFontSize,
                 min: 10,
                 max: 24,
@@ -56,7 +57,7 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
               ),
               _buildSlider(
                 context,
-                label: '行高',
+                label: S.of(context).lineHeight,
                 value: settings.smallLineHeight,
                 min: 0.8,
                 max: 2.0,
@@ -68,11 +69,11 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           _buildSection(
             context,
-            title: '全屏字幕 (竖屏/横屏)',
+            title: S.of(context).fullscreenSubtitleMode,
             children: [
               _buildSlider(
                 context,
-                label: '当前字幕大小',
+                label: S.of(context).activeSubtitleFontSize,
                 value: settings.fullActiveFontSize,
                 min: 14,
                 max: 32,
@@ -80,7 +81,7 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
               ),
               _buildSlider(
                 context,
-                label: '其他字幕大小',
+                label: S.of(context).inactiveSubtitleFontSize,
                 value: settings.fullInactiveFontSize,
                 min: 12,
                 max: 28,
@@ -88,7 +89,7 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
               ),
               _buildSlider(
                 context,
-                label: '行高',
+                label: S.of(context).lineHeight,
                 value: settings.fullLineHeight,
                 min: 1.0,
                 max: 3.0,
@@ -102,7 +103,7 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
             child: TextButton.icon(
               onPressed: () => notifier.reset(),
               icon: const Icon(Icons.restore),
-              label: const Text('恢复默认设置'),
+              label: Text(S.of(context).restoreDefaultSettings),
             ),
           ),
         ],

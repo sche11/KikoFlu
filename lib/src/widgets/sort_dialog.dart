@@ -174,7 +174,7 @@ class _CommonSortDialogState extends State<CommonSortDialog> {
             : [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('关闭'),
+                  child: Text(S.of(context).close),
                 ),
               ],
       );

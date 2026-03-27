@@ -281,7 +281,7 @@ class SRu extends S {
   String get enterSearchContent => 'Введите поисковый запрос';
 
   @override
-  String get searchTag => 'Искать теги...';
+  String get searchTag => 'Поиск тегов...';
 
   @override
   String get minRating => 'Мин. рейтинг';
@@ -917,7 +917,7 @@ class SRu extends S {
 
   @override
   String loadTagsFailed(String error) {
-    return 'Ошибка загрузки тегов: $error';
+    return 'Не удалось загрузить теги: $error';
   }
 
   @override
@@ -928,7 +928,7 @@ class SRu extends S {
       'Теги отправлены, ожидается обработка сервером';
 
   @override
-  String get bindEmailFirst => 'Сначала привяжите email на www.asmr.one';
+  String get bindEmailFirst => 'Пожалуйста, привяжите email на www.asmr.one';
 
   @override
   String selectedNTags(int count) {
@@ -936,7 +936,7 @@ class SRu extends S {
   }
 
   @override
-  String get noMatchingTags => 'Совпадающие теги не найдены';
+  String get noMatchingTags => 'Нет совпадающих тегов';
 
   @override
   String get loadFailedRetry => 'Ошибка загрузки. Нажмите для повтора';
@@ -965,8 +965,8 @@ class SRu extends S {
   }
 
   @override
-  String pageNOfTotal(int page, int total) {
-    return 'Стр. $page/$total';
+  String pageNOfTotal(int current, int total) {
+    return 'Страница $current / $total';
   }
 
   @override
@@ -1186,7 +1186,7 @@ class SRu extends S {
   String get llmTestFailed => 'Тест не пройден';
 
   @override
-  String get subtitleTimingAdjustment => 'Тайминг субтитров';
+  String get subtitleTimingAdjustment => 'Настройка тайминга субтитров';
 
   @override
   String get playerLyricStyle => 'Стиль текста в плеере';
@@ -1303,7 +1303,7 @@ class SRu extends S {
   String get imageSaved => 'Изображение сохранено';
 
   @override
-  String get saveImageFailed => 'Не удалось сохранить изображение';
+  String get saveImageFailed => 'Ошибка сохранения';
 
   @override
   String get logout => 'Выход';
@@ -1330,7 +1330,7 @@ class SRu extends S {
 
   @override
   String ratingsCount(int count) {
-    return 'Оценок: $count';
+    return 'Всего $count оценок';
   }
 
   @override
@@ -1783,7 +1783,7 @@ class SRu extends S {
 
   @override
   String totalNItems(int count) {
-    return 'Всего $count';
+    return 'Всего $count записей';
   }
 
   @override
@@ -1911,7 +1911,7 @@ class SRu extends S {
 
   @override
   String nWorksCount(int count) {
-    return '$count работ';
+    return '$count произведений';
   }
 
   @override
@@ -1927,7 +1927,7 @@ class SRu extends S {
       'Проверьте сетевое подключение или повторите попытку позже';
 
   @override
-  String get reachedEnd => 'Вы добрались до конца~';
+  String get reachedEnd => 'Вы достигли конца~';
 
   @override
   String excludedNWorks(int count) {
@@ -1937,5 +1937,1080 @@ class SRu extends S {
   @override
   String pageExcludedNWorks(int count) {
     return 'На этой странице исключено $count работ';
+  }
+
+  @override
+  String get noSubtitlesAvailable => 'Субтитры отсутствуют';
+
+  @override
+  String get unlock => 'Разблокировать';
+
+  @override
+  String get backToCover => 'Вернуться к обложке';
+
+  @override
+  String get lyricHintTapCover =>
+      'Нажмите на обложку или название для перехода к субтитрам';
+
+  @override
+  String get floatingSubtitle => 'Плавающие субтитры';
+
+  @override
+  String get appendMode => 'Режим добавления';
+
+  @override
+  String get appendModeStatusOn => 'Режим добавления: Вкл';
+
+  @override
+  String get appendModeStatusOff => 'Режим добавления: Выкл';
+
+  @override
+  String get playlistEmpty => 'Плейлист пуст';
+
+  @override
+  String get appendModeEnabled => 'Режим добавления включён';
+
+  @override
+  String get appendModeHint =>
+      'Следующие нажатия на аудио добавят треки в конец текущего плейлиста, а не заменят его.\nДубликаты не добавляются.';
+
+  @override
+  String get gotIt => 'Понятно';
+
+  @override
+  String nMinutes(int count) {
+    return '$count мин';
+  }
+
+  @override
+  String nHours(int count) {
+    return '$count ч';
+  }
+
+  @override
+  String get titleLabel => 'Название';
+
+  @override
+  String get rjNumberLabel => 'RJ номер';
+
+  @override
+  String get tapToViewRatingDetail => 'Нажмите для просмотра деталей рейтинга';
+
+  @override
+  String priceInYen(int price) {
+    return '$price иен';
+  }
+
+  @override
+  String soldCount(String count) {
+    return 'Продано: $count';
+  }
+
+  @override
+  String get circleAndVaSection => 'Кружок | Сэйю';
+
+  @override
+  String get subtitleBadge => 'Субтитры';
+
+  @override
+  String get otherEditions => 'Другие версии';
+
+  @override
+  String tenThousandSuffix(String count) {
+    return '$count тыс.';
+  }
+
+  @override
+  String get packingWork => 'Упаковка работы...';
+
+  @override
+  String get workDirectoryNotExist => 'Каталог работы не существует';
+
+  @override
+  String get packingFailed => 'Ошибка упаковки';
+
+  @override
+  String exportSuccess(String path) {
+    return 'Экспорт выполнен: $path';
+  }
+
+  @override
+  String exportFailed(String error) {
+    return 'Ошибка экспорта: $error';
+  }
+
+  @override
+  String get exportAsZip => 'Экспорт в ZIP';
+
+  @override
+  String get offlineBadge => 'Офлайн';
+
+  @override
+  String loadFilesFailed(String error) {
+    return 'Ошибка загрузки файлов: $error';
+  }
+
+  @override
+  String get unknown => 'Неизвестно';
+
+  @override
+  String get noPlayableAudioFiles => 'Воспроизводимые аудиофайлы не найдены';
+
+  @override
+  String cannotFindAudioFile(String title) {
+    return 'Аудиофайл не найден: $title';
+  }
+
+  @override
+  String nowPlayingNOfTotal(String title, int current, int total) {
+    return 'Воспроизведение: $title ($current/$total)';
+  }
+
+  @override
+  String get noAudioCannotLoadSubtitle =>
+      'Нет воспроизводимого аудио, невозможно загрузить субтитры';
+
+  @override
+  String get loadSubtitle => 'Загрузить субтитры';
+
+  @override
+  String get loadSubtitleConfirm =>
+      'Загрузить этот файл как субтитры для текущего аудио?';
+
+  @override
+  String get subtitleFile => 'Файл субтитров';
+
+  @override
+  String get currentAudio => 'Текущее аудио';
+
+  @override
+  String get subtitleAutoRestoreNote =>
+      'При переключении аудио субтитры автоматически вернутся к стандартному подбору';
+
+  @override
+  String get confirmLoad => 'Подтвердить загрузку';
+
+  @override
+  String get loadingSubtitle => 'Загрузка субтитров...';
+
+  @override
+  String subtitleLoadSuccess(String title) {
+    return 'Субтитры загружены: $title';
+  }
+
+  @override
+  String subtitleLoadFailed(String error) {
+    return 'Ошибка загрузки субтитров: $error';
+  }
+
+  @override
+  String get cannotPreviewImageMissingInfo =>
+      'Невозможно предпросмотр изображения: недостаточно данных';
+
+  @override
+  String get cannotFindImageFile => 'Файл изображения не найден';
+
+  @override
+  String get cannotPreviewTextMissingInfo =>
+      'Невозможно предпросмотр текста: недостаточно данных';
+
+  @override
+  String get cannotPreviewPdfMissingInfo =>
+      'Невозможно предпросмотр PDF: недостаточно данных';
+
+  @override
+  String get cannotPlayVideoMissingId =>
+      'Невозможно воспроизвести видео: отсутствует ID файла';
+
+  @override
+  String get cannotPlayVideoMissingParams =>
+      'Невозможно воспроизвести видео: отсутствуют параметры';
+
+  @override
+  String get cannotPlayDirectly => 'Невозможно воспроизвести напрямую';
+
+  @override
+  String get noVideoPlayerFound => 'Поддерживаемый видеоплеер не найден.';
+
+  @override
+  String get youCan => 'Вы можете:';
+
+  @override
+  String get copyLinkToExternalPlayer =>
+      '1. Скопировать ссылку во внешний плеер (MX Player, VLC и др.)';
+
+  @override
+  String get openInBrowserOption => '2. Открыть в браузере';
+
+  @override
+  String playVideoError(String error) {
+    return 'Ошибка воспроизведения видео: $error';
+  }
+
+  @override
+  String get noFiles => 'Нет файлов';
+
+  @override
+  String get resourceFiles => 'Файлы ресурсов';
+
+  @override
+  String resourceFilesTranslated(int count) {
+    return 'Файлы ресурсов (переведено $count)';
+  }
+
+  @override
+  String get translationOriginal => 'Ориг';
+
+  @override
+  String get translationTranslated => 'Перев';
+
+  @override
+  String copiedName(String title) {
+    return 'Имя скопировано: $title';
+  }
+
+  @override
+  String translationComplete(int count) {
+    return 'Перевод завершён: $count элементов';
+  }
+
+  @override
+  String get noContentToTranslate => 'Нет содержимого для перевода';
+
+  @override
+  String get preparingTranslation => 'Подготовка перевода...';
+
+  @override
+  String translatingProgress(int current, int total) {
+    return 'Перевод $current/$total';
+  }
+
+  @override
+  String nItems(int count) {
+    return '$count элементов';
+  }
+
+  @override
+  String get loadAsSubtitle => 'Загрузить как субтитры';
+
+  @override
+  String get preview => 'Предпросмотр';
+
+  @override
+  String openVideoFileError(String error) {
+    return 'Ошибка открытия видеофайла: $error';
+  }
+
+  @override
+  String cannotOpenVideoFile(String message) {
+    return 'Невозможно открыть видеофайл: $message';
+  }
+
+  @override
+  String get noFileTreeInfo => 'Нет информации о дереве файлов';
+
+  @override
+  String get workFolderNotExist => 'Папка работы не существует';
+
+  @override
+  String get cannotPlayAudioMissingId =>
+      'Невозможно воспроизвести аудио: отсутствует ID файла';
+
+  @override
+  String get audioFileNotExist => 'Аудиофайл не существует';
+
+  @override
+  String get noPreviewableImages => 'Изображения для предпросмотра не найдены';
+
+  @override
+  String get cannotPreviewTextMissingId =>
+      'Невозможно предпросмотр текста: отсутствует ID файла';
+
+  @override
+  String get cannotFindFilePath => 'Путь к файлу не найден';
+
+  @override
+  String fileNotExist(String title) {
+    return 'Файл не существует: $title';
+  }
+
+  @override
+  String get cannotPreviewPdfMissingId =>
+      'Невозможно предпросмотр PDF: отсутствует ID файла';
+
+  @override
+  String get videoFileNotExist => 'Видеофайл не существует';
+
+  @override
+  String get cannotOpenVideo => 'Невозможно открыть видео';
+
+  @override
+  String errorInfo(String message) {
+    return 'Ошибка: $message';
+  }
+
+  @override
+  String get installVideoPlayerApp =>
+      'Установите видеоплеер (VLC, MX Player и др.)';
+
+  @override
+  String get filePathLabel => 'Путь к файлу:';
+
+  @override
+  String get noDownloadedFiles => 'Нет загруженных файлов';
+
+  @override
+  String get offlineFiles => 'Офлайн-файлы';
+
+  @override
+  String unsupportedFileType(String title) {
+    return 'Этот тип файлов не поддерживается: $title';
+  }
+
+  @override
+  String get deleteFilePrompt => 'Вы уверены, что хотите удалить этот файл?';
+
+  @override
+  String deletedItem(String title) {
+    return 'Удалено: $title';
+  }
+
+  @override
+  String get selectAtLeastOneFile => 'Выберите хотя бы один файл';
+
+  @override
+  String addedNFilesToDownloadQueue(int count) {
+    return '$count файлов добавлено в очередь загрузки';
+  }
+
+  @override
+  String downloadedAndSelected(int downloaded, int selected) {
+    return 'Загружено $downloaded · Выбрано $selected';
+  }
+
+  @override
+  String downloadN(int count) {
+    return 'Скачать ($count)';
+  }
+
+  @override
+  String get checkingDownloadedFiles => 'Проверка загруженных файлов...';
+
+  @override
+  String get noDownloadableFiles => 'Нет файлов для загрузки';
+
+  @override
+  String get selectFilesToDownload => 'Выбрать файлы для загрузки';
+
+  @override
+  String downloadedNCount(int count) {
+    return 'Загружено $count';
+  }
+
+  @override
+  String selectedNCount(int count) {
+    return 'Выбрано $count';
+  }
+
+  @override
+  String get pleaseEnterServerAddress => 'Введите адрес сервера';
+
+  @override
+  String get pleaseEnterUsername => 'Введите имя пользователя';
+
+  @override
+  String get pleaseEnterPassword => 'Введите пароль';
+
+  @override
+  String get notTestedYet => 'Ещё не тестировалось';
+
+  @override
+  String latencyResultDetail(String latency, String status) {
+    return 'Задержка $latency ($status)';
+  }
+
+  @override
+  String connectionFailedWithDetail(String error) {
+    return 'Ошибка подключения: $error';
+  }
+
+  @override
+  String get noAccountTapToRegister => 'Нет аккаунта? Нажмите для регистрации';
+
+  @override
+  String get haveAccountTapToLogin => 'Есть аккаунт? Нажмите для входа';
+
+  @override
+  String get cannotDeleteActiveAccount =>
+      'Невозможно удалить текущий активный аккаунт';
+
+  @override
+  String get selectAccount => 'Выбрать аккаунт';
+
+  @override
+  String get noSavedAccounts => 'Нет сохранённых аккаунтов';
+
+  @override
+  String get addAccountToGetStarted => 'Добавьте аккаунт, чтобы начать';
+
+  @override
+  String get unknownHost => 'Неизвестный хост';
+
+  @override
+  String lastUsedTime(String time) {
+    return 'Последнее использование: $time';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count дней назад';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count часов назад';
+  }
+
+  @override
+  String minutesAgo(int count) {
+    return '$count минут назад';
+  }
+
+  @override
+  String get justNow => 'Только что';
+
+  @override
+  String get confirmDelete => 'Подтвердить удаление';
+
+  @override
+  String deleteSelectedConfirm(int count) {
+    return 'Удалить $count выбранных элементов?';
+  }
+
+  @override
+  String deletedNOfTotalItems(int success, int total) {
+    return 'Удалено $success/$total элементов';
+  }
+
+  @override
+  String get importingSubtitleFile => 'Импорт файла субтитров...';
+
+  @override
+  String get preparingImport => 'Подготовка импорта...';
+
+  @override
+  String get preparingExtract => 'Подготовка распаковки...';
+
+  @override
+  String get importSubtitleFile => 'Импорт файла субтитров';
+
+  @override
+  String get supportedSubtitleFormats =>
+      'Поддержка .srt, .vtt, .lrc и других форматов субтитров';
+
+  @override
+  String get importFolder => 'Импорт папки';
+
+  @override
+  String get importFolderDesc =>
+      'Сохраняет структуру папок, импортирует только файлы субтитров';
+
+  @override
+  String get importArchive => 'Импорт архива';
+
+  @override
+  String get importArchiveDesc =>
+      'Поддержка ZIP-архивов без пароля.\nДля массового импорта сожмите все в один архив.';
+
+  @override
+  String get subtitleLibraryGuide => 'Руководство по библиотеке субтитров';
+
+  @override
+  String get subtitleLibraryFunction => 'Функция библиотеки субтитров';
+
+  @override
+  String get subtitleLibraryFunctionDesc =>
+      'Хранение импортированных/сохранённых субтитров с поддержкой авто/ручной загрузки при воспроизведении';
+
+  @override
+  String get subtitleAutoLoad => 'Автозагрузка субтитров';
+
+  @override
+  String get subtitleAutoLoadDesc =>
+      'При воспроизведении аудио система автоматически ищет подходящие субтитры:';
+
+  @override
+  String get smartCategoryAndMark => 'Умная классификация и маркировка';
+
+  @override
+  String get open => 'Открыть';
+
+  @override
+  String get moveTo => 'Переместить в';
+
+  @override
+  String get rename => 'Переименовать';
+
+  @override
+  String get newName => 'Новое имя';
+
+  @override
+  String get renameSuccess => 'Переименование выполнено';
+
+  @override
+  String get renameFailed => 'Ошибка переименования';
+
+  @override
+  String deleteItemConfirm(String title) {
+    return 'Удалить \"$title\"?';
+  }
+
+  @override
+  String get deleteFolderContentsWarning =>
+      'Всё содержимое папки будет удалено.';
+
+  @override
+  String get deleteFailed => 'Ошибка удаления';
+
+  @override
+  String subtitleLoaded(String title) {
+    return 'Субтитры загружены: $title';
+  }
+
+  @override
+  String get moveSuccess => 'Перемещение выполнено';
+
+  @override
+  String get moveFailed => 'Ошибка перемещения';
+
+  @override
+  String previewFailed(String error) {
+    return 'Ошибка предпросмотра: $error';
+  }
+
+  @override
+  String openFailed(String error) {
+    return 'Ошибка открытия: $error';
+  }
+
+  @override
+  String get back => 'Назад';
+
+  @override
+  String get subtitleLibraryEmpty => 'Библиотека субтитров пуста';
+
+  @override
+  String get tapToImportSubtitle => 'Нажмите + для импорта субтитров';
+
+  @override
+  String get importSubtitle => 'Импорт субтитров';
+
+  @override
+  String get sampleSubtitleContent => '♪ Пример субтитров ♪';
+
+  @override
+  String get presetStyles => 'Предустановленные стили';
+
+  @override
+  String get backgroundOpacity => 'Непрозрачность фона';
+
+  @override
+  String get colorSettings => 'Настройки цвета';
+
+  @override
+  String get shapeSettings => 'Настройки формы';
+
+  @override
+  String get cornerRadius => 'Радиус скругления';
+
+  @override
+  String get horizontalPadding => 'Горизонтальный отступ';
+
+  @override
+  String get verticalPadding => 'Вертикальный отступ';
+
+  @override
+  String get resetStyle => 'Сбросить стиль';
+
+  @override
+  String get resetStyleConfirm => 'Восстановить стиль по умолчанию?';
+
+  @override
+  String get restoreDefaultStyle => 'Восстановить стиль по умолчанию';
+
+  @override
+  String get reset => 'Сброс';
+
+  @override
+  String noBlockedItemsOfType(String type) {
+    return 'Нет заблокированных $type';
+  }
+
+  @override
+  String unblockedItem(String item) {
+    return 'Разблокировано: $item';
+  }
+
+  @override
+  String addBlockedItem(String type) {
+    return 'Заблокировать $type';
+  }
+
+  @override
+  String blockedItemName(String type) {
+    return 'Название $type';
+  }
+
+  @override
+  String enterBlockedItemHint(String type) {
+    return 'Введите $type для блокировки';
+  }
+
+  @override
+  String blockedItemAdded(String item) {
+    return 'Заблокировано: $item';
+  }
+
+  @override
+  String workCountLabel(int count) {
+    return 'Работ: $count';
+  }
+
+  @override
+  String get miniPlayer => 'Мини-плеер';
+
+  @override
+  String get lineHeight => 'Высота строки';
+
+  @override
+  String get portraitPlayerBelowCover => 'Портретный плеер (под обложкой)';
+
+  @override
+  String get fullscreenSubtitleMode =>
+      'Полноэкранные субтитры (портрет/ландшафт)';
+
+  @override
+  String get activeSubtitleFontSize => 'Размер активных субтитров';
+
+  @override
+  String get inactiveSubtitleFontSize => 'Размер неактивных субтитров';
+
+  @override
+  String get restoreDefaultSettings => 'Восстановить настройки по умолчанию';
+
+  @override
+  String get guideInPrefix => 'В ';
+
+  @override
+  String get guideParsedFolder => '<Распознанные>';
+
+  @override
+  String get guideFindWorkDesc =>
+      ' папке найти соответствующие произведения\nПоддерживаемый формат папки: RJ123456';
+
+  @override
+  String get guideSavedFolder => '<Сохранённые>';
+
+  @override
+  String get guideFindSubtitleDesc => ' папке найти отдельные файлы субтитров';
+
+  @override
+  String get guideMatchRule =>
+      'Правило соответствия: имя файла субтитров совпадает с именем аудиофайла (с расширением или без)';
+
+  @override
+  String get guideRecognizedWorkPrefix =>
+      'Распознанные произведения получают зелёный ';
+
+  @override
+  String get guideTagSuffix => ' тег, а значки аудиофайлов получают ';
+
+  @override
+  String get guideSubtitleMatchSuffix =>
+      ' отметку, указывающую на совпадение в библиотеке субтитров';
+
+  @override
+  String get guideAutoRecognizeRJ =>
+      'Автоматическое распознавание формата RJ при импорте, категоризация в <Распознанные>';
+
+  @override
+  String get guideAutoAddRJPrefix =>
+      'Папки с числовыми именами автоматически получают префикс RJ (напр. 123456 → RJ123456)';
+
+  @override
+  String get unknownFile => 'Неизвестный файл';
+
+  @override
+  String deleteWithCount(int count) {
+    return 'Удалить ($count)';
+  }
+
+  @override
+  String get searchSubtitles => 'Поиск субтитров...';
+
+  @override
+  String nFilesWithSize(int count, String size) {
+    return '$count файлов • $size';
+  }
+
+  @override
+  String get rootDirectory => 'Корень';
+
+  @override
+  String get goToParent => 'На уровень выше';
+
+  @override
+  String moveToTarget(String name) {
+    return 'Переместить в: $name';
+  }
+
+  @override
+  String get noSubfoldersHere => 'В этой директории нет подпапок';
+
+  @override
+  String addedToPlaylist(String name) {
+    return 'Добавлено в плейлист \"$name\"';
+  }
+
+  @override
+  String removedFromPlaylist(String name) {
+    return 'Удалено из плейлиста \"$name\"';
+  }
+
+  @override
+  String get alreadyFavorited => 'В избранном';
+
+  @override
+  String loadImageFailedWithError(String error) {
+    return 'Не удалось загрузить изображение\n$error';
+  }
+
+  @override
+  String get noImageAvailable => 'Нет доступных изображений';
+
+  @override
+  String get storagePermissionRequiredForImage =>
+      'Для сохранения изображений требуется разрешение на хранилище';
+
+  @override
+  String get savedToGallery => 'Сохранено в галерею';
+
+  @override
+  String get saveCoverImage => 'Сохранить обложку';
+
+  @override
+  String savedToPath(String path) {
+    return 'Сохранено в: $path';
+  }
+
+  @override
+  String get doubleTapToZoom =>
+      'Двойное нажатие для увеличения · Щипок для масштабирования';
+
+  @override
+  String getStatusFailed(String error) {
+    return 'Не удалось получить статус: $error';
+  }
+
+  @override
+  String get deleteRecord => 'Удалить запись';
+
+  @override
+  String deletePlayRecordConfirm(String title) {
+    return 'Удалить запись воспроизведения для \"$title\"?';
+  }
+
+  @override
+  String get notPlayedYet => 'Ещё не воспроизводилось';
+
+  @override
+  String playbackFailed(String error) {
+    return 'Ошибка воспроизведения: $error';
+  }
+
+  @override
+  String get storagePermissionRequired => 'Требуется разрешение на хранилище';
+
+  @override
+  String get storagePermissionForGalleryDesc =>
+      'Для сохранения изображений требуется доступ к галерее. Предоставьте разрешение в настройках.';
+
+  @override
+  String get goToSettings => 'Перейти в настройки';
+
+  @override
+  String get imageSavedToGallery => 'Изображение сохранено в галерею';
+
+  @override
+  String imageSavedToPath(String path) {
+    return 'Изображение сохранено: $path';
+  }
+
+  @override
+  String get pullDownForNextPage => 'Потяните вниз для следующей страницы';
+
+  @override
+  String get releaseForNextPage =>
+      'Отпустите для перехода на следующую страницу';
+
+  @override
+  String get jumpTo => 'Перейти';
+
+  @override
+  String get goToPageTitle => 'Перейти на страницу';
+
+  @override
+  String pageNumberRange(int max) {
+    return 'Страница (1-$max)';
+  }
+
+  @override
+  String get enterPageNumber => 'Введите номер страницы';
+
+  @override
+  String enterValidPageNumber(int max) {
+    return 'Введите корректный номер страницы (1-$max)';
+  }
+
+  @override
+  String get previousPage => 'Предыдущая';
+
+  @override
+  String get nextPage => 'Следующая';
+
+  @override
+  String get localPdfNotExist => 'Локальный PDF-файл не существует';
+
+  @override
+  String get cannotOpenPdf => 'Невозможно открыть PDF-файл';
+
+  @override
+  String loadPdfFailed(String error) {
+    return 'Не удалось загрузить PDF: $error';
+  }
+
+  @override
+  String pdfPageOfTotal(int current, int total) {
+    return 'Страница $current из $total';
+  }
+
+  @override
+  String get loadingPdf => 'Загрузка PDF...';
+
+  @override
+  String get pdfPathInvalid => 'Некорректный путь к PDF-файлу';
+
+  @override
+  String get desktopPdfPreviewNotSupported =>
+      'Предварительный просмотр PDF на рабочем столе пока не поддерживается';
+
+  @override
+  String get openWithSystemApp => 'Открыть системным приложением';
+
+  @override
+  String renderPdfFailed(String error) {
+    return 'Ошибка рендеринга PDF: $error';
+  }
+
+  @override
+  String get ratingDetails => 'Подробности оценки';
+
+  @override
+  String get selectSaveDirectory => 'Выбрать папку для сохранения';
+
+  @override
+  String get noSubtitleContentToSave =>
+      'Нет содержимого субтитров для сохранения';
+
+  @override
+  String get savedToSubtitleLibrary => 'Сохранено в библиотеку субтитров';
+
+  @override
+  String get saveToLocal => 'Сохранить локально';
+
+  @override
+  String get selectDirectoryToSaveFile => 'Выбрать папку для сохранения файла';
+
+  @override
+  String get saveToSubtitleLibrary => 'Сохранить в библиотеку субтитров';
+
+  @override
+  String get saveToSubtitleLibraryDesc =>
+      'Сохранить в папку \"Сохранённые\" в библиотеке субтитров';
+
+  @override
+  String get saveToFile => 'Сохранить в файл';
+
+  @override
+  String get noContentToSave => 'Нет содержимого для сохранения';
+
+  @override
+  String fileSavedToPath(String path) {
+    return 'Файл сохранён: $path';
+  }
+
+  @override
+  String get localFileNotExist => 'Локальный файл не существует';
+
+  @override
+  String loadTextFailed(String error) {
+    return 'Не удалось загрузить текст: $error';
+  }
+
+  @override
+  String get previewMode => 'Режим предпросмотра';
+
+  @override
+  String get editMode => 'Режим редактирования';
+
+  @override
+  String get showOriginal => 'Показать оригинал';
+
+  @override
+  String get translateContent => 'Перевести содержимое';
+
+  @override
+  String get editTextContentHint => 'Редактировать текст...';
+
+  @override
+  String get bookmarkRemoved => 'Закладка удалена';
+
+  @override
+  String setProgressAndRating(String progress, int rating) {
+    return 'Установлено: $progress, оценка: $rating звёзд';
+  }
+
+  @override
+  String setProgressTo(String progress) {
+    return 'Установлено: $progress';
+  }
+
+  @override
+  String ratingSetTo(int rating) {
+    return 'Оценка: $rating звёзд';
+  }
+
+  @override
+  String get updated => 'Обновлено';
+
+  @override
+  String addTagFailed(String error) {
+    return 'Не удалось добавить тег: $error';
+  }
+
+  @override
+  String addWithCount(int count) {
+    return 'Добавить ($count)';
+  }
+
+  @override
+  String get undo => 'Отменить';
+
+  @override
+  String nStars(int count) {
+    return '$count звёзд';
+  }
+
+  @override
+  String get voteRemoved => 'Голос отменён';
+
+  @override
+  String get votedUp => 'Голос за';
+
+  @override
+  String get votedDown => 'Голос против';
+
+  @override
+  String voteFailedWithError(String error) {
+    return 'Ошибка голосования: $error';
+  }
+
+  @override
+  String get voteFor => 'За';
+
+  @override
+  String get voteAgainst => 'Против';
+
+  @override
+  String get voted => 'Проголосовали';
+
+  @override
+  String tagBlockedWithName(String name) {
+    return 'Тег заблокирован: $name';
+  }
+
+  @override
+  String get subtitleParseFailedUnsupportedFormat =>
+      'Ошибка анализа, неподдерживаемый формат';
+
+  @override
+  String get lyricPresetDynamic => 'Динамичный';
+
+  @override
+  String get lyricPresetClassic => 'Классический';
+
+  @override
+  String get lyricPresetModern => 'Современный';
+
+  @override
+  String get lyricPresetMinimal => 'Минимальный';
+
+  @override
+  String get lyricPresetVibrant => 'Яркий';
+
+  @override
+  String get lyricPresetElegant => 'Элегантный';
+
+  @override
+  String get lyricPresetDynamicDesc =>
+      'Следует за темой системы, автоматические цвета';
+
+  @override
+  String get lyricPresetClassicDesc => 'Чёрный фон, белый текст, классика';
+
+  @override
+  String get lyricPresetModernDesc => 'Градиентный фон, стильный современный';
+
+  @override
+  String get lyricPresetMinimalDesc =>
+      'Лёгкая прозрачность, просто и элегантно';
+
+  @override
+  String get lyricPresetVibrantDesc => 'Яркие цвета, полны энергии';
+
+  @override
+  String get lyricPresetElegantDesc =>
+      'Глубокий синий, изысканная элегантность';
+
+  @override
+  String get floatingLyricLoading => '♪ Загрузка субтитров ♪';
+
+  @override
+  String get subtitleFileNotExist => 'Файл не существует';
+
+  @override
+  String get subtitleMissingInfo => 'Недостаточно информации';
+
+  @override
+  String get privacyDefaultTitle => 'Воспроизведение аудио';
+
+  @override
+  String get offlineModeStartup => 'Ошибка подключения, запуск в офлайн-режиме';
+
+  @override
+  String get playlistInfoNotLoaded => 'Информация о плейлисте не загружена';
+
+  @override
+  String get encodingUnrecognized =>
+      'Кодировка файла не распознана, невозможно корректно отобразить';
+
+  @override
+  String editPlaylistFailed(String error) {
+    return 'Не удалось редактировать плейлист: $error';
+  }
+
+  @override
+  String unsupportedFileTypeWithTitle(String title) {
+    return 'Невозможно открыть этот тип файла: $title';
   }
 }

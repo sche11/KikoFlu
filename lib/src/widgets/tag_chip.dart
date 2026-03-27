@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/work.dart';
 import '../screens/search_result_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class TagChip extends StatelessWidget {
   final Tag tag;
@@ -40,7 +41,7 @@ class TagChip extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SearchResultScreen(
                     keyword: tag.name,
-                    searchTypeLabel: '标签',
+                    searchTypeLabel: S.of(context).searchTypeTag,
                     searchParams: {'tagId': tag.id, 'tagName': tag.name},
                   ),
                 ),
@@ -80,7 +81,7 @@ class TagChip extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SearchResultScreen(
                     keyword: tag.name,
-                    searchTypeLabel: '标签',
+                    searchTypeLabel: S.of(context).searchTypeTag,
                     searchParams: {'tagId': tag.id, 'tagName': tag.name},
                   ),
                 ),
@@ -111,7 +112,7 @@ class TagChip extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SearchResultScreen(
                     keyword: tag.name,
-                    searchTypeLabel: '标签',
+                    searchTypeLabel: S.of(context).searchTypeTag,
                     searchParams: {'tagId': tag.id, 'tagName': tag.name},
                   ),
                 ),

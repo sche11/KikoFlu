@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../screens/search_result_screen.dart';
 
 class CircleChip extends StatelessWidget {
@@ -41,7 +42,7 @@ class CircleChip extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SearchResultScreen(
                     keyword: circleName,
-                    searchTypeLabel: '社团',
+                    searchTypeLabel: S.of(context).searchTypeCircle,
                     searchParams: {
                       'circleId': circleId,
                       'circleName': circleName
@@ -84,7 +85,7 @@ class CircleChip extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => SearchResultScreen(
                     keyword: circleName,
-                    searchTypeLabel: '社团',
+                    searchTypeLabel: S.of(context).searchTypeCircle,
                     searchParams: {
                       'circleId': circleId,
                       'circleName': circleName
@@ -120,7 +121,7 @@ class CircleChip extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => SearchResultScreen(
                   keyword: circleName,
-                  searchTypeLabel: '社团',
+                  searchTypeLabel: S.of(context).searchTypeCircle,
                   searchParams: {
                     'circleId': circleId,
                     'circleName': circleName
