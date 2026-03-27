@@ -1,10 +1,13 @@
+import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'translation_service.dart';
 
 class LLMTranslator {
   final Dio _dio = Dio();
 
-  Future<String> translate(String text, {String? sourceLang}) async {
+  Future<String> translate(String text,
+      {String? sourceLang, Locale? locale}) async {
     if (text.isEmpty) return text;
 
     try {
@@ -14,7 +17,8 @@ class LLMTranslator {
       final apiKey = prefs.getString('llm_settings_api_key') ?? '';
       final model = prefs.getString('llm_settings_model') ?? 'gpt-3.5-turbo';
       final prompt = prefs.getString('llm_settings_prompt') ??
-          'You are a professional translator. Translate the following text into Simplified Chinese (zh-CN). Output ONLY the translated text without any explanations, notes, or markdown code blocks.';
+          TranslationService.getDefaultLLMPrompt(
+              locale ?? const Locale('zh'));
 
       if (apiKey.isEmpty) {
         return 'Error: API Key is missing. Please configure LLM settings.';

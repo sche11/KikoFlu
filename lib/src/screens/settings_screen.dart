@@ -17,6 +17,7 @@ import '../providers/settings_provider.dart';
 import '../providers/update_provider.dart';
 import '../providers/floating_lyric_provider.dart';
 import '../services/cache_service.dart';
+import '../services/translation_service.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../widgets/download_fab.dart';
@@ -1097,6 +1098,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  await TranslationService().clearCache();
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                    _showSnackBar(
+                      SnackBar(
+                        content: Text(S.of(context).translationCacheCleared),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.translate),
+                label: Text(S.of(context).clearTranslationCache),
               ),
             ],
           ),

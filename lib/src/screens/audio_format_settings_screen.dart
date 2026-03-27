@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/scrollable_appbar.dart';
 
@@ -35,7 +36,7 @@ class _AudioFormatSettingsScreenState
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('设置已保存')),
+        SnackBar(content: Text(S.of(context).settingsSaved)),
       );
       Navigator.of(context).pop();
     }
@@ -45,16 +46,16 @@ class _AudioFormatSettingsScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('恢复默认设置'),
-        content: const Text('确定要恢复默认的音频格式优先级吗？'),
+        title: Text(S.of(context).restoreDefaultSettings),
+        content: Text(S.of(context).confirmRestoreAudioFormat),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('确定'),
+            child: Text(S.of(context).confirm),
           ),
         ],
       ),
@@ -69,7 +70,7 @@ class _AudioFormatSettingsScreenState
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已恢复默认设置')),
+          SnackBar(content: Text(S.of(context).restoredToDefault)),
         );
       }
     }
@@ -79,12 +80,12 @@ class _AudioFormatSettingsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: const Text('音频格式优先级', style: TextStyle(fontSize: 18)),
+        title: Text(S.of(context).audioFormatPriority, style: const TextStyle(fontSize: 18)),
         actions: [
           TextButton.icon(
             onPressed: _resetToDefault,
             icon: const Icon(Icons.restart_alt),
-            label: const Text('恢复默认'),
+            label: Text(S.of(context).restoreDefault),
           ),
           const SizedBox(width: 8),
         ],
@@ -110,7 +111,7 @@ class _AudioFormatSettingsScreenState
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '优先级说明',
+                              S.of(context).priorityDescription,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall
@@ -121,9 +122,9 @@ class _AudioFormatSettingsScreenState
                           ],
                         ),
                         const SizedBox(height: 12),
-                        const Text(
-                          '• 打开作品详情页时，会自动优先展开优先级更高格式音频的文件夹',
-                          style: TextStyle(fontSize: 12, height: 1.5),
+                        Text(
+                          S.of(context).audioFormatPriorityDesc,
+                          style: const TextStyle(fontSize: 12, height: 1.5),
                         ),
                       ],
                     ),
@@ -212,7 +213,7 @@ class _AudioFormatSettingsScreenState
                       child: FilledButton.icon(
                         onPressed: _saveSettings,
                         icon: const Icon(Icons.check),
-                        label: const Text('保存设置'),
+                        label: Text(S.of(context).saveSettings),
                       ),
                     ),
                   ),

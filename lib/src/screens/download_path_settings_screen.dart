@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../services/download_path_service.dart';
 import '../services/download_service.dart';
 import '../providers/settings_provider.dart';
@@ -40,21 +41,21 @@ class _DownloadPathSettingsScreenState
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        _showSnackBar('加载路径失败: $e', isError: true);
+        _showSnackBar(S.of(context).loadPathFailedWithError('$e'), isError: true);
       }
     }
   }
 
   Future<void> _selectCustomPath() async {
     if (!DownloadPathService.isPlatformSupported()) {
-      _showSnackBar('当前平台不支持自定义下载路径', isError: true);
+      _showSnackBar(S.of(context).platformNotSupportCustomPath, isError: true);
       return;
     }
 
     // 检查是否有下载任务正在进行
     if (DownloadService.instance.hasActiveDownloads) {
       final count = DownloadService.instance.activeDownloadCount;
-      _showSnackBar('有 $count 个下载任务正在进行中，请先取消或完成下载后再切换路径', isError: true);
+      _showSnackBar(S.of(context).activeDownloadsWarning(count), isError: true);
       return;
     }
 
@@ -125,7 +126,7 @@ class _DownloadPathSettingsScreenState
       // 延迟显示错误消息
       Future.microtask(() {
         if (mounted) {
-          _showSnackBar('设置路径失败: $e', isError: true);
+          _showSnackBar(S.of(context).setPathFailedWithError('$e'), isError: true);
         }
       });
     }
@@ -135,12 +136,12 @@ class _DownloadPathSettingsScreenState
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认迁移下载文件'),
+        title: Text(S.of(context).confirmMigrateFiles),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('将把现有下载文件迁移到新目录：'),
+            Text(S.of(context).migrateFilesToNewDir),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -157,20 +158,20 @@ class _DownloadPathSettingsScreenState
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              '此操作可能需要一些时间，具体取决于文件数量和大小。',
-              style: TextStyle(fontSize: 12),
+            Text(
+              S.of(context).migrationMayTakeTime,
+              style: const TextStyle(fontSize: 12),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('确认迁移'),
+            child: Text(S.of(context).confirmMigrate),
           ),
         ],
       ),
@@ -183,23 +184,23 @@ class _DownloadPathSettingsScreenState
     // 检查是否有下载任务正在进行
     if (DownloadService.instance.hasActiveDownloads) {
       final count = DownloadService.instance.activeDownloadCount;
-      _showSnackBar('有 $count 个下载任务正在进行中，请先取消或完成下载后再切换路径', isError: true);
+      _showSnackBar(S.of(context).activeDownloadsWarning(count), isError: true);
       return;
     }
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('恢复默认路径'),
-        content: const Text('将下载路径恢复为默认位置，并迁移所有文件。\n\n是否继续？'),
+        title: Text(S.of(context).restoreDefaultPath),
+        content: Text(S.of(context).restoreDefaultPathConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('确认'),
+            child: Text(S.of(context).confirm),
           ),
         ],
       ),
@@ -226,7 +227,7 @@ class _DownloadPathSettingsScreenState
 
       // 延迟显示成功消息
       if (mounted) {
-        final message = result.message.isNotEmpty ? result.message : '已恢复默认路径';
+        final message = result.message.isNotEmpty ? result.message : S.of(context).defaultPathRestored;
         Future.microtask(() {
           if (mounted) {
             _showSnackBar(message);
@@ -238,7 +239,7 @@ class _DownloadPathSettingsScreenState
       if (mounted) {
         Future.microtask(() {
           if (mounted) {
-            _showSnackBar('恢复默认路径失败: $e', isError: true);
+            _showSnackBar(S.of(context).resetPathFailedWithError('$e'), isError: true);
           }
         });
       }
@@ -268,8 +269,8 @@ class _DownloadPathSettingsScreenState
     final hasCustomPath = DownloadPathService.hasCustomPath();
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('下载路径设置', style: TextStyle(fontSize: 18)),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).downloadPathSettings, style: const TextStyle(fontSize: 18)),
       ),
       body: _isMigrating
           ? Center(
@@ -279,13 +280,13 @@ class _DownloadPathSettingsScreenState
                   const CircularProgressIndicator(),
                   const SizedBox(height: 24),
                   Text(
-                    '正在迁移文件...',
+                    S.of(context).migratingFiles,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    '请勿关闭应用',
-                    style: TextStyle(fontSize: 12),
+                  Text(
+                    S.of(context).doNotCloseApp,
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ],
               ),
@@ -318,7 +319,7 @@ class _DownloadPathSettingsScreenState
 
                 // 当前路径
                 Text(
-                  '当前下载路径',
+                  S.of(context).currentDownloadPath,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
@@ -342,7 +343,7 @@ class _DownloadPathSettingsScreenState
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    hasCustomPath ? '自定义路径' : '默认路径',
+                                    hasCustomPath ? S.of(context).customPath : S.of(context).defaultPath,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: Theme.of(context)
@@ -362,7 +363,7 @@ class _DownloadPathSettingsScreenState
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: SelectableText(
-                                  _currentPath ?? '加载中...',
+                                  _currentPath ?? S.of(context).loading,
                                   style: const TextStyle(
                                     fontFamily: 'monospace',
                                     fontSize: 11,
@@ -381,7 +382,7 @@ class _DownloadPathSettingsScreenState
                     onPressed:
                         _isLoading || _isMigrating ? null : _selectCustomPath,
                     icon: const Icon(Icons.folder_open),
-                    label: Text(hasCustomPath ? '更改自定义路径' : '设置自定义路径'),
+                    label: Text(hasCustomPath ? S.of(context).changeCustomPath : S.of(context).setCustomPath),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(48),
                     ),
@@ -392,7 +393,7 @@ class _DownloadPathSettingsScreenState
                       onPressed:
                           _isLoading || _isMigrating ? null : _resetToDefault,
                       icon: const Icon(Icons.restore),
-                      label: const Text('恢复默认路径'),
+                      label: Text(S.of(context).restoreDefaultPath),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                       ),
@@ -407,7 +408,7 @@ class _DownloadPathSettingsScreenState
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        '当前平台不支持自定义下载路径',
+                        S.of(context).platformNotSupportCustomPath,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.error,
                         ),
@@ -436,18 +437,15 @@ class _DownloadPathSettingsScreenState
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '使用说明',
+                              S.of(context).usageInstructions,
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        const Text(
-                          '• 自定义路径后，所有现有文件将自动迁移到新位置\n'
-                          '• 迁移过程中请勿关闭应用\n'
-                          '• 建议选择空间充足的目录\n'
-                          '• 恢复默认路径时，文件也会自动迁移回去',
-                          style: TextStyle(fontSize: 12, height: 1.5),
+                        Text(
+                          S.of(context).downloadPathUsageDesc,
+                          style: const TextStyle(fontSize: 12, height: 1.5),
                         ),
                       ],
                     ),

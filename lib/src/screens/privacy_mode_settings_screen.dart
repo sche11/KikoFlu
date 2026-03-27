@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
@@ -43,20 +44,20 @@ class _PrivacyModeSettingsScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('设置替换标题'),
+        title: Text(S.of(context).setReplaceTitle),
         content: TextField(
           controller: _titleController,
-          decoration: const InputDecoration(
-            labelText: '替换标题',
-            hintText: '输入要显示的标题',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: S.of(context).replaceTitle,
+            hintText: S.of(context).enterDisplayTitle,
+            border: const OutlineInputBorder(),
           ),
           maxLength: 50,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -66,10 +67,10 @@ class _PrivacyModeSettingsScreenState
                     .read(privacyModeSettingsProvider.notifier)
                     .setCustomTitle(title);
                 Navigator.pop(context);
-                SnackBarUtil.showSuccess(context, '替换标题已保存');
+                SnackBarUtil.showSuccess(context, S.of(context).replaceTitleSaved);
               }
             },
-            child: const Text('保存'),
+            child: Text(S.of(context).save),
           ),
         ],
       ),
@@ -81,8 +82,8 @@ class _PrivacyModeSettingsScreenState
     final settings = ref.watch(privacyModeSettingsProvider);
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('防社死设置', style: TextStyle(fontSize: 18)),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).privacyModeSettingsTitle, style: const TextStyle(fontSize: 18)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -105,7 +106,7 @@ class _PrivacyModeSettingsScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '什么是防社死模式？',
+                          S.of(context).whatIsPrivacyMode,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -116,7 +117,7 @@ class _PrivacyModeSettingsScreenState
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '启用后，在系统通知栏、锁屏等位置显示的播放信息将被模糊处理，保护您的隐私。',
+                          S.of(context).privacyModeDescription,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Theme.of(context)
@@ -142,9 +143,9 @@ class _PrivacyModeSettingsScreenState
                     ? Colors.green
                     : Theme.of(context).colorScheme.primary,
               ),
-              title: const Text('启用防社死模式'),
+              title: Text(S.of(context).enablePrivacyMode),
               subtitle: Text(
-                settings.enabled ? '已启用 - 播放信息将被隐藏' : '未启用 - 正常显示播放信息',
+                settings.enabled ? S.of(context).privacyModeEnabledSubtitle : S.of(context).privacyModeDisabledSubtitle,
               ),
               value: settings.enabled,
               onChanged: (value) {
@@ -181,7 +182,7 @@ class _PrivacyModeSettingsScreenState
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '模糊处理选项',
+                        S.of(context).blurOptions,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -196,8 +197,8 @@ class _PrivacyModeSettingsScreenState
                     Icons.notifications_outlined,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('模糊通知封面'),
-                  subtitle: const Text('对系统通知、锁屏或控制中心中的封面应用模糊'),
+                  title: Text(S.of(context).blurNotificationCover),
+                  subtitle: Text(S.of(context).blurNotificationCoverSubtitle),
                   value: settings.blurCover,
                   onChanged: settings.enabled
                       ? (value) {
@@ -215,8 +216,8 @@ class _PrivacyModeSettingsScreenState
                     Icons.blur_on,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('模糊应用内封面'),
-                  subtitle: const Text('在播放器、列表等界面中模糊封面图片'),
+                  title: Text(S.of(context).blurInAppCover),
+                  subtitle: Text(S.of(context).blurInAppCoverSubtitle),
                   value: settings.blurCoverInApp,
                   onChanged: settings.enabled
                       ? (value) {
@@ -234,8 +235,8 @@ class _PrivacyModeSettingsScreenState
                     Icons.text_fields,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('替换标题'),
-                  subtitle: const Text('使用自定义标题替换真实标题'),
+                  title: Text(S.of(context).replaceTitle),
+                  subtitle: Text(S.of(context).replaceTitleSubtitle),
                   value: settings.maskTitle,
                   onChanged: settings.enabled
                       ? (value) {
@@ -256,7 +257,7 @@ class _PrivacyModeSettingsScreenState
                         ? Theme.of(context).colorScheme.primary
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  title: const Text('替换标题内容'),
+                  title: Text(S.of(context).replaceTitleContent),
                   subtitle: Text(settings.customTitle),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: settings.enabled && settings.maskTitle
@@ -285,7 +286,7 @@ class _PrivacyModeSettingsScreenState
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '效果举例',
+                        S.of(context).effectExample,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),

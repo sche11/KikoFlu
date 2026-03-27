@@ -1218,7 +1218,7 @@ class SEn extends S {
   String get buttonOrder => 'Button Order';
 
   @override
-  String get workCardDisplaySettings => 'Work Card Display';
+  String get workCardDisplaySettings => 'Work Card Display Settings';
 
   @override
   String get showTags => 'Show Tags';
@@ -1245,7 +1245,7 @@ class SEn extends S {
   String get full => 'Full';
 
   @override
-  String get workDetailDisplaySettings => 'Work Detail Display';
+  String get workDetailDisplaySettings => 'Work Detail Display Settings';
 
   @override
   String get infoSectionVisibility => 'Info Section Visibility';
@@ -1257,7 +1257,7 @@ class SEn extends S {
   String get showMetadata => 'Show Metadata';
 
   @override
-  String get myTabsDisplaySettings => 'My Page Tab Settings';
+  String get myTabsDisplaySettings => '\"My\" Page Settings';
 
   @override
   String get showTab => 'Show Tab';
@@ -3002,4 +3002,326 @@ class SEn extends S {
   String unsupportedFileTypeWithTitle(String title) {
     return 'Cannot open this file type: $title';
   }
+
+  @override
+  String get settingsSaved => 'Settings saved';
+
+  @override
+  String get restoredToDefault => 'Restored to default settings';
+
+  @override
+  String get restoreDefault => 'Restore Default';
+
+  @override
+  String get saveSettings => 'Save Settings';
+
+  @override
+  String get addAtLeastOneSearchCondition =>
+      'Please add at least one search condition';
+
+  @override
+  String get privacyModeSettingsTitle => 'Privacy Mode Settings';
+
+  @override
+  String get whatIsPrivacyMode => 'What is Privacy Mode?';
+
+  @override
+  String get privacyModeDescription =>
+      'When enabled, playback information displayed in system notifications, lock screen, etc. will be blurred to protect your privacy.';
+
+  @override
+  String get enablePrivacyMode => 'Enable Privacy Mode';
+
+  @override
+  String get privacyModeEnabledSubtitle =>
+      'Enabled - Playback info will be hidden';
+
+  @override
+  String get privacyModeDisabledSubtitle =>
+      'Disabled - Playback info displayed normally';
+
+  @override
+  String get blurOptions => 'Blur Options';
+
+  @override
+  String get blurNotificationCover => 'Blur Notification Cover';
+
+  @override
+  String get blurNotificationCoverSubtitle =>
+      'Apply blur to cover art in system notifications, lock screen, or control center';
+
+  @override
+  String get blurInAppCover => 'Blur In-App Cover';
+
+  @override
+  String get blurInAppCoverSubtitle =>
+      'Blur cover art in player, lists, and other screens';
+
+  @override
+  String get replaceTitle => 'Replace Title';
+
+  @override
+  String get replaceTitleSubtitle => 'Replace real title with a custom title';
+
+  @override
+  String get replaceTitleContent => 'Replacement Title Content';
+
+  @override
+  String get setReplaceTitle => 'Set Replacement Title';
+
+  @override
+  String get enterDisplayTitle => 'Enter the title to display';
+
+  @override
+  String get replaceTitleSaved => 'Replacement title saved';
+
+  @override
+  String get effectExample => 'Example';
+
+  @override
+  String get downloadPathSettings => 'Download Path Settings';
+
+  @override
+  String loadPathFailedWithError(String error) {
+    return 'Failed to load path: $error';
+  }
+
+  @override
+  String get platformNotSupportCustomPath =>
+      'Custom download path is not supported on this platform';
+
+  @override
+  String activeDownloadsWarning(int count) {
+    return '$count download tasks are in progress. Please cancel or complete them before switching paths';
+  }
+
+  @override
+  String setPathFailedWithError(String error) {
+    return 'Failed to set path: $error';
+  }
+
+  @override
+  String get confirmMigrateFiles => 'Confirm File Migration';
+
+  @override
+  String get migrateFilesToNewDir =>
+      'Existing downloaded files will be migrated to the new directory:';
+
+  @override
+  String get migrationMayTakeTime =>
+      'This operation may take some time depending on the number and size of files.';
+
+  @override
+  String get confirmMigrate => 'Confirm Migration';
+
+  @override
+  String get restoreDefaultPath => 'Restore Default Path';
+
+  @override
+  String get restoreDefaultPathConfirm =>
+      'Restore download path to default location and migrate all files.\n\nContinue?';
+
+  @override
+  String get defaultPathRestored => 'Default path restored';
+
+  @override
+  String resetPathFailedWithError(String error) {
+    return 'Failed to restore default path: $error';
+  }
+
+  @override
+  String get migratingFiles => 'Migrating files...';
+
+  @override
+  String get doNotCloseApp => 'Please do not close the app';
+
+  @override
+  String get currentDownloadPath => 'Current Download Path';
+
+  @override
+  String get customPath => 'Custom Path';
+
+  @override
+  String get defaultPath => 'Default Path';
+
+  @override
+  String get changeCustomPath => 'Change Custom Path';
+
+  @override
+  String get setCustomPath => 'Set Custom Path';
+
+  @override
+  String get usageInstructions => 'Usage Instructions';
+
+  @override
+  String get downloadPathUsageDesc =>
+      '• After customizing the path, all existing files will be automatically migrated\n• Do not close the app during migration\n• Choose a directory with sufficient storage space\n• When restoring the default path, files will be migrated back automatically';
+
+  @override
+  String get llmTranslationSettings => 'LLM Translation Settings';
+
+  @override
+  String get apiEndpointUrl => 'API Endpoint URL';
+
+  @override
+  String get openaiCompatibleEndpoint => 'OpenAI-compatible endpoint URL';
+
+  @override
+  String get pleaseEnterApiUrl => 'Please enter API endpoint URL';
+
+  @override
+  String get pleaseEnterValidUrl => 'Please enter a valid URL';
+
+  @override
+  String get pleaseEnterApiKey => 'Please enter API Key';
+
+  @override
+  String get modelName => 'Model Name';
+
+  @override
+  String get pleaseEnterModelName => 'Please enter model name';
+
+  @override
+  String get concurrencyCount => 'Concurrency';
+
+  @override
+  String get concurrencyDescription =>
+      'Number of concurrent translation requests, recommended 3-5';
+
+  @override
+  String get promptSection => 'Prompt';
+
+  @override
+  String get promptDescription =>
+      'Since the system uses chunked translation, please ensure the prompt clearly instructs to output only translation results without any explanation.';
+
+  @override
+  String get enterSystemPrompt => 'Enter system prompt...';
+
+  @override
+  String get pleaseEnterPrompt => 'Please enter a prompt';
+
+  @override
+  String get restoreDefaultPrompt => 'Restore Default Prompt';
+
+  @override
+  String get confirmRestoreButtonOrder =>
+      'Are you sure you want to restore the default button order?';
+
+  @override
+  String get buttonDisplayRules => 'Button Display Rules';
+
+  @override
+  String buttonDisplayRulesDesc(int maxVisible) {
+    return '• The first $maxVisible buttons will be shown at the bottom of the player\n• The remaining buttons will be in the \"More\" menu';
+  }
+
+  @override
+  String get shownInPlayer => 'Shown in player';
+
+  @override
+  String get shownInMoreMenu => 'Shown in More menu';
+
+  @override
+  String get audioFormatPriority => 'Audio Format Priority';
+
+  @override
+  String get confirmRestoreAudioFormat =>
+      'Are you sure you want to restore the default audio format priority?';
+
+  @override
+  String get priorityDescription => 'Priority Description';
+
+  @override
+  String get audioFormatPriorityDesc =>
+      '• When opening a work\'s detail page, the folder with the highest priority audio format will be expanded first';
+
+  @override
+  String get ratingInfo => 'Rating Info';
+
+  @override
+  String get showRatingAndReviewCount => 'Show work rating and review count';
+
+  @override
+  String get priceInfo => 'Price Info';
+
+  @override
+  String get showWorkPrice => 'Show work price';
+
+  @override
+  String get durationInfo => 'Duration Info';
+
+  @override
+  String get showWorkDuration => 'Show work duration';
+
+  @override
+  String get showWorkTotalDuration => 'Show total work duration';
+
+  @override
+  String get salesInfo => 'Sales Info';
+
+  @override
+  String get showWorkSalesCount => 'Show work sales count';
+
+  @override
+  String get externalLinkInfo => 'External Links';
+
+  @override
+  String get showExternalLinks =>
+      'Show external links such as DLsite, official website, etc.';
+
+  @override
+  String get releaseDateInfo => 'Release Date';
+
+  @override
+  String get showWorkReleaseDate => 'Show work release date';
+
+  @override
+  String get translateButtonLabel => 'Translate Button';
+
+  @override
+  String get showTranslateButton => 'Show translate button for work title';
+
+  @override
+  String get subtitleTagLabel => 'Subtitle Tag';
+
+  @override
+  String get showSubtitleTagOnCover => 'Show subtitle tag on cover image';
+
+  @override
+  String get circleInfo => 'Circle Info';
+
+  @override
+  String get showWorkCircle => 'Show work\'s circle';
+
+  @override
+  String get showSubtitleTagOnCard => 'Show subtitle tag on work card';
+
+  @override
+  String get showOnlineMarks => 'Show online marked works';
+
+  @override
+  String get cannotBeDisabled => 'Cannot be disabled';
+
+  @override
+  String get showPlaylists => 'Show created playlists';
+
+  @override
+  String get showSubtitleLibrary => 'Show subtitle library management';
+
+  @override
+  String get playlistPrivacyPrivateDesc => 'Only you can view';
+
+  @override
+  String get playlistPrivacyUnlistedDesc =>
+      'Only people with the link can view';
+
+  @override
+  String get playlistPrivacyPublicDesc => 'Anyone can view';
+
+  @override
+  String get clearTranslationCache => 'Clear Translation Cache';
+
+  @override
+  String get translationCacheCleared => 'Translation cache cleared';
 }

@@ -7,7 +7,8 @@ class YoudaoTranslator {
   static const String _url = 'https://dict.youdao.com/dicttranslate';
   static const String _key = 'cybibtzhdwayqjmrncst';
 
-  Future<String> translate(String text, {String? sourceLang}) async {
+  Future<String> translate(String text,
+      {String? sourceLang, String targetLang = 'zh-CHS'}) async {
     if (text.isEmpty) return text;
 
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -17,7 +18,7 @@ class YoudaoTranslator {
       'keyfrom': 'deskdict.main',
       'client': 'deskdict',
       'from': sourceLang ?? 'auto',
-      'to': 'zh-CHS',
+      'to': targetLang,
       'keyid': 'deskdict',
       'mysticTime': timestamp,
       'pointParam': 'client,product,mysticTime',

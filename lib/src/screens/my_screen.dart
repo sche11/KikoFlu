@@ -5,6 +5,7 @@ import '../providers/my_reviews_provider.dart';
 import '../providers/my_tabs_display_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/server_utils.dart';
+import '../utils/l10n_extensions.dart';
 import '../widgets/enhanced_work_card.dart';
 import '../widgets/pagination_bar.dart';
 import '../utils/responsive_grid_helper.dart';
@@ -350,7 +351,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
                       for (int i = 0; i < MyReviewFilter.values.length; i++)
                         _buildFilterButton(
                           icon: _getFilterIcon(MyReviewFilter.values[i]),
-                          label: MyReviewFilter.values[i].label,
+                          label: MyReviewFilter.values[i].localizedLabel(context),
                           isSelected: state.filter == MyReviewFilter.values[i],
                           onTap: () => ref
                               .read(myReviewsProvider.notifier)

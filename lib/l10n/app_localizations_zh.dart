@@ -1195,7 +1195,7 @@ class SZh extends S {
   String get buttonOrder => '按钮顺序';
 
   @override
-  String get workCardDisplaySettings => '作品卡片显示';
+  String get workCardDisplaySettings => '作品卡片显示设置';
 
   @override
   String get showTags => '显示标签';
@@ -1222,7 +1222,7 @@ class SZh extends S {
   String get full => '完整';
 
   @override
-  String get workDetailDisplaySettings => '作品详情显示';
+  String get workDetailDisplaySettings => '作品详情显示设置';
 
   @override
   String get infoSectionVisibility => '信息区域可见性';
@@ -1234,7 +1234,7 @@ class SZh extends S {
   String get showMetadata => '显示元数据';
 
   @override
-  String get myTabsDisplaySettings => '我的页面标签设置';
+  String get myTabsDisplaySettings => '\"我的\"界面设置';
 
   @override
   String get showTab => '显示标签';
@@ -2919,6 +2919,312 @@ class SZh extends S {
   String unsupportedFileTypeWithTitle(String title) {
     return '暂不支持打开此类型文件: $title';
   }
+
+  @override
+  String get settingsSaved => '设置已保存';
+
+  @override
+  String get restoredToDefault => '已恢复默认设置';
+
+  @override
+  String get restoreDefault => '恢复默认';
+
+  @override
+  String get saveSettings => '保存设置';
+
+  @override
+  String get addAtLeastOneSearchCondition => '请至少添加一个搜索条件';
+
+  @override
+  String get privacyModeSettingsTitle => '防社死设置';
+
+  @override
+  String get whatIsPrivacyMode => '什么是防社死模式？';
+
+  @override
+  String get privacyModeDescription => '启用后，在系统通知栏、锁屏等位置显示的播放信息将被模糊处理，保护您的隐私。';
+
+  @override
+  String get enablePrivacyMode => '启用防社死模式';
+
+  @override
+  String get privacyModeEnabledSubtitle => '已启用 - 播放信息将被隐藏';
+
+  @override
+  String get privacyModeDisabledSubtitle => '未启用 - 正常显示播放信息';
+
+  @override
+  String get blurOptions => '模糊处理选项';
+
+  @override
+  String get blurNotificationCover => '模糊通知封面';
+
+  @override
+  String get blurNotificationCoverSubtitle => '对系统通知、锁屏或控制中心中的封面应用模糊';
+
+  @override
+  String get blurInAppCover => '模糊应用内封面';
+
+  @override
+  String get blurInAppCoverSubtitle => '在播放器、列表等界面中模糊封面图片';
+
+  @override
+  String get replaceTitle => '替换标题';
+
+  @override
+  String get replaceTitleSubtitle => '使用自定义标题替换真实标题';
+
+  @override
+  String get replaceTitleContent => '替换标题内容';
+
+  @override
+  String get setReplaceTitle => '设置替换标题';
+
+  @override
+  String get enterDisplayTitle => '输入要显示的标题';
+
+  @override
+  String get replaceTitleSaved => '替换标题已保存';
+
+  @override
+  String get effectExample => '效果举例';
+
+  @override
+  String get downloadPathSettings => '下载路径设置';
+
+  @override
+  String loadPathFailedWithError(String error) {
+    return '加载路径失败: $error';
+  }
+
+  @override
+  String get platformNotSupportCustomPath => '当前平台不支持自定义下载路径';
+
+  @override
+  String activeDownloadsWarning(int count) {
+    return '有 $count 个下载任务正在进行中，请先取消或完成下载后再切换路径';
+  }
+
+  @override
+  String setPathFailedWithError(String error) {
+    return '设置路径失败: $error';
+  }
+
+  @override
+  String get confirmMigrateFiles => '确认迁移下载文件';
+
+  @override
+  String get migrateFilesToNewDir => '将把现有下载文件迁移到新目录：';
+
+  @override
+  String get migrationMayTakeTime => '此操作可能需要一些时间，具体取决于文件数量和大小。';
+
+  @override
+  String get confirmMigrate => '确认迁移';
+
+  @override
+  String get restoreDefaultPath => '恢复默认路径';
+
+  @override
+  String get restoreDefaultPathConfirm => '将下载路径恢复为默认位置，并迁移所有文件。\n\n是否继续？';
+
+  @override
+  String get defaultPathRestored => '已恢复默认路径';
+
+  @override
+  String resetPathFailedWithError(String error) {
+    return '恢复默认路径失败: $error';
+  }
+
+  @override
+  String get migratingFiles => '正在迁移文件...';
+
+  @override
+  String get doNotCloseApp => '请勿关闭应用';
+
+  @override
+  String get currentDownloadPath => '当前下载路径';
+
+  @override
+  String get customPath => '自定义路径';
+
+  @override
+  String get defaultPath => '默认路径';
+
+  @override
+  String get changeCustomPath => '更改自定义路径';
+
+  @override
+  String get setCustomPath => '设置自定义路径';
+
+  @override
+  String get usageInstructions => '使用说明';
+
+  @override
+  String get downloadPathUsageDesc =>
+      '• 自定义路径后，所有现有文件将自动迁移到新位置\n• 迁移过程中请勿关闭应用\n• 建议选择空间充足的目录\n• 恢复默认路径时，文件也会自动迁移回去';
+
+  @override
+  String get llmTranslationSettings => 'LLM翻译设置';
+
+  @override
+  String get apiEndpointUrl => 'API 接口地址';
+
+  @override
+  String get openaiCompatibleEndpoint => 'OpenAI 兼容接口地址';
+
+  @override
+  String get pleaseEnterApiUrl => '请输入 API 接口地址';
+
+  @override
+  String get pleaseEnterValidUrl => '请输入有效的 URL';
+
+  @override
+  String get pleaseEnterApiKey => '请输入 API Key';
+
+  @override
+  String get modelName => '模型名称';
+
+  @override
+  String get pleaseEnterModelName => '请输入模型名称';
+
+  @override
+  String get concurrencyCount => '并发数';
+
+  @override
+  String get concurrencyDescription => '同时进行的翻译请求数量，建议 3-5';
+
+  @override
+  String get promptSection => '提示词 (Prompt)';
+
+  @override
+  String get promptDescription =>
+      '由于系统采用分块翻译机制，请确保 Prompt 指令明确，要求只输出翻译结果，不包含任何解释。';
+
+  @override
+  String get enterSystemPrompt => '输入系统提示词...';
+
+  @override
+  String get pleaseEnterPrompt => '请输入提示词';
+
+  @override
+  String get restoreDefaultPrompt => '恢复默认提示词';
+
+  @override
+  String get confirmRestoreButtonOrder => '确定要恢复默认的按钮顺序吗？';
+
+  @override
+  String get buttonDisplayRules => '按钮显示规则';
+
+  @override
+  String buttonDisplayRulesDesc(int maxVisible) {
+    return '• 前 $maxVisible 个按钮会显示在播放器底部\n• 其余按钮会收纳在\"更多\"菜单中';
+  }
+
+  @override
+  String get shownInPlayer => '显示在播放器';
+
+  @override
+  String get shownInMoreMenu => '显示在更多菜单';
+
+  @override
+  String get audioFormatPriority => '音频格式优先级';
+
+  @override
+  String get confirmRestoreAudioFormat => '确定要恢复默认的音频格式优先级吗？';
+
+  @override
+  String get priorityDescription => '优先级说明';
+
+  @override
+  String get audioFormatPriorityDesc => '• 打开作品详情页时，会自动优先展开优先级更高格式音频的文件夹';
+
+  @override
+  String get ratingInfo => '评分信息';
+
+  @override
+  String get showRatingAndReviewCount => '显示作品评分和评价人数';
+
+  @override
+  String get priceInfo => '售价信息';
+
+  @override
+  String get showWorkPrice => '显示作品价格';
+
+  @override
+  String get durationInfo => '时长信息';
+
+  @override
+  String get showWorkDuration => '显示作品时长';
+
+  @override
+  String get showWorkTotalDuration => '显示作品总时长';
+
+  @override
+  String get salesInfo => '售出信息';
+
+  @override
+  String get showWorkSalesCount => '显示作品售出数量';
+
+  @override
+  String get externalLinkInfo => '外部链接信息';
+
+  @override
+  String get showExternalLinks => '显示DLsite、官网等外部链接';
+
+  @override
+  String get releaseDateInfo => '发布日期';
+
+  @override
+  String get showWorkReleaseDate => '显示作品发布日期';
+
+  @override
+  String get translateButtonLabel => '翻译按钮';
+
+  @override
+  String get showTranslateButton => '显示作品标题的翻译按钮';
+
+  @override
+  String get subtitleTagLabel => '字幕标签';
+
+  @override
+  String get showSubtitleTagOnCover => '在封面图上显示字幕标签';
+
+  @override
+  String get circleInfo => '社团信息';
+
+  @override
+  String get showWorkCircle => '显示作品所属社团';
+
+  @override
+  String get showSubtitleTagOnCard => '显示作品卡片上的字幕标签';
+
+  @override
+  String get showOnlineMarks => '显示在线标记的作品';
+
+  @override
+  String get cannotBeDisabled => '不可关闭';
+
+  @override
+  String get showPlaylists => '显示创建的播放列表';
+
+  @override
+  String get showSubtitleLibrary => '显示字幕库管理';
+
+  @override
+  String get playlistPrivacyPrivateDesc => '只有您可以查看';
+
+  @override
+  String get playlistPrivacyUnlistedDesc => '知道链接的人才能查看';
+
+  @override
+  String get playlistPrivacyPublicDesc => '任何人都可以查看';
+
+  @override
+  String get clearTranslationCache => '清除翻译缓存';
+
+  @override
+  String get translationCacheCleared => '翻译缓存已清除';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -4112,7 +4418,7 @@ class SZhHant extends SZh {
   String get buttonOrder => '按鈕順序';
 
   @override
-  String get workCardDisplaySettings => '作品卡片顯示';
+  String get workCardDisplaySettings => '作品卡片顯示設定';
 
   @override
   String get showTags => '顯示標籤';
@@ -4139,7 +4445,7 @@ class SZhHant extends SZh {
   String get full => '完整';
 
   @override
-  String get workDetailDisplaySettings => '作品詳情顯示';
+  String get workDetailDisplaySettings => '作品詳情顯示設定';
 
   @override
   String get infoSectionVisibility => '資訊區域可見性';
@@ -4151,7 +4457,7 @@ class SZhHant extends SZh {
   String get showMetadata => '顯示元資料';
 
   @override
-  String get myTabsDisplaySettings => '我的頁面標籤設定';
+  String get myTabsDisplaySettings => '「我的」介面設定';
 
   @override
   String get showTab => '顯示標籤';
@@ -5836,4 +6142,310 @@ class SZhHant extends SZh {
   String unsupportedFileTypeWithTitle(String title) {
     return '暫不支援開啟此類型檔案: $title';
   }
+
+  @override
+  String get settingsSaved => '設定已儲存';
+
+  @override
+  String get restoredToDefault => '已恢復預設設定';
+
+  @override
+  String get restoreDefault => '恢復預設';
+
+  @override
+  String get saveSettings => '儲存設定';
+
+  @override
+  String get addAtLeastOneSearchCondition => '請至少新增一個搜尋條件';
+
+  @override
+  String get privacyModeSettingsTitle => '防社死設定';
+
+  @override
+  String get whatIsPrivacyMode => '什麼是防社死模式？';
+
+  @override
+  String get privacyModeDescription => '啟用後，在系統通知欄、鎖屏等位置顯示的播放資訊將被模糊處理，保護您的隱私。';
+
+  @override
+  String get enablePrivacyMode => '啟用防社死模式';
+
+  @override
+  String get privacyModeEnabledSubtitle => '已啟用 - 播放資訊將被隱藏';
+
+  @override
+  String get privacyModeDisabledSubtitle => '未啟用 - 正常顯示播放資訊';
+
+  @override
+  String get blurOptions => '模糊處理選項';
+
+  @override
+  String get blurNotificationCover => '模糊通知封面';
+
+  @override
+  String get blurNotificationCoverSubtitle => '對系統通知、鎖屏或控制中心中的封面應用模糊';
+
+  @override
+  String get blurInAppCover => '模糊應用內封面';
+
+  @override
+  String get blurInAppCoverSubtitle => '在播放器、列表等介面中模糊封面圖片';
+
+  @override
+  String get replaceTitle => '替換標題';
+
+  @override
+  String get replaceTitleSubtitle => '使用自訂標題替換真實標題';
+
+  @override
+  String get replaceTitleContent => '替換標題內容';
+
+  @override
+  String get setReplaceTitle => '設定替換標題';
+
+  @override
+  String get enterDisplayTitle => '輸入要顯示的標題';
+
+  @override
+  String get replaceTitleSaved => '替換標題已儲存';
+
+  @override
+  String get effectExample => '效果舉例';
+
+  @override
+  String get downloadPathSettings => '下載路徑設定';
+
+  @override
+  String loadPathFailedWithError(String error) {
+    return '載入路徑失敗: $error';
+  }
+
+  @override
+  String get platformNotSupportCustomPath => '目前平台不支援自訂下載路徑';
+
+  @override
+  String activeDownloadsWarning(int count) {
+    return '有 $count 個下載任務正在進行中，請先取消或完成下載後再切換路徑';
+  }
+
+  @override
+  String setPathFailedWithError(String error) {
+    return '設定路徑失敗: $error';
+  }
+
+  @override
+  String get confirmMigrateFiles => '確認遷移下載檔案';
+
+  @override
+  String get migrateFilesToNewDir => '將把現有下載檔案遷移到新目錄：';
+
+  @override
+  String get migrationMayTakeTime => '此操作可能需要一些時間，具體取決於檔案數量和大小。';
+
+  @override
+  String get confirmMigrate => '確認遷移';
+
+  @override
+  String get restoreDefaultPath => '恢復預設路徑';
+
+  @override
+  String get restoreDefaultPathConfirm => '將下載路徑恢復為預設位置，並遷移所有檔案。\n\n是否繼續？';
+
+  @override
+  String get defaultPathRestored => '已恢復預設路徑';
+
+  @override
+  String resetPathFailedWithError(String error) {
+    return '恢復預設路徑失敗: $error';
+  }
+
+  @override
+  String get migratingFiles => '正在遷移檔案...';
+
+  @override
+  String get doNotCloseApp => '請勿關閉應用';
+
+  @override
+  String get currentDownloadPath => '目前下載路徑';
+
+  @override
+  String get customPath => '自訂路徑';
+
+  @override
+  String get defaultPath => '預設路徑';
+
+  @override
+  String get changeCustomPath => '更改自訂路徑';
+
+  @override
+  String get setCustomPath => '設定自訂路徑';
+
+  @override
+  String get usageInstructions => '使用說明';
+
+  @override
+  String get downloadPathUsageDesc =>
+      '• 自訂路徑後，所有現有檔案將自動遷移到新位置\n• 遷移過程中請勿關閉應用\n• 建議選擇空間充足的目錄\n• 恢復預設路徑時，檔案也會自動遷移回去';
+
+  @override
+  String get llmTranslationSettings => 'LLM翻譯設定';
+
+  @override
+  String get apiEndpointUrl => 'API 介面地址';
+
+  @override
+  String get openaiCompatibleEndpoint => 'OpenAI 相容介面地址';
+
+  @override
+  String get pleaseEnterApiUrl => '請輸入 API 介面地址';
+
+  @override
+  String get pleaseEnterValidUrl => '請輸入有效的 URL';
+
+  @override
+  String get pleaseEnterApiKey => '請輸入 API Key';
+
+  @override
+  String get modelName => '模型名稱';
+
+  @override
+  String get pleaseEnterModelName => '請輸入模型名稱';
+
+  @override
+  String get concurrencyCount => '並行數';
+
+  @override
+  String get concurrencyDescription => '同時進行的翻譯請求數量，建議 3-5';
+
+  @override
+  String get promptSection => '提示詞 (Prompt)';
+
+  @override
+  String get promptDescription =>
+      '由於系統採用分塊翻譯機制，請確保 Prompt 指令明確，要求只輸出翻譯結果，不包含任何解釋。';
+
+  @override
+  String get enterSystemPrompt => '輸入系統提示詞...';
+
+  @override
+  String get pleaseEnterPrompt => '請輸入提示詞';
+
+  @override
+  String get restoreDefaultPrompt => '恢復預設提示詞';
+
+  @override
+  String get confirmRestoreButtonOrder => '確定要恢復預設的按鈕順序嗎？';
+
+  @override
+  String get buttonDisplayRules => '按鈕顯示規則';
+
+  @override
+  String buttonDisplayRulesDesc(int maxVisible) {
+    return '• 前 $maxVisible 個按鈕會顯示在播放器底部\n• 其餘按鈕會收納在「更多」選單中';
+  }
+
+  @override
+  String get shownInPlayer => '顯示在播放器';
+
+  @override
+  String get shownInMoreMenu => '顯示在更多選單';
+
+  @override
+  String get audioFormatPriority => '音訊格式優先級';
+
+  @override
+  String get confirmRestoreAudioFormat => '確定要恢復預設的音訊格式優先級嗎？';
+
+  @override
+  String get priorityDescription => '優先級說明';
+
+  @override
+  String get audioFormatPriorityDesc => '• 打開作品詳情頁時，會自動優先展開優先級更高格式音訊的資料夾';
+
+  @override
+  String get ratingInfo => '評分資訊';
+
+  @override
+  String get showRatingAndReviewCount => '顯示作品評分和評價人數';
+
+  @override
+  String get priceInfo => '售價資訊';
+
+  @override
+  String get showWorkPrice => '顯示作品價格';
+
+  @override
+  String get durationInfo => '時長資訊';
+
+  @override
+  String get showWorkDuration => '顯示作品時長';
+
+  @override
+  String get showWorkTotalDuration => '顯示作品總時長';
+
+  @override
+  String get salesInfo => '售出資訊';
+
+  @override
+  String get showWorkSalesCount => '顯示作品售出數量';
+
+  @override
+  String get externalLinkInfo => '外部連結資訊';
+
+  @override
+  String get showExternalLinks => '顯示DLsite、官網等外部連結';
+
+  @override
+  String get releaseDateInfo => '發布日期';
+
+  @override
+  String get showWorkReleaseDate => '顯示作品發布日期';
+
+  @override
+  String get translateButtonLabel => '翻譯按鈕';
+
+  @override
+  String get showTranslateButton => '顯示作品標題的翻譯按鈕';
+
+  @override
+  String get subtitleTagLabel => '字幕標籤';
+
+  @override
+  String get showSubtitleTagOnCover => '在封面圖上顯示字幕標籤';
+
+  @override
+  String get circleInfo => '社團資訊';
+
+  @override
+  String get showWorkCircle => '顯示作品所屬社團';
+
+  @override
+  String get showSubtitleTagOnCard => '顯示作品卡片上的字幕標籤';
+
+  @override
+  String get showOnlineMarks => '顯示線上標記的作品';
+
+  @override
+  String get cannotBeDisabled => '不可關閉';
+
+  @override
+  String get showPlaylists => '顯示建立的播放列表';
+
+  @override
+  String get showSubtitleLibrary => '顯示字幕庫管理';
+
+  @override
+  String get playlistPrivacyPrivateDesc => '只有您可以查看';
+
+  @override
+  String get playlistPrivacyUnlistedDesc => '知道連結的人才能查看';
+
+  @override
+  String get playlistPrivacyPublicDesc => '任何人都可以查看';
+
+  @override
+  String get clearTranslationCache => '清除翻譯快取';
+
+  @override
+  String get translationCacheCleared => '翻譯快取已清除';
 }

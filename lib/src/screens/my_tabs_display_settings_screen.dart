@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../providers/my_tabs_display_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/server_utils.dart';
@@ -17,10 +18,10 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
     final isOfficialServer = ServerUtils.isOfficialServer(authState.host);
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
+      appBar: ScrollableAppBar(
         title: Text(
-          '"我的"界面设置',
-          style: TextStyle(fontSize: 18),
+          S.of(context).myTabsDisplaySettings,
+          style: const TextStyle(fontSize: 18),
         ),
       ),
       body: ListView(
@@ -35,8 +36,8 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
                     Icons.favorite,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('在线标记'),
-                  subtitle: const Text('显示在线标记的作品'),
+                  title: Text(S.of(context).onlineMarks),
+                  subtitle: Text(S.of(context).showOnlineMarks),
                   value: settings.showOnlineMarks,
                   onChanged: (value) => notifier.setShowOnlineMarks(value),
                 ),
@@ -47,9 +48,9 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
                     Icons.download,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  title: const Text('历史记录'),
+                  title: Text(S.of(context).historyRecord),
                   subtitle: Text(
-                    '不可关闭',
+                    S.of(context).cannotBeDisabled,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -66,8 +67,8 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
                       Icons.playlist_play,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    title: const Text('播放列表'),
-                    subtitle: const Text('显示创建的播放列表'),
+                    title: Text(S.of(context).playlists),
+                    subtitle: Text(S.of(context).showPlaylists),
                     value: settings.showPlaylists,
                     onChanged: (value) => notifier.setShowPlaylists(value),
                   ),
@@ -78,8 +79,8 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
                     Icons.subtitles,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('字幕库'),
-                  subtitle: const Text('显示字幕库管理'),
+                  title: Text(S.of(context).subtitleLibrary),
+                  subtitle: Text(S.of(context).showSubtitleLibrary),
                   value: settings.showSubtitleLibrary,
                   onChanged: (value) => notifier.setShowSubtitleLibrary(value),
                 ),
@@ -90,9 +91,9 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
                     Icons.download,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  title: const Text('已下载'),
+                  title: Text(S.of(context).downloaded),
                   subtitle: Text(
-                    '不可关闭',
+                    S.of(context).cannotBeDisabled,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),

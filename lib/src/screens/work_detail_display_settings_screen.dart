@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../providers/work_detail_display_provider.dart';
 import '../widgets/scrollable_appbar.dart';
 
@@ -13,10 +14,10 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
     final notifier = ref.read(workDetailDisplayProvider.notifier);
 
     return Scaffold(
-      appBar: const ScrollableAppBar(
+      appBar: ScrollableAppBar(
         title: Text(
-          '作品详情显示设置',
-          style: TextStyle(fontSize: 18),
+          S.of(context).workDetailDisplaySettings,
+          style: const TextStyle(fontSize: 18),
         ),
       ),
       body: ListView(
@@ -30,8 +31,8 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                     Icons.star,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('评分信息'),
-                  subtitle: const Text('显示作品评分和评价人数'),
+                  title: Text(S.of(context).ratingInfo),
+                  subtitle: Text(S.of(context).showRatingAndReviewCount),
                   value: settings.showRating,
                   onChanged: (_) => notifier.toggleRating(),
                 ),
@@ -41,8 +42,8 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                     Icons.attach_money,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('售价信息'),
-                  subtitle: const Text('显示作品价格'),
+                  title: Text(S.of(context).priceInfo),
+                  subtitle: Text(S.of(context).showWorkPrice),
                   value: settings.showPrice,
                   onChanged: (_) => notifier.togglePrice(),
                 ),
@@ -52,8 +53,8 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                     Icons.access_time,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('时长信息'),
-                  subtitle: const Text('显示作品时长'),
+                  title: Text(S.of(context).durationInfo),
+                  subtitle: Text(S.of(context).showWorkDuration),
                   value: settings.showDuration,
                   onChanged: (_) => notifier.toggleDuration(),
                 ),
@@ -63,8 +64,8 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                     Icons.shopping_cart,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('售出信息'),
-                  subtitle: const Text('显示作品售出数量'),
+                  title: Text(S.of(context).salesInfo),
+                  subtitle: Text(S.of(context).showWorkSalesCount),
                   value: settings.showSales,
                   onChanged: (_) => notifier.toggleSales(),
                 ),
@@ -74,8 +75,8 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                     Icons.open_in_new,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('外部链接信息'),
-                  subtitle: const Text('显示DLsite、官网等外部链接'),
+                  title: Text(S.of(context).externalLinkInfo),
+                  subtitle: Text(S.of(context).showExternalLinks),
                   value: settings.showExternalLinks,
                   onChanged: (_) => notifier.toggleExternalLinks(),
                 ),
@@ -85,8 +86,8 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                     Icons.calendar_today,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('发布日期'),
-                  subtitle: const Text('显示作品发布日期'),
+                  title: Text(S.of(context).releaseDateInfo),
+                  subtitle: Text(S.of(context).showWorkReleaseDate),
                   value: settings.showReleaseDate,
                   onChanged: (_) => notifier.toggleReleaseDate(),
                 ),
@@ -96,8 +97,8 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                     Icons.translate,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('翻译按钮'),
-                  subtitle: const Text('显示作品标题的翻译按钮'),
+                  title: Text(S.of(context).translateButtonLabel),
+                  subtitle: Text(S.of(context).showTranslateButton),
                   value: settings.showTranslateButton,
                   onChanged: (_) => notifier.toggleTranslateButton(),
                 ),
@@ -107,8 +108,8 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                     Icons.closed_caption,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: const Text('字幕标签'),
-                  subtitle: const Text('在封面图上显示字幕标签'),
+                  title: Text(S.of(context).subtitleTagLabel),
+                  subtitle: Text(S.of(context).showSubtitleTagOnCover),
                   value: settings.showSubtitleTag,
                   onChanged: (_) => notifier.toggleSubtitleTag(),
                 ),

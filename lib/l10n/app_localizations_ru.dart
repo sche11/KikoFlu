@@ -1219,7 +1219,8 @@ class SRu extends S {
   String get buttonOrder => 'Порядок кнопок';
 
   @override
-  String get workCardDisplaySettings => 'Карточка работы';
+  String get workCardDisplaySettings =>
+      'Настройки отображения карточек произведений';
 
   @override
   String get showTags => 'Показывать теги';
@@ -1246,7 +1247,8 @@ class SRu extends S {
   String get full => 'Полный';
 
   @override
-  String get workDetailDisplaySettings => 'Детали работы';
+  String get workDetailDisplaySettings =>
+      'Настройки отображения деталей произведения';
 
   @override
   String get infoSectionVisibility => 'Видимость разделов';
@@ -1258,7 +1260,7 @@ class SRu extends S {
   String get showMetadata => 'Показывать метаданные';
 
   @override
-  String get myTabsDisplaySettings => 'Вкладки «Моё»';
+  String get myTabsDisplaySettings => 'Настройки страницы «Моё»';
 
   @override
   String get showTab => 'Показать вкладку';
@@ -3013,4 +3015,332 @@ class SRu extends S {
   String unsupportedFileTypeWithTitle(String title) {
     return 'Невозможно открыть этот тип файла: $title';
   }
+
+  @override
+  String get settingsSaved => 'Настройки сохранены';
+
+  @override
+  String get restoredToDefault => 'Восстановлены настройки по умолчанию';
+
+  @override
+  String get restoreDefault => 'По умолчанию';
+
+  @override
+  String get saveSettings => 'Сохранить настройки';
+
+  @override
+  String get addAtLeastOneSearchCondition =>
+      'Добавьте хотя бы одно условие поиска';
+
+  @override
+  String get privacyModeSettingsTitle => 'Настройки приватного режима';
+
+  @override
+  String get whatIsPrivacyMode => 'Что такое приватный режим?';
+
+  @override
+  String get privacyModeDescription =>
+      'При включении информация о воспроизведении в уведомлениях и на экране блокировки будет размыта для защиты конфиденциальности.';
+
+  @override
+  String get enablePrivacyMode => 'Включить приватный режим';
+
+  @override
+  String get privacyModeEnabledSubtitle =>
+      'Включено - информация о воспроизведении будет скрыта';
+
+  @override
+  String get privacyModeDisabledSubtitle =>
+      'Отключено - информация отображается нормально';
+
+  @override
+  String get blurOptions => 'Параметры размытия';
+
+  @override
+  String get blurNotificationCover => 'Размытие обложки в уведомлениях';
+
+  @override
+  String get blurNotificationCoverSubtitle =>
+      'Размытие обложки в системных уведомлениях, на экране блокировки и в центре управления';
+
+  @override
+  String get blurInAppCover => 'Размытие обложки в приложении';
+
+  @override
+  String get blurInAppCoverSubtitle =>
+      'Размытие обложки в плеере, списках и других экранах';
+
+  @override
+  String get replaceTitle => 'Заменить заголовок';
+
+  @override
+  String get replaceTitleSubtitle =>
+      'Заменить настоящее название пользовательским';
+
+  @override
+  String get replaceTitleContent => 'Содержимое замены заголовка';
+
+  @override
+  String get setReplaceTitle => 'Установить замену заголовка';
+
+  @override
+  String get enterDisplayTitle => 'Введите отображаемый заголовок';
+
+  @override
+  String get replaceTitleSaved => 'Замена заголовка сохранена';
+
+  @override
+  String get effectExample => 'Пример эффекта';
+
+  @override
+  String get downloadPathSettings => 'Настройки пути загрузки';
+
+  @override
+  String loadPathFailedWithError(String error) {
+    return 'Не удалось загрузить путь: $error';
+  }
+
+  @override
+  String get platformNotSupportCustomPath =>
+      'Пользовательский путь загрузки не поддерживается на этой платформе';
+
+  @override
+  String activeDownloadsWarning(int count) {
+    return 'Выполняется $count загрузок. Завершите или отмените их перед сменой пути';
+  }
+
+  @override
+  String setPathFailedWithError(String error) {
+    return 'Не удалось установить путь: $error';
+  }
+
+  @override
+  String get confirmMigrateFiles => 'Подтвердите перенос файлов';
+
+  @override
+  String get migrateFilesToNewDir =>
+      'Существующие загруженные файлы будут перенесены в новый каталог:';
+
+  @override
+  String get migrationMayTakeTime =>
+      'Эта операция может занять некоторое время в зависимости от количества и размера файлов.';
+
+  @override
+  String get confirmMigrate => 'Подтвердить перенос';
+
+  @override
+  String get restoreDefaultPath => 'Восстановить путь по умолчанию';
+
+  @override
+  String get restoreDefaultPathConfirm =>
+      'Восстановить путь загрузки по умолчанию и перенести все файлы.\n\nПродолжить?';
+
+  @override
+  String get defaultPathRestored => 'Путь по умолчанию восстановлен';
+
+  @override
+  String resetPathFailedWithError(String error) {
+    return 'Не удалось восстановить путь по умолчанию: $error';
+  }
+
+  @override
+  String get migratingFiles => 'Перенос файлов...';
+
+  @override
+  String get doNotCloseApp => 'Не закрывайте приложение';
+
+  @override
+  String get currentDownloadPath => 'Текущий путь загрузки';
+
+  @override
+  String get customPath => 'Пользовательский путь';
+
+  @override
+  String get defaultPath => 'Путь по умолчанию';
+
+  @override
+  String get changeCustomPath => 'Изменить пользовательский путь';
+
+  @override
+  String get setCustomPath => 'Установить пользовательский путь';
+
+  @override
+  String get usageInstructions => 'Инструкция по использованию';
+
+  @override
+  String get downloadPathUsageDesc =>
+      '• После изменения пути все существующие файлы будут автоматически перенесены\n• Не закрывайте приложение во время переноса\n• Рекомендуется выбрать каталог с достаточным объёмом памяти\n• При восстановлении пути по умолчанию файлы также будут перенесены обратно';
+
+  @override
+  String get llmTranslationSettings => 'Настройки LLM-перевода';
+
+  @override
+  String get apiEndpointUrl => 'URL-адрес API';
+
+  @override
+  String get openaiCompatibleEndpoint => 'URL-адрес, совместимый с OpenAI';
+
+  @override
+  String get pleaseEnterApiUrl => 'Введите URL-адрес API';
+
+  @override
+  String get pleaseEnterValidUrl => 'Введите действительный URL';
+
+  @override
+  String get pleaseEnterApiKey => 'Введите API-ключ';
+
+  @override
+  String get modelName => 'Название модели';
+
+  @override
+  String get pleaseEnterModelName => 'Введите название модели';
+
+  @override
+  String get concurrencyCount => 'Параллельность';
+
+  @override
+  String get concurrencyDescription =>
+      'Количество одновременных запросов на перевод, рекомендуется 3-5';
+
+  @override
+  String get promptSection => 'Промпт (Prompt)';
+
+  @override
+  String get promptDescription =>
+      'Поскольку система использует блочный перевод, убедитесь, что промпт чётко требует выводить только результат перевода без пояснений.';
+
+  @override
+  String get enterSystemPrompt => 'Введите системный промпт...';
+
+  @override
+  String get pleaseEnterPrompt => 'Введите промпт';
+
+  @override
+  String get restoreDefaultPrompt => 'Восстановить промпт по умолчанию';
+
+  @override
+  String get confirmRestoreButtonOrder =>
+      'Восстановить порядок кнопок по умолчанию?';
+
+  @override
+  String get buttonDisplayRules => 'Правила отображения кнопок';
+
+  @override
+  String buttonDisplayRulesDesc(int maxVisible) {
+    return '• Первые $maxVisible кнопок отображаются внизу плеера\n• Остальные кнопки доступны в меню «Ещё»';
+  }
+
+  @override
+  String get shownInPlayer => 'Отображается в плеере';
+
+  @override
+  String get shownInMoreMenu => 'Отображается в меню «Ещё»';
+
+  @override
+  String get audioFormatPriority => 'Приоритет аудиоформатов';
+
+  @override
+  String get confirmRestoreAudioFormat =>
+      'Восстановить приоритет аудиоформатов по умолчанию?';
+
+  @override
+  String get priorityDescription => 'Описание приоритетов';
+
+  @override
+  String get audioFormatPriorityDesc =>
+      '• При открытии страницы произведения автоматически раскрывается папка с аудио наиболее приоритетного формата';
+
+  @override
+  String get ratingInfo => 'Информация о рейтинге';
+
+  @override
+  String get showRatingAndReviewCount =>
+      'Показывать рейтинг и количество оценок';
+
+  @override
+  String get priceInfo => 'Информация о цене';
+
+  @override
+  String get showWorkPrice => 'Показывать цену произведения';
+
+  @override
+  String get durationInfo => 'Информация о длительности';
+
+  @override
+  String get showWorkDuration => 'Показывать длительность произведения';
+
+  @override
+  String get showWorkTotalDuration =>
+      'Показывать общую длительность произведения';
+
+  @override
+  String get salesInfo => 'Информация о продажах';
+
+  @override
+  String get showWorkSalesCount => 'Показывать количество продаж';
+
+  @override
+  String get externalLinkInfo => 'Внешние ссылки';
+
+  @override
+  String get showExternalLinks =>
+      'Показывать внешние ссылки (DLsite, офиц. сайт и др.)';
+
+  @override
+  String get releaseDateInfo => 'Дата публикации';
+
+  @override
+  String get showWorkReleaseDate => 'Показывать дату публикации произведения';
+
+  @override
+  String get translateButtonLabel => 'Кнопка перевода';
+
+  @override
+  String get showTranslateButton =>
+      'Показывать кнопку перевода заголовка произведения';
+
+  @override
+  String get subtitleTagLabel => 'Метка субтитров';
+
+  @override
+  String get showSubtitleTagOnCover => 'Показывать метку субтитров на обложке';
+
+  @override
+  String get circleInfo => 'Информация о кружке';
+
+  @override
+  String get showWorkCircle => 'Показывать кружок произведения';
+
+  @override
+  String get showSubtitleTagOnCard =>
+      'Показывать метку субтитров на карточке произведения';
+
+  @override
+  String get showOnlineMarks => 'Показывать произведения с онлайн-метками';
+
+  @override
+  String get cannotBeDisabled => 'Нельзя отключить';
+
+  @override
+  String get showPlaylists => 'Показывать созданные плейлисты';
+
+  @override
+  String get showSubtitleLibrary =>
+      'Показывать управление библиотекой субтитров';
+
+  @override
+  String get playlistPrivacyPrivateDesc => 'Только вы можете просматривать';
+
+  @override
+  String get playlistPrivacyUnlistedDesc =>
+      'Могут просматривать только те, у кого есть ссылка';
+
+  @override
+  String get playlistPrivacyPublicDesc => 'Может просматривать любой';
+
+  @override
+  String get clearTranslationCache => 'Очистить кэш переводов';
+
+  @override
+  String get translationCacheCleared => 'Кэш переводов очищен';
 }

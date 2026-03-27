@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:translator/translator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -17,14 +18,93 @@ class TranslationService {
   final MicrosoftTranslator _microsoftTranslator = MicrosoftTranslator();
   final LLMTranslator _llmTranslator = LLMTranslator();
   static const String _cachePrefix = 'translation_cache_';
-  static const String _targetLang = 'zh-cn'; // 目标语言：简体中文
 
-  /// 翻译文本到中文
+  /// 根据应用当前 locale 获取翻译目标语言代码
+  Future<Locale> _getEffectiveLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString('locale_language');
+    if (language == null) {
+      return PlatformDispatcher.instance.locale;
+    }
+    final script = prefs.getString('locale_script');
+    return script != null
+        ? Locale.fromSubtags(languageCode: language, scriptCode: script)
+        : Locale(language);
+  }
+
+  /// 判断 locale 是否是繁体中文
+  bool _isTraditionalChinese(Locale locale) {
+    return locale.scriptCode == 'Hant' ||
+        locale.countryCode == 'TW' ||
+        locale.countryCode == 'HK';
+  }
+
+  /// 获取 Google Translate 目标语言代码
+  String _googleTargetLang(Locale locale) {
+    if (locale.languageCode == 'zh') {
+      return _isTraditionalChinese(locale) ? 'zh-tw' : 'zh-cn';
+    }
+    return locale.languageCode;
+  }
+
+  /// 获取有道翻译目标语言代码
+  String _youdaoTargetLang(Locale locale) {
+    if (locale.languageCode == 'zh') {
+      return _isTraditionalChinese(locale) ? 'zh-CHT' : 'zh-CHS';
+    }
+    return locale.languageCode;
+  }
+
+  /// 获取 Microsoft 翻译目标语言代码
+  String _microsoftTargetLang(Locale locale) {
+    if (locale.languageCode == 'zh') {
+      return _isTraditionalChinese(locale) ? 'zh-Hant' : 'zh-Hans';
+    }
+    return locale.languageCode;
+  }
+
+  /// 获取 LLM 翻译目标语言名称
+  static String llmTargetLanguageName(Locale locale) {
+    final isTraditional = locale.scriptCode == 'Hant' ||
+        locale.countryCode == 'TW' ||
+        locale.countryCode == 'HK';
+    switch (locale.languageCode) {
+      case 'zh':
+        return isTraditional
+            ? 'Traditional Chinese (zh-TW)'
+            : 'Simplified Chinese (zh-CN)';
+      case 'en':
+        return 'English';
+      case 'ja':
+        return 'Japanese';
+      case 'ru':
+        return 'Russian';
+      default:
+        return locale.languageCode;
+    }
+  }
+
+  /// 获取 LLM 默认 prompt（基于当前 locale）
+  static String getDefaultLLMPrompt(Locale locale) {
+    final langName = llmTargetLanguageName(locale);
+    return 'You are a professional translator. Translate the following text into $langName. Output ONLY the translated text without any explanations, notes, or markdown code blocks.';
+  }
+
+  /// 获取当前 locale 对应的默认 LLM prompt
+  Future<String> getDefaultLLMPromptForCurrentLocale() async {
+    final locale = await _getEffectiveLocale();
+    return getDefaultLLMPrompt(locale);
+  }
+
+  /// 翻译文本到应用当前语言
   Future<String> translate(String text, {String? sourceLang}) async {
     if (text.isEmpty) return text;
 
+    final locale = await _getEffectiveLocale();
+
     // 检查缓存
-    final cachedTranslation = await _getCachedTranslation(text, sourceLang);
+    final cachedTranslation =
+        await _getCachedTranslation(text, sourceLang, locale);
     if (cachedTranslation != null) {
       return cachedTranslation;
     }
@@ -54,19 +134,22 @@ class TranslationService {
       try {
         String result;
         if (source == 'youdao') {
-          result =
-              await _youdaoTranslator.translate(text, sourceLang: sourceLang);
+          result = await _youdaoTranslator.translate(text,
+              sourceLang: sourceLang,
+              targetLang: _youdaoTargetLang(locale));
         } else if (source == 'microsoft') {
           result = await _microsoftTranslator.translate(text,
-              sourceLang: sourceLang);
+              sourceLang: sourceLang,
+              targetLang: _microsoftTargetLang(locale));
         } else if (source == 'llm') {
-          result = await _llmTranslator.translate(text, sourceLang: sourceLang);
+          result = await _llmTranslator.translate(text,
+              sourceLang: sourceLang, locale: locale);
         } else {
           // Google 翻译
           final translation = await _googleTranslator.translate(
             text,
             from: sourceLang ?? 'auto',
-            to: _targetLang,
+            to: _googleTargetLang(locale),
           );
           result = translation.text;
         }
@@ -77,7 +160,7 @@ class TranslationService {
         }
 
         // 缓存结果
-        await _cacheTranslation(text, result, sourceLang);
+        await _cacheTranslation(text, result, sourceLang, locale);
 
         return result;
       } catch (e) {
@@ -239,10 +322,11 @@ class TranslationService {
   }
 
   /// 获取缓存的翻译
-  Future<String?> _getCachedTranslation(String text, String? sourceLang) async {
+  Future<String?> _getCachedTranslation(
+      String text, String? sourceLang, Locale targetLocale) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = _getCacheKey(text, sourceLang);
+      final key = _getCacheKey(text, sourceLang, targetLocale);
       final cached = prefs.getString(key);
       if (cached != null) {
         final data = json.decode(cached);
@@ -261,10 +345,11 @@ class TranslationService {
 
   /// 缓存翻译结果
   Future<void> _cacheTranslation(
-      String text, String translation, String? sourceLang) async {
+      String text, String translation, String? sourceLang,
+      Locale targetLocale) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = _getCacheKey(text, sourceLang);
+      final key = _getCacheKey(text, sourceLang, targetLocale);
       final data = json.encode({
         'translation': translation,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
@@ -275,10 +360,13 @@ class TranslationService {
     }
   }
 
-  /// 生成缓存键
-  String _getCacheKey(String text, String? sourceLang) {
+  /// 生成缓存键（包含目标语言）
+  String _getCacheKey(String text, String? sourceLang, Locale targetLocale) {
     final lang = sourceLang ?? 'auto';
-    return '$_cachePrefix${lang}_${text.hashCode}';
+    final target = targetLocale.scriptCode != null
+        ? '${targetLocale.languageCode}_${targetLocale.scriptCode}'
+        : targetLocale.languageCode;
+    return '$_cachePrefix${lang}_${target}_${text.hashCode}';
   }
 
   /// 清除所有翻译缓存

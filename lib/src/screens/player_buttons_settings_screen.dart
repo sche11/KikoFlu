@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../providers/player_buttons_provider.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
@@ -67,7 +68,7 @@ class _PlayerButtonsSettingsScreenState
     }
 
     if (mounted) {
-      SnackBarUtil.showSuccess(context, '设置已保存');
+      SnackBarUtil.showSuccess(context, S.of(context).settingsSaved);
       Navigator.of(context).pop();
     }
   }
@@ -76,16 +77,16 @@ class _PlayerButtonsSettingsScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('恢复默认设置'),
-        content: const Text('确定要恢复默认的按钮顺序吗？'),
+        title: Text(S.of(context).restoreDefaultSettings),
+        content: Text(S.of(context).confirmRestoreButtonOrder),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(S.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('确定'),
+            child: Text(S.of(context).confirm),
           ),
         ],
       ),
@@ -111,7 +112,7 @@ class _PlayerButtonsSettingsScreenState
       }
 
       if (mounted) {
-        SnackBarUtil.showSuccess(context, '已恢复默认设置');
+        SnackBarUtil.showSuccess(context, S.of(context).restoredToDefault);
       }
     }
   }
@@ -122,12 +123,12 @@ class _PlayerButtonsSettingsScreenState
 
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: const Text('播放器按钮设置', style: TextStyle(fontSize: 18)),
+        title: Text(S.of(context).playerButtonSettings, style: const TextStyle(fontSize: 18)),
         actions: [
           TextButton.icon(
             onPressed: _resetToDefault,
             icon: const Icon(Icons.restart_alt),
-            label: const Text('恢复默认'),
+            label: Text(S.of(context).restoreDefault),
           ),
           const SizedBox(width: 8),
         ],
@@ -153,7 +154,7 @@ class _PlayerButtonsSettingsScreenState
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '按钮显示规则',
+                              S.of(context).buttonDisplayRules,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleSmall
@@ -165,8 +166,7 @@ class _PlayerButtonsSettingsScreenState
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          '• 前 $maxVisible 个按钮会显示在播放器底部\n'
-                          '• 其余按钮会收纳在"更多"菜单中',
+                          S.of(context).buttonDisplayRulesDesc(maxVisible),
                           style: const TextStyle(fontSize: 12, height: 1.5),
                         ),
                       ],
@@ -205,7 +205,7 @@ class _PlayerButtonsSettingsScreenState
                           ),
                           title: Text(button.label),
                           subtitle: Text(
-                            isVisible ? '显示在播放器' : '显示在更多菜单',
+                            isVisible ? S.of(context).shownInPlayer : S.of(context).shownInMoreMenu,
                             style: TextStyle(
                               color: isVisible
                                   ? Theme.of(context).colorScheme.primary
@@ -237,7 +237,7 @@ class _PlayerButtonsSettingsScreenState
                       child: FilledButton.icon(
                         onPressed: _saveSettings,
                         icon: const Icon(Icons.check),
-                        label: const Text('保存设置'),
+                        label: Text(S.of(context).saveSettings),
                       ),
                     ),
                   ),

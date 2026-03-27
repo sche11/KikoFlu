@@ -77,11 +77,10 @@ class MicrosoftTranslator {
     23
   ];
 
-  Future<String> translate(String text, {String? sourceLang}) async {
+  Future<String> translate(String text,
+      {String? sourceLang, String targetLang = 'zh-Hans'}) async {
     if (text.isEmpty) return text;
 
-    final targetLang =
-        'zh-Hans'; // Microsoft uses zh-Hans for Simplified Chinese
     final from = sourceLang != null ? '&from=$sourceLang' : '';
 
     // Construct URL path and query for signature

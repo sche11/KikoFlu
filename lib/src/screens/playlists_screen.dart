@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/playlists_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/l10n_extensions.dart';
 import '../widgets/playlist_card.dart';
 import '../widgets/pagination_bar.dart';
 import '../models/playlist.dart' show PlaylistPrivacy;
@@ -146,13 +147,13 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
                                     labelText: S.of(context).privacySetting,
                                     border: const OutlineInputBorder(),
                                     prefixIcon: const Icon(Icons.lock_outline),
-                                    helperText: selectedPrivacy.description,
+                                    helperText: selectedPrivacy.localizedDescription(context),
                                     helperMaxLines: 2,
                                   ),
                                   items: PlaylistPrivacy.values.map((privacy) {
                                     return DropdownMenuItem<PlaylistPrivacy>(
                                       value: privacy,
-                                      child: Text(privacy.label),
+                                      child: Text(privacy.localizedLabel(context)),
                                     );
                                   }).toList(),
                                   onChanged: (value) {

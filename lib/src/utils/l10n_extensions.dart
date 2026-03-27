@@ -164,6 +164,29 @@ extension PlaylistPrivacyL10n on PlaylistPrivacy {
       PlaylistPrivacy.public => s.playlistPrivacyPublic,
     };
   }
+
+  String localizedDescription(BuildContext context) {
+    final s = S.of(context);
+    return switch (this) {
+      PlaylistPrivacy.private => s.playlistPrivacyPrivateDesc,
+      PlaylistPrivacy.unlisted => s.playlistPrivacyUnlistedDesc,
+      PlaylistPrivacy.public => s.playlistPrivacyPublicDesc,
+    };
+  }
+}
+
+// ============================================================
+// SalesRange
+// ============================================================
+
+extension SalesRangeL10n on SalesRange {
+  String localizedLabel(BuildContext context) {
+    final s = S.of(context);
+    return switch (this) {
+      SalesRange.all => s.all,
+      _ => label,
+    };
+  }
 }
 
 // ============================================================

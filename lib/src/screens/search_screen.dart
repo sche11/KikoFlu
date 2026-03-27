@@ -148,7 +148,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   void _addSearchCondition() {
     final value = _searchController.text.trim();
     if (value.isEmpty) {
-      SnackBarUtil.showWarning(context, '请输入搜索内容');
+      SnackBarUtil.showWarning(context, S.of(context).enterSearchContent);
       return;
     }
 
@@ -187,7 +187,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
 
   Future<void> _performSearch() async {
     if (_searchConditions.isEmpty) {
-      SnackBarUtil.showWarning(context, '请至少添加一个搜索条件');
+      SnackBarUtil.showWarning(context, S.of(context).addAtLeastOneSearchCondition);
       return;
     }
 
@@ -230,7 +230,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       searchParams['ageRating'] = _ageRating.localizedLabel(context);
     }
     if (_salesRange != SalesRange.all) {
-      searchParams['salesRange'] = _salesRange.label;
+      searchParams['salesRange'] = _salesRange.localizedLabel(context);
     }
 
     // 构建可读的显示文本
@@ -291,7 +291,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       child: Scaffold(
         floatingActionButton: const DownloadFab(),
         appBar: ScrollableAppBar(
-          title: const Text('搜索', style: TextStyle(fontSize: 18)),
+          title: Text(S.of(context).search, style: const TextStyle(fontSize: 18)),
           actions: [
             // 筛选按钮移到右上角
             IconButton(

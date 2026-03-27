@@ -2355,7 +2355,7 @@ abstract class S {
   /// No description provided for @workCardDisplaySettings.
   ///
   /// In en, this message translates to:
-  /// **'Work Card Display'**
+  /// **'Work Card Display Settings'**
   String get workCardDisplaySettings;
 
   /// No description provided for @showTags.
@@ -2409,7 +2409,7 @@ abstract class S {
   /// No description provided for @workDetailDisplaySettings.
   ///
   /// In en, this message translates to:
-  /// **'Work Detail Display'**
+  /// **'Work Detail Display Settings'**
   String get workDetailDisplaySettings;
 
   /// No description provided for @infoSectionVisibility.
@@ -2433,7 +2433,7 @@ abstract class S {
   /// No description provided for @myTabsDisplaySettings.
   ///
   /// In en, this message translates to:
-  /// **'My Page Tab Settings'**
+  /// **'\"My\" Page Settings'**
   String get myTabsDisplaySettings;
 
   /// No description provided for @showTab.
@@ -5333,6 +5333,594 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Cannot open this file type: {title}'**
   String unsupportedFileTypeWithTitle(String title);
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved'**
+  String get settingsSaved;
+
+  /// No description provided for @restoredToDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored to default settings'**
+  String get restoredToDefault;
+
+  /// No description provided for @restoreDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Default'**
+  String get restoreDefault;
+
+  /// No description provided for @saveSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Settings'**
+  String get saveSettings;
+
+  /// No description provided for @addAtLeastOneSearchCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add at least one search condition'**
+  String get addAtLeastOneSearchCondition;
+
+  /// No description provided for @privacyModeSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Mode Settings'**
+  String get privacyModeSettingsTitle;
+
+  /// No description provided for @whatIsPrivacyMode.
+  ///
+  /// In en, this message translates to:
+  /// **'What is Privacy Mode?'**
+  String get whatIsPrivacyMode;
+
+  /// No description provided for @privacyModeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, playback information displayed in system notifications, lock screen, etc. will be blurred to protect your privacy.'**
+  String get privacyModeDescription;
+
+  /// No description provided for @enablePrivacyMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Privacy Mode'**
+  String get enablePrivacyMode;
+
+  /// No description provided for @privacyModeEnabledSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled - Playback info will be hidden'**
+  String get privacyModeEnabledSubtitle;
+
+  /// No description provided for @privacyModeDisabledSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled - Playback info displayed normally'**
+  String get privacyModeDisabledSubtitle;
+
+  /// No description provided for @blurOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur Options'**
+  String get blurOptions;
+
+  /// No description provided for @blurNotificationCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur Notification Cover'**
+  String get blurNotificationCover;
+
+  /// No description provided for @blurNotificationCoverSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply blur to cover art in system notifications, lock screen, or control center'**
+  String get blurNotificationCoverSubtitle;
+
+  /// No description provided for @blurInAppCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur In-App Cover'**
+  String get blurInAppCover;
+
+  /// No description provided for @blurInAppCoverSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur cover art in player, lists, and other screens'**
+  String get blurInAppCoverSubtitle;
+
+  /// No description provided for @replaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace Title'**
+  String get replaceTitle;
+
+  /// No description provided for @replaceTitleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace real title with a custom title'**
+  String get replaceTitleSubtitle;
+
+  /// No description provided for @replaceTitleContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement Title Content'**
+  String get replaceTitleContent;
+
+  /// No description provided for @setReplaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Replacement Title'**
+  String get setReplaceTitle;
+
+  /// No description provided for @enterDisplayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the title to display'**
+  String get enterDisplayTitle;
+
+  /// No description provided for @replaceTitleSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement title saved'**
+  String get replaceTitleSaved;
+
+  /// No description provided for @effectExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get effectExample;
+
+  /// No description provided for @downloadPathSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Path Settings'**
+  String get downloadPathSettings;
+
+  /// No description provided for @loadPathFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load path: {error}'**
+  String loadPathFailedWithError(String error);
+
+  /// No description provided for @platformNotSupportCustomPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom download path is not supported on this platform'**
+  String get platformNotSupportCustomPath;
+
+  /// No description provided for @activeDownloadsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} download tasks are in progress. Please cancel or complete them before switching paths'**
+  String activeDownloadsWarning(int count);
+
+  /// No description provided for @setPathFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to set path: {error}'**
+  String setPathFailedWithError(String error);
+
+  /// No description provided for @confirmMigrateFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm File Migration'**
+  String get confirmMigrateFiles;
+
+  /// No description provided for @migrateFilesToNewDir.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing downloaded files will be migrated to the new directory:'**
+  String get migrateFilesToNewDir;
+
+  /// No description provided for @migrationMayTakeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'This operation may take some time depending on the number and size of files.'**
+  String get migrationMayTakeTime;
+
+  /// No description provided for @confirmMigrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Migration'**
+  String get confirmMigrate;
+
+  /// No description provided for @restoreDefaultPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Default Path'**
+  String get restoreDefaultPath;
+
+  /// No description provided for @restoreDefaultPathConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore download path to default location and migrate all files.\n\nContinue?'**
+  String get restoreDefaultPathConfirm;
+
+  /// No description provided for @defaultPathRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Default path restored'**
+  String get defaultPathRestored;
+
+  /// No description provided for @resetPathFailedWithError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore default path: {error}'**
+  String resetPathFailedWithError(String error);
+
+  /// No description provided for @migratingFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrating files...'**
+  String get migratingFiles;
+
+  /// No description provided for @doNotCloseApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Please do not close the app'**
+  String get doNotCloseApp;
+
+  /// No description provided for @currentDownloadPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Download Path'**
+  String get currentDownloadPath;
+
+  /// No description provided for @customPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Path'**
+  String get customPath;
+
+  /// No description provided for @defaultPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Path'**
+  String get defaultPath;
+
+  /// No description provided for @changeCustomPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Custom Path'**
+  String get changeCustomPath;
+
+  /// No description provided for @setCustomPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Custom Path'**
+  String get setCustomPath;
+
+  /// No description provided for @usageInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Instructions'**
+  String get usageInstructions;
+
+  /// No description provided for @downloadPathUsageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'• After customizing the path, all existing files will be automatically migrated\n• Do not close the app during migration\n• Choose a directory with sufficient storage space\n• When restoring the default path, files will be migrated back automatically'**
+  String get downloadPathUsageDesc;
+
+  /// No description provided for @llmTranslationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'LLM Translation Settings'**
+  String get llmTranslationSettings;
+
+  /// No description provided for @apiEndpointUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'API Endpoint URL'**
+  String get apiEndpointUrl;
+
+  /// No description provided for @openaiCompatibleEndpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible endpoint URL'**
+  String get openaiCompatibleEndpoint;
+
+  /// No description provided for @pleaseEnterApiUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter API endpoint URL'**
+  String get pleaseEnterApiUrl;
+
+  /// No description provided for @pleaseEnterValidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid URL'**
+  String get pleaseEnterValidUrl;
+
+  /// No description provided for @pleaseEnterApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter API Key'**
+  String get pleaseEnterApiKey;
+
+  /// No description provided for @modelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Name'**
+  String get modelName;
+
+  /// No description provided for @pleaseEnterModelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter model name'**
+  String get pleaseEnterModelName;
+
+  /// No description provided for @concurrencyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Concurrency'**
+  String get concurrencyCount;
+
+  /// No description provided for @concurrencyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of concurrent translation requests, recommended 3-5'**
+  String get concurrencyDescription;
+
+  /// No description provided for @promptSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get promptSection;
+
+  /// No description provided for @promptDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Since the system uses chunked translation, please ensure the prompt clearly instructs to output only translation results without any explanation.'**
+  String get promptDescription;
+
+  /// No description provided for @enterSystemPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter system prompt...'**
+  String get enterSystemPrompt;
+
+  /// No description provided for @pleaseEnterPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a prompt'**
+  String get pleaseEnterPrompt;
+
+  /// No description provided for @restoreDefaultPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Default Prompt'**
+  String get restoreDefaultPrompt;
+
+  /// No description provided for @confirmRestoreButtonOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore the default button order?'**
+  String get confirmRestoreButtonOrder;
+
+  /// No description provided for @buttonDisplayRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Button Display Rules'**
+  String get buttonDisplayRules;
+
+  /// No description provided for @buttonDisplayRulesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'• The first {maxVisible} buttons will be shown at the bottom of the player\n• The remaining buttons will be in the \"More\" menu'**
+  String buttonDisplayRulesDesc(int maxVisible);
+
+  /// No description provided for @shownInPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown in player'**
+  String get shownInPlayer;
+
+  /// No description provided for @shownInMoreMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown in More menu'**
+  String get shownInMoreMenu;
+
+  /// No description provided for @audioFormatPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Format Priority'**
+  String get audioFormatPriority;
+
+  /// No description provided for @confirmRestoreAudioFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore the default audio format priority?'**
+  String get confirmRestoreAudioFormat;
+
+  /// No description provided for @priorityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority Description'**
+  String get priorityDescription;
+
+  /// No description provided for @audioFormatPriorityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'• When opening a work\'s detail page, the folder with the highest priority audio format will be expanded first'**
+  String get audioFormatPriorityDesc;
+
+  /// No description provided for @ratingInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating Info'**
+  String get ratingInfo;
+
+  /// No description provided for @showRatingAndReviewCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Show work rating and review count'**
+  String get showRatingAndReviewCount;
+
+  /// No description provided for @priceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Info'**
+  String get priceInfo;
+
+  /// No description provided for @showWorkPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Show work price'**
+  String get showWorkPrice;
+
+  /// No description provided for @durationInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration Info'**
+  String get durationInfo;
+
+  /// No description provided for @showWorkDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Show work duration'**
+  String get showWorkDuration;
+
+  /// No description provided for @showWorkTotalDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Show total work duration'**
+  String get showWorkTotalDuration;
+
+  /// No description provided for @salesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Info'**
+  String get salesInfo;
+
+  /// No description provided for @showWorkSalesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Show work sales count'**
+  String get showWorkSalesCount;
+
+  /// No description provided for @externalLinkInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'External Links'**
+  String get externalLinkInfo;
+
+  /// No description provided for @showExternalLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Show external links such as DLsite, official website, etc.'**
+  String get showExternalLinks;
+
+  /// No description provided for @releaseDateInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Release Date'**
+  String get releaseDateInfo;
+
+  /// No description provided for @showWorkReleaseDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Show work release date'**
+  String get showWorkReleaseDate;
+
+  /// No description provided for @translateButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate Button'**
+  String get translateButtonLabel;
+
+  /// No description provided for @showTranslateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Show translate button for work title'**
+  String get showTranslateButton;
+
+  /// No description provided for @subtitleTagLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle Tag'**
+  String get subtitleTagLabel;
+
+  /// No description provided for @showSubtitleTagOnCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Show subtitle tag on cover image'**
+  String get showSubtitleTagOnCover;
+
+  /// No description provided for @circleInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Circle Info'**
+  String get circleInfo;
+
+  /// No description provided for @showWorkCircle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show work\'s circle'**
+  String get showWorkCircle;
+
+  /// No description provided for @showSubtitleTagOnCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Show subtitle tag on work card'**
+  String get showSubtitleTagOnCard;
+
+  /// No description provided for @showOnlineMarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Show online marked works'**
+  String get showOnlineMarks;
+
+  /// No description provided for @cannotBeDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot be disabled'**
+  String get cannotBeDisabled;
+
+  /// No description provided for @showPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Show created playlists'**
+  String get showPlaylists;
+
+  /// No description provided for @showSubtitleLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Show subtitle library management'**
+  String get showSubtitleLibrary;
+
+  /// No description provided for @playlistPrivacyPrivateDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you can view'**
+  String get playlistPrivacyPrivateDesc;
+
+  /// No description provided for @playlistPrivacyUnlistedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only people with the link can view'**
+  String get playlistPrivacyUnlistedDesc;
+
+  /// No description provided for @playlistPrivacyPublicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone can view'**
+  String get playlistPrivacyPublicDesc;
+
+  /// No description provided for @clearTranslationCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Translation Cache'**
+  String get clearTranslationCache;
+
+  /// No description provided for @translationCacheCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation cache cleared'**
+  String get translationCacheCleared;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
+import '../services/translation_service.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
 
@@ -52,7 +54,7 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
       await ref.read(llmSettingsProvider.notifier).updateSettings(settings);
 
       if (mounted) {
-        SnackBarUtil.showSuccess(context, '设置已保存');
+        SnackBarUtil.showSuccess(context, S.of(context).settingsSaved);
         Navigator.pop(context);
       }
     }
@@ -61,8 +63,8 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ScrollableAppBar(
-        title: Text('LLM翻译设置', style: TextStyle(fontSize: 18)),
+      appBar: ScrollableAppBar(
+        title: Text(S.of(context).llmTranslationSettings, style: const TextStyle(fontSize: 18)),
       ),
       body: Form(
         key: _formKey,
@@ -77,18 +79,18 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                   children: [
                     TextFormField(
                       controller: _apiUrlController,
-                      decoration: const InputDecoration(
-                        labelText: 'API 接口地址',
+                      decoration: InputDecoration(
+                        labelText: S.of(context).apiEndpointUrl,
                         hintText: 'https://api.openai.com/v1/chat/completions',
-                        helperText: 'OpenAI 兼容接口地址',
-                        border: OutlineInputBorder(),
+                        helperText: S.of(context).openaiCompatibleEndpoint,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '请输入 API 接口地址';
+                          return S.of(context).pleaseEnterApiUrl;
                         }
                         if (!value.startsWith('http')) {
-                          return '请输入有效的 URL';
+                          return S.of(context).pleaseEnterValidUrl;
                         }
                         return null;
                       },
@@ -104,7 +106,7 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                       obscureText: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '请输入 API Key';
+                          return S.of(context).pleaseEnterApiKey;
                         }
                         return null;
                       },
@@ -112,14 +114,14 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _modelController,
-                      decoration: const InputDecoration(
-                        labelText: '模型名称',
+                      decoration: InputDecoration(
+                        labelText: S.of(context).modelName,
                         hintText: 'gpt-3.5-turbo',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '请输入模型名称';
+                          return S.of(context).pleaseEnterModelName;
                         }
                         return null;
                       },
@@ -130,7 +132,7 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                       children: [
                         Row(
                           children: [
-                            const Text('并发数', style: TextStyle(fontSize: 16)),
+                            Text(S.of(context).concurrencyCount, style: const TextStyle(fontSize: 16)),
                             const SizedBox(width: 8),
                             Text(
                               '${_concurrency.toInt()}',
@@ -141,9 +143,9 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                             ),
                           ],
                         ),
-                        const Text(
-                          '同时进行的翻译请求数量，建议 3-5',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        Text(
+                          S.of(context).concurrencyDescription,
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                         Slider(
                           value: _concurrency,
@@ -170,29 +172,29 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '提示词 (Prompt)',
-                      style: TextStyle(
+                    Text(
+                      S.of(context).promptSection,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      '由于系统采用分块翻译机制，请确保 Prompt 指令明确，要求只输出翻译结果，不包含任何解释。',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    Text(
+                      S.of(context).promptDescription,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _promptController,
                       maxLines: 5,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: '输入系统提示词...',
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        hintText: S.of(context).enterSystemPrompt,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return '请输入提示词';
+                          return S.of(context).pleaseEnterPrompt;
                         }
                         return null;
                       },
@@ -200,11 +202,12 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                     const SizedBox(height: 8),
                     TextButton.icon(
                       onPressed: () {
+                        final locale = Localizations.localeOf(context);
                         _promptController.text =
-                            'You are a professional translator. Translate the following text into Simplified Chinese (zh-CN). Output ONLY the translated text without any explanations, notes, or markdown code blocks.';
+                            TranslationService.getDefaultLLMPrompt(locale);
                       },
                       icon: const Icon(Icons.restore),
-                      label: const Text('恢复默认提示词'),
+                      label: Text(S.of(context).restoreDefaultPrompt),
                     ),
                   ],
                 ),
@@ -216,7 +219,7 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
               child: FilledButton.icon(
                 onPressed: _saveSettings,
                 icon: const Icon(Icons.save),
-                label: const Text('保存设置'),
+                label: Text(S.of(context).saveSettings),
               ),
             ),
           ],

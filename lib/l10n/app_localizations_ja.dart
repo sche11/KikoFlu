@@ -1197,7 +1197,7 @@ class SJa extends S {
   String get buttonOrder => 'ボタンの順序';
 
   @override
-  String get workCardDisplaySettings => '作品カード表示';
+  String get workCardDisplaySettings => '作品カード表示設定';
 
   @override
   String get showTags => 'タグを表示';
@@ -1224,7 +1224,7 @@ class SJa extends S {
   String get full => 'フル';
 
   @override
-  String get workDetailDisplaySettings => '作品詳細表示';
+  String get workDetailDisplaySettings => '作品詳細表示設定';
 
   @override
   String get infoSectionVisibility => '情報セクションの表示';
@@ -1236,7 +1236,7 @@ class SJa extends S {
   String get showMetadata => 'メタデータを表示';
 
   @override
-  String get myTabsDisplaySettings => 'マイページタブ設定';
+  String get myTabsDisplaySettings => '「マイ」ページ設定';
 
   @override
   String get showTab => 'タブを表示';
@@ -2931,4 +2931,315 @@ class SJa extends S {
   String unsupportedFileTypeWithTitle(String title) {
     return 'このファイルタイプは開けません: $title';
   }
+
+  @override
+  String get settingsSaved => '設定を保存しました';
+
+  @override
+  String get restoredToDefault => 'デフォルト設定に復元しました';
+
+  @override
+  String get restoreDefault => 'デフォルトに戻す';
+
+  @override
+  String get saveSettings => '設定を保存';
+
+  @override
+  String get addAtLeastOneSearchCondition => '検索条件を少なくとも1つ追加してください';
+
+  @override
+  String get privacyModeSettingsTitle => 'プライバシーモード設定';
+
+  @override
+  String get whatIsPrivacyMode => 'プライバシーモードとは？';
+
+  @override
+  String get privacyModeDescription =>
+      '有効にすると、システム通知やロック画面に表示される再生情報がぼかし処理され、プライバシーが保護されます。';
+
+  @override
+  String get enablePrivacyMode => 'プライバシーモードを有効にする';
+
+  @override
+  String get privacyModeEnabledSubtitle => '有効 - 再生情報が非表示になります';
+
+  @override
+  String get privacyModeDisabledSubtitle => '無効 - 再生情報が通常表示されます';
+
+  @override
+  String get blurOptions => 'ぼかしオプション';
+
+  @override
+  String get blurNotificationCover => '通知カバーをぼかす';
+
+  @override
+  String get blurNotificationCoverSubtitle =>
+      'システム通知、ロック画面、コントロールセンターのカバーにぼかしを適用';
+
+  @override
+  String get blurInAppCover => 'アプリ内カバーをぼかす';
+
+  @override
+  String get blurInAppCoverSubtitle => 'プレーヤーやリストなどの画面でカバー画像をぼかす';
+
+  @override
+  String get replaceTitle => 'タイトルを置換';
+
+  @override
+  String get replaceTitleSubtitle => '実際のタイトルをカスタムタイトルに置換';
+
+  @override
+  String get replaceTitleContent => '置換タイトルの内容';
+
+  @override
+  String get setReplaceTitle => '置換タイトルを設定';
+
+  @override
+  String get enterDisplayTitle => '表示するタイトルを入力';
+
+  @override
+  String get replaceTitleSaved => '置換タイトルを保存しました';
+
+  @override
+  String get effectExample => '効果の例';
+
+  @override
+  String get downloadPathSettings => 'ダウンロードパス設定';
+
+  @override
+  String loadPathFailedWithError(String error) {
+    return 'パスの読み込みに失敗: $error';
+  }
+
+  @override
+  String get platformNotSupportCustomPath =>
+      'このプラットフォームではカスタムダウンロードパスはサポートされていません';
+
+  @override
+  String activeDownloadsWarning(int count) {
+    return '$count 件のダウンロードが進行中です。パスを切り替える前に完了またはキャンセルしてください';
+  }
+
+  @override
+  String setPathFailedWithError(String error) {
+    return 'パスの設定に失敗: $error';
+  }
+
+  @override
+  String get confirmMigrateFiles => 'ファイル移行の確認';
+
+  @override
+  String get migrateFilesToNewDir => '既存のダウンロードファイルを新しいディレクトリに移行します：';
+
+  @override
+  String get migrationMayTakeTime => 'この操作はファイルの数とサイズによって時間がかかる場合があります。';
+
+  @override
+  String get confirmMigrate => '移行を確認';
+
+  @override
+  String get restoreDefaultPath => 'デフォルトパスに戻す';
+
+  @override
+  String get restoreDefaultPathConfirm =>
+      'ダウンロードパスをデフォルトの場所に戻し、すべてのファイルを移行します。\n\n続行しますか？';
+
+  @override
+  String get defaultPathRestored => 'デフォルトパスに復元しました';
+
+  @override
+  String resetPathFailedWithError(String error) {
+    return 'デフォルトパスの復元に失敗: $error';
+  }
+
+  @override
+  String get migratingFiles => 'ファイルを移行中...';
+
+  @override
+  String get doNotCloseApp => 'アプリを閉じないでください';
+
+  @override
+  String get currentDownloadPath => '現在のダウンロードパス';
+
+  @override
+  String get customPath => 'カスタムパス';
+
+  @override
+  String get defaultPath => 'デフォルトパス';
+
+  @override
+  String get changeCustomPath => 'カスタムパスを変更';
+
+  @override
+  String get setCustomPath => 'カスタムパスを設定';
+
+  @override
+  String get usageInstructions => '使用方法';
+
+  @override
+  String get downloadPathUsageDesc =>
+      '• パスをカスタマイズすると、既存のファイルは自動的に新しい場所に移行されます\n• 移行中はアプリを閉じないでください\n• 十分な空き容量のあるディレクトリを選択してください\n• デフォルトパスに戻すと、ファイルも自動的に戻されます';
+
+  @override
+  String get llmTranslationSettings => 'LLM翻訳設定';
+
+  @override
+  String get apiEndpointUrl => 'APIエンドポイントURL';
+
+  @override
+  String get openaiCompatibleEndpoint => 'OpenAI互換エンドポイントURL';
+
+  @override
+  String get pleaseEnterApiUrl => 'APIエンドポイントURLを入力してください';
+
+  @override
+  String get pleaseEnterValidUrl => '有効なURLを入力してください';
+
+  @override
+  String get pleaseEnterApiKey => 'APIキーを入力してください';
+
+  @override
+  String get modelName => 'モデル名';
+
+  @override
+  String get pleaseEnterModelName => 'モデル名を入力してください';
+
+  @override
+  String get concurrencyCount => '同時実行数';
+
+  @override
+  String get concurrencyDescription => '同時翻訳リクエスト数、推奨 3-5';
+
+  @override
+  String get promptSection => 'プロンプト (Prompt)';
+
+  @override
+  String get promptDescription =>
+      'システムはチャンク翻訳を使用しているため、翻訳結果のみを出力し説明を含めないようプロンプトを明確にしてください。';
+
+  @override
+  String get enterSystemPrompt => 'システムプロンプトを入力...';
+
+  @override
+  String get pleaseEnterPrompt => 'プロンプトを入力してください';
+
+  @override
+  String get restoreDefaultPrompt => 'デフォルトプロンプトに戻す';
+
+  @override
+  String get confirmRestoreButtonOrder => 'デフォルトのボタン順序に戻しますか？';
+
+  @override
+  String get buttonDisplayRules => 'ボタン表示ルール';
+
+  @override
+  String buttonDisplayRulesDesc(int maxVisible) {
+    return '• 最初の $maxVisible 個のボタンがプレーヤーの下部に表示されます\n• 残りのボタンは「その他」メニューに格納されます';
+  }
+
+  @override
+  String get shownInPlayer => 'プレーヤーに表示';
+
+  @override
+  String get shownInMoreMenu => 'その他メニューに表示';
+
+  @override
+  String get audioFormatPriority => 'オーディオ形式の優先順位';
+
+  @override
+  String get confirmRestoreAudioFormat => 'デフォルトのオーディオ形式優先順位に戻しますか？';
+
+  @override
+  String get priorityDescription => '優先順位の説明';
+
+  @override
+  String get audioFormatPriorityDesc =>
+      '• 作品詳細ページを開くと、優先度の高い形式のオーディオフォルダが自動的に展開されます';
+
+  @override
+  String get ratingInfo => '評価情報';
+
+  @override
+  String get showRatingAndReviewCount => '作品の評価とレビュー数を表示';
+
+  @override
+  String get priceInfo => '価格情報';
+
+  @override
+  String get showWorkPrice => '作品の価格を表示';
+
+  @override
+  String get durationInfo => '再生時間情報';
+
+  @override
+  String get showWorkDuration => '作品の再生時間を表示';
+
+  @override
+  String get showWorkTotalDuration => '作品の合計再生時間を表示';
+
+  @override
+  String get salesInfo => '販売情報';
+
+  @override
+  String get showWorkSalesCount => '作品の販売数を表示';
+
+  @override
+  String get externalLinkInfo => '外部リンク情報';
+
+  @override
+  String get showExternalLinks => 'DLsiteや公式サイトなどの外部リンクを表示';
+
+  @override
+  String get releaseDateInfo => '発売日';
+
+  @override
+  String get showWorkReleaseDate => '作品の発売日を表示';
+
+  @override
+  String get translateButtonLabel => '翻訳ボタン';
+
+  @override
+  String get showTranslateButton => '作品タイトルの翻訳ボタンを表示';
+
+  @override
+  String get subtitleTagLabel => '字幕タグ';
+
+  @override
+  String get showSubtitleTagOnCover => 'カバー画像に字幕タグを表示';
+
+  @override
+  String get circleInfo => 'サークル情報';
+
+  @override
+  String get showWorkCircle => '作品のサークルを表示';
+
+  @override
+  String get showSubtitleTagOnCard => '作品カードに字幕タグを表示';
+
+  @override
+  String get showOnlineMarks => 'オンラインマークの作品を表示';
+
+  @override
+  String get cannotBeDisabled => '無効にできません';
+
+  @override
+  String get showPlaylists => '作成したプレイリストを表示';
+
+  @override
+  String get showSubtitleLibrary => '字幕ライブラリ管理を表示';
+
+  @override
+  String get playlistPrivacyPrivateDesc => '自分だけが閲覧可能';
+
+  @override
+  String get playlistPrivacyUnlistedDesc => 'リンクを知っている人だけが閲覧可能';
+
+  @override
+  String get playlistPrivacyPublicDesc => '誰でも閲覧可能';
+
+  @override
+  String get clearTranslationCache => '翻訳キャッシュをクリア';
+
+  @override
+  String get translationCacheCleared => '翻訳キャッシュをクリアしました';
 }
