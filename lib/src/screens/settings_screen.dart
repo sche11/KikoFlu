@@ -252,6 +252,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           if (Platform.isAndroid ||
               Platform.isWindows ||
               Platform.isMacOS ||
+              Platform.isLinux ||
               Platform.isIOS) ...[
             Divider(color: Theme.of(context).colorScheme.outlineVariant),
             _buildFloatingLyricTile(context),

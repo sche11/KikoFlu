@@ -5946,6 +5946,12 @@ abstract class S {
   /// **'macOS: Any accessible directory can be selected'**
   String get platformHintMacOS;
 
+  /// No description provided for @platformHintLinux.
+  ///
+  /// In en, this message translates to:
+  /// **'Linux: Any accessible directory can be selected'**
+  String get platformHintLinux;
+
   /// No description provided for @platformHintDefault.
   ///
   /// In en, this message translates to:

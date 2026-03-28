@@ -1139,6 +1139,7 @@
   "platformHintIOS": "iOS: 受系统限制，使用默认路径，可使用系统默认文件浏览器查看",
   "platformHintWindows": "Windows: 可选择任意可访问的目录",
   "platformHintMacOS": "macOS: 可选择任意可访问的目录",
+  "platformHintLinux": "Linux: 可选择任意可访问的目录",
   "platformHintDefault": "选择一个用于保存下载文件的目录",
   "subtitleFolderParsed": "已解析",
   "subtitleFolderSaved": "已保存",

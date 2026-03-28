@@ -1096,6 +1096,7 @@
   "platformHintIOS": "iOS: システム制限によりデフォルトパスを使用します。システムのファイルマネージャーで確認できます",
   "platformHintWindows": "Windows: 任意のアクセス可能なディレクトリを選択できます",
   "platformHintMacOS": "macOS: 任意のアクセス可能なディレクトリを選択できます",
+  "platformHintLinux": "Linux: 任意のアクセス可能なディレクトリを選択できます",
   "platformHintDefault": "ダウンロードファイルを保存するディレクトリを選択してください",
   "subtitleFolderParsed": "解析済み",
   "subtitleFolderSaved": "保存済み",

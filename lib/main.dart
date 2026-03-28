@@ -43,7 +43,7 @@ void _setEnv(String key, String value) {
     SetEnvironmentVariable(keyNative, valueNative);
     calloc.free(keyNative);
     calloc.free(valueNative);
-  } else if (Platform.isMacOS) {
+  } else if (Platform.isMacOS || Platform.isLinux) {
     final keyNative = key.toNativeUtf8();
     final valueNative = value.toNativeUtf8();
     final setenv = ffi.DynamicLibrary.process().lookupFunction<
@@ -56,7 +56,7 @@ void _setEnv(String key, String value) {
 }
 
 Future<void> _configureMpv() async {
-  if (!Platform.isWindows && !Platform.isMacOS) return;
+  if (!Platform.isWindows && !Platform.isMacOS && !Platform.isLinux) return;
 
   try {
     final prefs = await SharedPreferences.getInstance();
@@ -90,6 +90,14 @@ ao=wasapi
 audio-exclusive=yes
 audio-spdif=ac3,dts,eac3
 log-file=mpv_debug.log
+msg-level=all=v
+video=no
+sub-auto=no
+''';
+      } else if (Platform.isLinux) {
+        configContent = '''
+audio-spdif=ac3,dts,eac3
+log-file=${p.join(configDir.path, 'mpv_debug.log')}
 msg-level=all=v
 video=no
 sub-auto=no
@@ -258,7 +266,7 @@ class _KikoeruAppState extends ConsumerState<KikoeruApp> with WindowListener {
 
   @override
   void onWindowClose() async {
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       // 关闭主窗口时，同时关闭悬浮字幕窗�?
       await FloatingLyricService.instance.hide();
     }

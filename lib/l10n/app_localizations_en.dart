@@ -3342,6 +3342,10 @@ class SEn extends S {
       'macOS: Any accessible directory can be selected';
 
   @override
+  String get platformHintLinux =>
+      'Linux: Any accessible directory can be selected';
+
+  @override
   String get platformHintDefault =>
       'Select a directory to save downloaded files';
 

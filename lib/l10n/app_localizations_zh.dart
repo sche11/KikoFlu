@@ -3239,6 +3239,9 @@ class SZh extends S {
   String get platformHintMacOS => 'macOS: 可选择任意可访问的目录';
 
   @override
+  String get platformHintLinux => 'Linux: 可选择任意可访问的目录';
+
+  @override
   String get platformHintDefault => '选择一个用于保存下载文件的目录';
 
   @override
@@ -6484,6 +6487,9 @@ class SZhHant extends SZh {
 
   @override
   String get platformHintMacOS => 'macOS: 可選擇任意可存取的目錄';
+
+  @override
+  String get platformHintLinux => 'Linux: 可選擇任意可存取的目錄';
 
   @override
   String get platformHintDefault => '選擇一個用於儲存下載檔案的目錄';

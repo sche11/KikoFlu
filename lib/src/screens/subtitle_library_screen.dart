@@ -111,7 +111,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
           await SubtitleLibraryService.getSubtitleLibraryDirectory();
       final path = libraryDir.path;
 
-      if (Platform.isWindows || Platform.isMacOS) {
+      if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
         final uri = Uri.file(path);
         await launchUrl(uri);
       }
@@ -1890,7 +1890,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
                     ),
                     onPressed: () => _loadFiles(forceRefresh: true),
                   ),
-                  if (Platform.isWindows || Platform.isMacOS)
+                  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
                     TextButton.icon(
                       icon: const Icon(Icons.folder_open, size: 20),
                       label: Text(S.of(context).openFolder),

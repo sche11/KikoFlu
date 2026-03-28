@@ -3361,6 +3361,10 @@ class SRu extends S {
       'macOS: Можно выбрать любую доступную директорию';
 
   @override
+  String get platformHintLinux =>
+      'Linux: Можно выбрать любую доступную директорию';
+
+  @override
   String get platformHintDefault =>
       'Выберите директорию для сохранения загруженных файлов';
 

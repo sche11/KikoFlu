@@ -294,6 +294,8 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
                   // Fallback for Windows if canLaunchUrl fails for file URI
                   if (Platform.isWindows) {
                     await Process.run('explorer', [_localFilePath!]);
+                  } else if (Platform.isLinux) {
+                    await Process.run('xdg-open', [_localFilePath!]);
                   }
                 }
               },

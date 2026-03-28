@@ -29,6 +29,7 @@ class _DownloadPathSettingsScreenState
     if (Platform.isIOS) return s.platformHintIOS;
     if (Platform.isWindows) return s.platformHintWindows;
     if (Platform.isMacOS) return s.platformHintMacOS;
+    if (Platform.isLinux) return s.platformHintLinux;
     return s.platformHintDefault;
   }
 

@@ -163,7 +163,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       final path = downloadDir.path;
 
       // 检查平台并打开文件夹
-      if (Platform.isWindows || Platform.isMacOS) {
+      if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
         final uri = Uri.file(path);
         final canLaunch = await canLaunchUrl(uri);
 
@@ -702,7 +702,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                       ),
                     ),
                     // 打开文件夹按钮（仅 Windows 和 macOS）
-                    if (Platform.isWindows || Platform.isMacOS)
+                    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: TextButton.icon(

@@ -3258,6 +3258,9 @@ class SJa extends S {
   String get platformHintMacOS => 'macOS: 任意のアクセス可能なディレクトリを選択できます';
 
   @override
+  String get platformHintLinux => 'Linux: 任意のアクセス可能なディレクトリを選択できます';
+
+  @override
   String get platformHintDefault => 'ダウンロードファイルを保存するディレクトリを選択してください';
 
   @override

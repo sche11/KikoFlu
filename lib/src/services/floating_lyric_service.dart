@@ -38,6 +38,7 @@ class FloatingLyricService {
       Platform.isAndroid ||
       Platform.isWindows ||
       Platform.isMacOS ||
+      Platform.isLinux ||
       Platform.isIOS;
 
   /// 显示悬浮窗
@@ -49,7 +50,7 @@ class FloatingLyricService {
       return false;
     }
 
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isLinux) {
       try {
         if (_windowId != null) {
           final result = await updateText(text);
@@ -110,7 +111,7 @@ class FloatingLyricService {
       return false;
     }
 
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isLinux) {
       if (_windowId != null) {
         try {
           final controller = WindowController.fromWindowId(_windowId!);
@@ -147,7 +148,7 @@ class FloatingLyricService {
     }
     _lastText = text;
 
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isLinux) {
       if (_windowId != null) {
         try {
           // print('[FloatingLyric] Updating text for window $_windowId: $text');
@@ -181,7 +182,7 @@ class FloatingLyricService {
 
   /// 检查是否有悬浮窗权限
   Future<bool> hasPermission() async {
-    if (Platform.isWindows || Platform.isMacOS || Platform.isIOS) return true;
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux || Platform.isIOS) return true;
     if (!isSupported) {
       return false;
     }
@@ -197,7 +198,7 @@ class FloatingLyricService {
 
   /// 请求悬浮窗权限
   Future<bool> requestPermission() async {
-    if (Platform.isWindows || Platform.isMacOS || Platform.isIOS) return true;
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux || Platform.isIOS) return true;
     if (!isSupported) {
       return false;
     }
@@ -240,7 +241,7 @@ class FloatingLyricService {
       params['paddingHorizontal'] = paddingHorizontal;
     if (paddingVertical != null) params['paddingVertical'] = paddingVertical;
 
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isLinux) {
       if (_windowId != null) {
         try {
           final controller = WindowController.fromWindowId(_windowId!);

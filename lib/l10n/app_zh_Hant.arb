@@ -1096,6 +1096,7 @@
   "platformHintIOS": "iOS: 受系統限制，使用預設路徑，可使用系統預設檔案瀏覽器查看",
   "platformHintWindows": "Windows: 可選擇任意可存取的目錄",
   "platformHintMacOS": "macOS: 可選擇任意可存取的目錄",
+  "platformHintLinux": "Linux: 可選擇任意可存取的目錄",
   "platformHintDefault": "選擇一個用於儲存下載檔案的目錄",
   "subtitleFolderParsed": "已解析",
   "subtitleFolderSaved": "已儲存",

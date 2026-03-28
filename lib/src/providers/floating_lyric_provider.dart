@@ -104,7 +104,7 @@ class FloatingLyricEnabledNotifier extends StateNotifier<bool> {
     await FloatingLyricService.instance.show('♪ - ♪', style: styleMap);
 
     // Windows 平台需要给予窗口一点初始化时间，避免立即发送消息导致 CHANNEL_UNREGISTERED
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isLinux) {
       await Future.delayed(const Duration(milliseconds: 500));
     }
 
