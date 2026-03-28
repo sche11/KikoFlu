@@ -1257,6 +1257,9 @@ class SEn extends S {
   String get showMetadata => 'Show Metadata';
 
   @override
+  String get relatedRecommendations => 'Related Works';
+
+  @override
   String get myTabsDisplaySettings => '\"My\" Page Settings';
 
   @override
@@ -3302,6 +3305,13 @@ class SEn extends S {
 
   @override
   String get showSubtitleTagOnCover => 'Show subtitle tag on cover image';
+
+  @override
+  String get recommendationsLabel => 'Related Recommendations';
+
+  @override
+  String get showRecommendations =>
+      'Show related recommendations on work detail page';
 
   @override
   String get circleInfo => 'Circle Info';

@@ -597,6 +597,7 @@
   "infoSectionVisibility": "Info Section Visibility",
   "imageSize": "Image Size",
   "showMetadata": "Show Metadata",
+  "relatedRecommendations": "Related Works",
 
   "myTabsDisplaySettings": "My Page Tab Settings",
   "showTab": "Show Tab",
@@ -1373,6 +1374,8 @@
   "showTranslateButton": "Show translate button for work title",
   "subtitleTagLabel": "Subtitle Tag",
   "showSubtitleTagOnCover": "Show subtitle tag on cover image",
+  "recommendationsLabel": "Related Recommendations",
+  "showRecommendations": "Show related recommendations on work detail page",
 
   "workCardDisplaySettings": "Work Card Display Settings",
   "circleInfo": "Circle Info",

@@ -1234,6 +1234,9 @@ class SZh extends S {
   String get showMetadata => '显示元数据';
 
   @override
+  String get relatedRecommendations => '相关推荐';
+
+  @override
   String get myTabsDisplaySettings => '\"我的\"界面设置';
 
   @override
@@ -3206,6 +3209,12 @@ class SZh extends S {
   String get showSubtitleTagOnCover => '在封面图上显示字幕标签';
 
   @override
+  String get recommendationsLabel => '相关推荐';
+
+  @override
+  String get showRecommendations => '在作品详情页显示相关推荐';
+
+  @override
   String get circleInfo => '社团信息';
 
   @override
@@ -4497,6 +4506,9 @@ class SZhHant extends SZh {
 
   @override
   String get showMetadata => '顯示元資料';
+
+  @override
+  String get relatedRecommendations => '相關推薦';
 
   @override
   String get myTabsDisplaySettings => '「我的」介面設定';
@@ -6469,6 +6481,12 @@ class SZhHant extends SZh {
 
   @override
   String get showSubtitleTagOnCover => '在封面圖上顯示字幕標籤';
+
+  @override
+  String get recommendationsLabel => '相關推薦';
+
+  @override
+  String get showRecommendations => '在作品詳情頁顯示相關推薦';
 
   @override
   String get circleInfo => '社團資訊';

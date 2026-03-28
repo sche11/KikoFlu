@@ -444,6 +444,7 @@
   "infoSectionVisibility": "情報セクションの表示",
   "imageSize": "画像サイズ",
   "showMetadata": "メタデータを表示",
+  "relatedRecommendations": "関連作品",
 
   "myTabsDisplaySettings": "マイページタブ設定",
   "showTab": "タブを表示",
@@ -1078,6 +1079,8 @@
   "showTranslateButton": "作品タイトルの翻訳ボタンを表示",
   "subtitleTagLabel": "字幕タグ",
   "showSubtitleTagOnCover": "カバー画像に字幕タグを表示",
+  "recommendationsLabel": "関連おすすめ",
+  "showRecommendations": "作品詳細ページに関連おすすめを表示",
 
   "workCardDisplaySettings": "作品カード表示設定",
   "circleInfo": "サークル情報",

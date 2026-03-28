@@ -1260,6 +1260,9 @@ class SRu extends S {
   String get showMetadata => 'Показывать метаданные';
 
   @override
+  String get relatedRecommendations => 'Похожие работы';
+
+  @override
   String get myTabsDisplaySettings => 'Настройки страницы «Моё»';
 
   @override
@@ -3319,6 +3322,13 @@ class SRu extends S {
 
   @override
   String get showSubtitleTagOnCover => 'Показывать метку субтитров на обложке';
+
+  @override
+  String get recommendationsLabel => 'Похожие рекомендации';
+
+  @override
+  String get showRecommendations =>
+      'Показывать похожие рекомендации на странице произведения';
 
   @override
   String get circleInfo => 'Информация о кружке';

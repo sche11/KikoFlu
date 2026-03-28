@@ -444,6 +444,7 @@
   "infoSectionVisibility": "Видимость разделов",
   "imageSize": "Размер изображения",
   "showMetadata": "Показывать метаданные",
+  "relatedRecommendations": "Похожие работы",
 
   "myTabsDisplaySettings": "Вкладки «Моё»",
   "showTab": "Показать вкладку",
@@ -1078,6 +1079,8 @@
   "showTranslateButton": "Показывать кнопку перевода заголовка произведения",
   "subtitleTagLabel": "Метка субтитров",
   "showSubtitleTagOnCover": "Показывать метку субтитров на обложке",
+  "recommendationsLabel": "Похожие рекомендации",
+  "showRecommendations": "Показывать похожие рекомендации на странице произведения",
 
   "workCardDisplaySettings": "Настройки отображения карточек произведений",
   "circleInfo": "Информация о кружке",

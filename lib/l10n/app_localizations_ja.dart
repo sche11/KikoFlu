@@ -1236,6 +1236,9 @@ class SJa extends S {
   String get showMetadata => 'メタデータを表示';
 
   @override
+  String get relatedRecommendations => '関連作品';
+
+  @override
   String get myTabsDisplaySettings => '「マイ」ページ設定';
 
   @override
@@ -3221,6 +3224,12 @@ class SJa extends S {
 
   @override
   String get showSubtitleTagOnCover => 'カバー画像に字幕タグを表示';
+
+  @override
+  String get recommendationsLabel => '関連おすすめ';
+
+  @override
+  String get showRecommendations => '作品詳細ページに関連おすすめを表示';
 
   @override
   String get circleInfo => 'サークル情報';

@@ -26,6 +26,7 @@ import '../providers/work_detail_display_provider.dart';
 import '../widgets/privacy_blur_cover.dart';
 import '../widgets/work_detail/tag_vote_dialog.dart';
 import '../widgets/work_detail/add_tag_dialog.dart';
+import '../widgets/work_detail/recommendation_section.dart';
 
 import '../widgets/cover_preview_dialog.dart';
 
@@ -1280,6 +1281,9 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
 
           // 文件浏览器组件 - 移除固定高度，让它自由展开
           FileExplorerWidget(work: work),
+
+          // 相关推荐
+          RecommendationSection(work: work),
         ],
       ),
     );

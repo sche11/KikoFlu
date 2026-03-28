@@ -11,6 +11,7 @@ class WorkDetailDisplaySettings {
   final bool showReleaseDate;
   final bool showTranslateButton;
   final bool showSubtitleTag;
+  final bool showRecommendations;
 
   const WorkDetailDisplaySettings({
     this.showRating = true,
@@ -21,6 +22,7 @@ class WorkDetailDisplaySettings {
     this.showReleaseDate = true,
     this.showTranslateButton = true,
     this.showSubtitleTag = true,
+    this.showRecommendations = true,
   });
 
   WorkDetailDisplaySettings copyWith({
@@ -32,6 +34,7 @@ class WorkDetailDisplaySettings {
     bool? showReleaseDate,
     bool? showTranslateButton,
     bool? showSubtitleTag,
+    bool? showRecommendations,
   }) {
     return WorkDetailDisplaySettings(
       showRating: showRating ?? this.showRating,
@@ -42,6 +45,7 @@ class WorkDetailDisplaySettings {
       showReleaseDate: showReleaseDate ?? this.showReleaseDate,
       showTranslateButton: showTranslateButton ?? this.showTranslateButton,
       showSubtitleTag: showSubtitleTag ?? this.showSubtitleTag,
+      showRecommendations: showRecommendations ?? this.showRecommendations,
     );
   }
 }
@@ -58,6 +62,7 @@ class WorkDetailDisplayNotifier
   static const String _keyReleaseDate = '${_keyPrefix}release_date';
   static const String _keyTranslateButton = '${_keyPrefix}translate_button';
   static const String _keySubtitleTag = '${_keyPrefix}subtitle_tag';
+  static const String _keyRecommendations = '${_keyPrefix}recommendations';
 
   WorkDetailDisplayNotifier() : super(const WorkDetailDisplaySettings()) {
     _loadSettings();
@@ -75,6 +80,7 @@ class WorkDetailDisplayNotifier
         showReleaseDate: prefs.getBool(_keyReleaseDate) ?? true,
         showTranslateButton: prefs.getBool(_keyTranslateButton) ?? true,
         showSubtitleTag: prefs.getBool(_keySubtitleTag) ?? true,
+        showRecommendations: prefs.getBool(_keyRecommendations) ?? true,
       );
     } catch (e) {
       // 加载失败，使用默认值
@@ -121,6 +127,11 @@ class WorkDetailDisplayNotifier
     await _saveSettings();
   }
 
+  Future<void> toggleRecommendations() async {
+    state = state.copyWith(showRecommendations: !state.showRecommendations);
+    await _saveSettings();
+  }
+
   Future<void> _saveSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -132,6 +143,7 @@ class WorkDetailDisplayNotifier
       await prefs.setBool(_keyReleaseDate, state.showReleaseDate);
       await prefs.setBool(_keyTranslateButton, state.showTranslateButton);
       await prefs.setBool(_keySubtitleTag, state.showSubtitleTag);
+      await prefs.setBool(_keyRecommendations, state.showRecommendations);
     } catch (e) {
       // 保存失败时静默处理
     }

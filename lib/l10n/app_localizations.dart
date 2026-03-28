@@ -2430,6 +2430,12 @@ abstract class S {
   /// **'Show Metadata'**
   String get showMetadata;
 
+  /// No description provided for @relatedRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Related Works'**
+  String get relatedRecommendations;
+
   /// No description provided for @myTabsDisplaySettings.
   ///
   /// In en, this message translates to:
@@ -5879,6 +5885,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Show subtitle tag on cover image'**
   String get showSubtitleTagOnCover;
+
+  /// No description provided for @recommendationsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Related Recommendations'**
+  String get recommendationsLabel;
+
+  /// No description provided for @showRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Show related recommendations on work detail page'**
+  String get showRecommendations;
 
   /// No description provided for @circleInfo.
   ///

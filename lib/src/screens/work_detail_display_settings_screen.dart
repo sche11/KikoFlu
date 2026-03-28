@@ -113,6 +113,17 @@ class WorkDetailDisplaySettingsScreen extends ConsumerWidget {
                   value: settings.showSubtitleTag,
                   onChanged: (_) => notifier.toggleSubtitleTag(),
                 ),
+                Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                SwitchListTile(
+                  secondary: Icon(
+                    Icons.recommend_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(S.of(context).recommendationsLabel),
+                  subtitle: Text(S.of(context).showRecommendations),
+                  value: settings.showRecommendations,
+                  onChanged: (_) => notifier.toggleRecommendations(),
+                ),
               ],
             ),
           ),
