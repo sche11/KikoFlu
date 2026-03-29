@@ -1052,19 +1052,19 @@ class SZh extends S {
   String get themeModeSystem => '跟随系统';
 
   @override
-  String get colorSchemeOceanBlue => '海洋蓝';
+  String get colorSchemeOceanBlue => '胖次蓝';
 
   @override
-  String get colorSchemeForestGreen => '森林绿';
+  String get colorSchemeForestGreen => '草原绿';
 
   @override
-  String get colorSchemeSunsetOrange => '日落橙';
+  String get colorSchemeSunsetOrange => '今日橙';
 
   @override
-  String get colorSchemeLavenderPurple => '薰衣草紫';
+  String get colorSchemeLavenderPurple => '基佬紫';
 
   @override
-  String get colorSchemeSakuraPink => '樱花粉';
+  String get colorSchemeSakuraPink => '哔哩粉';
 
   @override
   String get colorSchemeDynamic => '动态取色';
@@ -4341,19 +4341,19 @@ class SZhHant extends SZh {
   String get themeModeSystem => '跟隨系統';
 
   @override
-  String get colorSchemeOceanBlue => '海洋藍';
+  String get colorSchemeOceanBlue => '胖次藍';
 
   @override
-  String get colorSchemeForestGreen => '森林綠';
+  String get colorSchemeForestGreen => '草原綠';
 
   @override
-  String get colorSchemeSunsetOrange => '日落橙';
+  String get colorSchemeSunsetOrange => '今日橙';
 
   @override
-  String get colorSchemeLavenderPurple => '薰衣草紫';
+  String get colorSchemeLavenderPurple => '基佬紫';
 
   @override
-  String get colorSchemeSakuraPink => '櫻花粉';
+  String get colorSchemeSakuraPink => '嗶哩粉';
 
   @override
   String get colorSchemeDynamic => '動態取色';
