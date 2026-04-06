@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../providers/theme_provider.dart';
 
 class AppTheme {
-  // Windows 平台的字体配置
+  // 平台字体配置
   static TextTheme? _getTextTheme() {
     if (Platform.isWindows) {
       // 使用 Microsoft YaHei 作为主字体，确保中文显示一致
@@ -39,6 +39,50 @@ class AppTheme {
             TextStyle(fontFamily: fontFamily, fontWeight: FontWeight.w500),
         labelSmall:
             TextStyle(fontFamily: fontFamily, fontWeight: FontWeight.w500),
+      );
+    }
+    if (Platform.isLinux) {
+      // Linux 上 Flutter 默认使用 Roboto，不含 CJK 字符
+      // 通过 fontFamilyFallback 回退到系统 CJK 字体
+      const fallback = [
+        'Noto Sans CJK SC',
+        'Noto Sans CJK TC',
+        'Noto Sans CJK JP',
+        'Source Han Sans SC',
+        'WenQuanYi Micro Hei',
+        'Droid Sans Fallback',
+      ];
+      return const TextTheme(
+        displayLarge:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        displayMedium:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        displaySmall:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        headlineLarge:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        headlineMedium:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        headlineSmall:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        titleLarge:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        titleMedium:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        titleSmall:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        bodyLarge:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        bodyMedium:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        bodySmall:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        labelLarge:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        labelMedium:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        labelSmall:
+            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
       );
     }
     return null;
