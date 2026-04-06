@@ -15,6 +15,9 @@ class FloatingLyricService {
 
   final _onCloseController = StreamController<void>.broadcast();
   Stream<void> get onClose => _onCloseController.stream;
+  final _onTouchEnabledChangedController = StreamController<bool>.broadcast();
+  Stream<bool> get onTouchEnabledChanged =>
+      _onTouchEnabledChangedController.stream;
 
   FloatingLyricService._() {
     _platform.setMethodCallHandler(_handleMethodCall);
@@ -24,6 +27,11 @@ class FloatingLyricService {
     switch (call.method) {
       case 'onClose':
         _onCloseController.add(null);
+        break;
+      case 'onTouchEnabledChanged':
+        final arguments = call.arguments;
+        final enabled = arguments is Map ? arguments['enabled'] == true : false;
+        _onTouchEnabledChangedController.add(enabled);
         break;
     }
   }

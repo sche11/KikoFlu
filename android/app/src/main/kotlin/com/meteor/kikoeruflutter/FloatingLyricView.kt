@@ -6,9 +6,13 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 
 /**
@@ -18,9 +22,12 @@ import android.widget.TextView
 class FloatingLyricView(
     context: Context,
     private val windowManager: WindowManager,
-    private val layoutParams: WindowManager.LayoutParams
+    private val layoutParams: WindowManager.LayoutParams,
+    initialTouchEnabled: Boolean,
+    private val onTouchEnabledChanged: (Boolean) -> Unit
 ) : FrameLayout(context) {
     private val textView: TextView
+    private val lockIndicator: ImageView
     
     // 触摸事件相关变量
     private var initialX: Int = 0
@@ -28,10 +35,23 @@ class FloatingLyricView(
     private var initialTouchX: Float = 0f
     private var initialTouchY: Float = 0f
     private var isDragging = false
+    private var longPressTriggered = false
     private val dragThreshold = 10f // 拖动阈值，避免点击误触发
+    private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
+
+    private val longPressRunnable = Runnable {
+        longPressTriggered = true
+        touchEnabled = !touchEnabled
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        onTouchEnabledChanged(touchEnabled)
+    }
 
     // 是否允许触摸交互（拖动等）
-    var touchEnabled: Boolean = true
+    var touchEnabled: Boolean = initialTouchEnabled
+        set(value) {
+            field = value
+            updateLockIndicator()
+        }
 
     // 当前样式状态
     private var currentBackgroundColor: Int = Color.parseColor("#F2000000")
@@ -65,9 +85,32 @@ class FloatingLyricView(
             LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT
         ))
+
+        lockIndicator = ImageView(context).apply {
+            setImageResource(android.R.drawable.ic_lock_lock)
+            setColorFilter(Color.WHITE)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.parseColor("#66000000"))
+            }
+            val iconPadding = dpToPx(4f).toInt()
+            setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
+            alpha = 0.95f
+        }
+
+        addView(lockIndicator, LayoutParams(
+            dpToPx(24f).toInt(),
+            dpToPx(24f).toInt(),
+            Gravity.END or Gravity.BOTTOM
+        ).apply {
+            val margin = dpToPx(6f).toInt()
+            setMargins(margin, margin, margin, margin)
+        })
+
+        updateLockIndicator()
     }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (!touchEnabled) return false
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 // 记录初始位置
@@ -76,6 +119,9 @@ class FloatingLyricView(
                 initialTouchX = event.rawX
                 initialTouchY = event.rawY
                 isDragging = false
+                longPressTriggered = false
+                removeCallbacks(longPressRunnable)
+                postDelayed(longPressRunnable, longPressTimeout)
                 return true
             }
             
@@ -86,10 +132,13 @@ class FloatingLyricView(
                 
                 // 判断是否超过拖动阈值
                 if (!isDragging && (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold)) {
-                    isDragging = true
+                    removeCallbacks(longPressRunnable)
+                    if (touchEnabled) {
+                        isDragging = true
+                    }
                 }
                 
-                if (isDragging) {
+                if (isDragging && touchEnabled) {
                     // 更新悬浮窗位置
                     layoutParams.x = initialX + dx.toInt()
                     layoutParams.y = initialY + dy.toInt()
@@ -104,7 +153,8 @@ class FloatingLyricView(
             }
             
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (!isDragging) {
+                removeCallbacks(longPressRunnable)
+                if (!isDragging && !longPressTriggered) {
                     // 如果没有拖动，可以在这里处理点击事件
                     performClick()
                 }
@@ -118,6 +168,10 @@ class FloatingLyricView(
         super.performClick()
         // 可以在这里添加点击事件处理
         return true
+    }
+
+    private fun updateLockIndicator() {
+        lockIndicator.visibility = if (touchEnabled) View.GONE else View.VISIBLE
     }
 
     /**

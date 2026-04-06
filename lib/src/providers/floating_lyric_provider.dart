@@ -24,9 +24,17 @@ final floatingLyricTouchEnabledProvider =
 class FloatingLyricTouchEnabledNotifier extends StateNotifier<bool> {
   static const _key = 'floating_lyric_touch_enabled';
   final Ref ref;
+  StreamSubscription<bool>? _touchEnabledSubscription;
 
   FloatingLyricTouchEnabledNotifier(this.ref) : super(true) {
     _load();
+    _listenToNativeChanges();
+  }
+
+  @override
+  void dispose() {
+    _touchEnabledSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -34,13 +42,31 @@ class FloatingLyricTouchEnabledNotifier extends StateNotifier<bool> {
     state = prefs.getBool(_key) ?? true;
   }
 
-  Future<void> toggle() async {
-    final newValue = !state;
-    state = newValue;
+  void _listenToNativeChanges() {
+    if (!Platform.isAndroid) return;
+
+    _touchEnabledSubscription =
+        FloatingLyricService.instance.onTouchEnabledChanged.listen((enabled) async {
+      if (state == enabled) return;
+
+      state = enabled;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_key, enabled);
+    });
+  }
+
+  Future<void> setEnabled(bool enabled, {bool applyToWindow = true}) async {
+    state = enabled;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_key, newValue);
-    // 实时应用到已显示的悬浮窗
-    await FloatingLyricService.instance.setTouchEnabled(newValue);
+    await prefs.setBool(_key, enabled);
+
+    if (applyToWindow) {
+      await FloatingLyricService.instance.setTouchEnabled(enabled);
+    }
+  }
+
+  Future<void> toggle() async {
+    await setEnabled(!state);
   }
 }
 

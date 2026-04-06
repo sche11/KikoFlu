@@ -372,15 +372,15 @@ class SRu extends S {
   String get floatingLyricDisabled => 'Выключено';
 
   @override
-  String get floatingLyricTouch => 'Касание плавающих субтитров';
+  String get floatingLyricTouch => 'Блокировка плавающих субтитров';
 
   @override
   String get floatingLyricTouchEnabled =>
-      'Включено — можно перетаскивать субтитры';
+      'Разблокировано — можно перетаскивать, удерживайте для блокировки';
 
   @override
   String get floatingLyricTouchDisabled =>
-      'Выключено — касание проходит сквозь субтитры';
+      'Заблокировано — удерживайте субтитры для разблокировки';
 
   @override
   String get styleSettings => 'Настройки стиля';

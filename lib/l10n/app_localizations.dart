@@ -801,19 +801,19 @@ abstract class S {
   /// No description provided for @floatingLyricTouch.
   ///
   /// In en, this message translates to:
-  /// **'Floating Lyric Touch'**
+  /// **'Floating Lyric Lock'**
   String get floatingLyricTouch;
 
   /// No description provided for @floatingLyricTouchEnabled.
   ///
   /// In en, this message translates to:
-  /// **'Enabled - Drag floating lyrics'**
+  /// **'Unlocked - Drag floating lyrics, long press to lock'**
   String get floatingLyricTouchEnabled;
 
   /// No description provided for @floatingLyricTouchDisabled.
   ///
   /// In en, this message translates to:
-  /// **'Disabled - Touch passes through'**
+  /// **'Locked - Long press floating lyrics to unlock'**
   String get floatingLyricTouchDisabled;
 
   /// No description provided for @styleSettings.

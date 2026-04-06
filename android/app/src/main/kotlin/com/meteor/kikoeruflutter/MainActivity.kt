@@ -13,10 +13,12 @@ class MainActivity : AudioServiceActivity() {
         
         // 注册悬浮字幕插件
         floatingLyricPlugin = FloatingLyricPlugin.getInstance(this)
-        MethodChannel(
+        val channel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             FloatingLyricPlugin.CHANNEL
-        ).setMethodCallHandler(floatingLyricPlugin)
+        )
+        floatingLyricPlugin?.attachChannel(channel)
+        channel.setMethodCallHandler(floatingLyricPlugin)
     }
 
     override fun onDestroy() {

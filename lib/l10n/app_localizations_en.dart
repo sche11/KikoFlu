@@ -371,13 +371,15 @@ class SEn extends S {
   String get floatingLyricDisabled => 'Disabled';
 
   @override
-  String get floatingLyricTouch => 'Floating Lyric Touch';
+  String get floatingLyricTouch => 'Floating Lyric Lock';
 
   @override
-  String get floatingLyricTouchEnabled => 'Enabled - Drag floating lyrics';
+  String get floatingLyricTouchEnabled =>
+      'Unlocked - Drag floating lyrics, long press to lock';
 
   @override
-  String get floatingLyricTouchDisabled => 'Disabled - Touch passes through';
+  String get floatingLyricTouchDisabled =>
+      'Locked - Long press floating lyrics to unlock';
 
   @override
   String get styleSettings => 'Style Settings';

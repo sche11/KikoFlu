@@ -7,10 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.WindowManager
-import android.widget.TextView
-import androidx.core.content.ContextCompat
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -38,9 +35,14 @@ class FloatingLyricPlugin private constructor(private val context: Context) : Me
     private var floatingView: FloatingLyricView? = null
     private var isShowing = false
     private var touchEnabled = true
+    private var channel: MethodChannel? = null
 
     init {
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    }
+
+    fun attachChannel(channel: MethodChannel) {
+        this.channel = channel
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -102,8 +104,7 @@ class FloatingLyricPlugin private constructor(private val context: Context) : Me
                 // 设置触摸模式
                 flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-                        (if (!touchEnabled) WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE else 0)
+                        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 format = PixelFormat.TRANSLUCENT
                 gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
                 x = 0 // 水平居中
@@ -111,7 +112,14 @@ class FloatingLyricPlugin private constructor(private val context: Context) : Me
             }
 
             // 创建悬浮窗视图（传入 windowManager 和 params 以支持拖动）
-            floatingView = FloatingLyricView(context, windowManager!!, params)
+            floatingView = FloatingLyricView(
+                context,
+                windowManager!!,
+                params,
+                touchEnabled
+            ) { enabled ->
+                handleTouchEnabledChanged(enabled)
+            }
             floatingView?.updateText(text)
 
             // 添加到窗口
@@ -209,20 +217,15 @@ class FloatingLyricPlugin private constructor(private val context: Context) : Me
         try {
             touchEnabled = enabled
             floatingView?.touchEnabled = enabled
-            // 动态更新窗口 FLAG_NOT_TOUCHABLE
-            if (isShowing && floatingView != null) {
-                val params = (floatingView!!.layoutParams as WindowManager.LayoutParams)
-                if (enabled) {
-                    params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
-                } else {
-                    params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                }
-                windowManager?.updateViewLayout(floatingView as android.view.View, params)
-            }
             result.success(true)
         } catch (e: Exception) {
             result.error("SET_TOUCH_FAILED", "设置触摸模式失败: ${e.message}", null)
         }
+    }
+
+    private fun handleTouchEnabledChanged(enabled: Boolean) {
+        touchEnabled = enabled
+        channel?.invokeMethod("onTouchEnabledChanged", mapOf("enabled" to enabled))
     }
 
     /**

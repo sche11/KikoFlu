@@ -366,13 +366,13 @@ class SZh extends S {
   String get floatingLyricDisabled => '未启用';
 
   @override
-  String get floatingLyricTouch => '悬浮字幕触摸';
+  String get floatingLyricTouch => '悬浮字幕锁定';
 
   @override
-  String get floatingLyricTouchEnabled => '已启用 - 可拖动悬浮字幕';
+  String get floatingLyricTouchEnabled => '已解锁 - 可拖动悬浮字幕，长按可锁定';
 
   @override
-  String get floatingLyricTouchDisabled => '已禁用 - 触摸穿透悬浮字幕';
+  String get floatingLyricTouchDisabled => '已锁定 - 长按悬浮字幕解锁';
 
   @override
   String get styleSettings => '样式设置';
@@ -3664,13 +3664,13 @@ class SZhHant extends SZh {
   String get floatingLyricDisabled => '未啟用';
 
   @override
-  String get floatingLyricTouch => '懸浮字幕觸控';
+  String get floatingLyricTouch => '懸浮字幕鎖定';
 
   @override
-  String get floatingLyricTouchEnabled => '已啟用 - 可拖動懸浮字幕';
+  String get floatingLyricTouchEnabled => '已解鎖 - 可拖動懸浮字幕，長按可鎖定';
 
   @override
-  String get floatingLyricTouchDisabled => '已停用 - 觸控穿透懸浮字幕';
+  String get floatingLyricTouchDisabled => '已鎖定 - 長按懸浮字幕解鎖';
 
   @override
   String get styleSettings => '樣式設定';
