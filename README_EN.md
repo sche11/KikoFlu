@@ -50,7 +50,7 @@
 - Multi-dimensional filtering (tags, rating, release date, etc.)
 - Detailed work information display
 
-### 🌐 Internationalization (Coming Soon)
+### 🌐 Internationalization
 - 简体中文 / 繁體中文 / English / 日本語 / Русский
 
 ### ⚙️ Settings
