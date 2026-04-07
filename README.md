@@ -4,6 +4,7 @@
   # KikoFlu
 
   [English](README_EN.md) | [日本語](README_JA.md) | 简体中文
+  
   一个跨平台同人音声客户端，支持连接 Kikoeru 自建服务器或在线服务
 
   [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)

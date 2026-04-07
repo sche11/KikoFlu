@@ -4,6 +4,7 @@
   # KikoFlu
 
   English | [日本語](README_JA.md) | [简体中文](README.md)
+  
   A cross-platform doujin voice client. Supports self-hosted Kikoeru servers and online services.
 
   [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)

@@ -4,6 +4,7 @@
   # KikoFlu
 
   [English](README_EN.md) | 日本語 | [简体中文](README.md)
+  
   クロスプラットフォーム同人音声クライアント。Kikoeru 自前サーバーおよびオンラインサービスに対応。
 
   [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)
