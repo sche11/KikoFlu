@@ -38,8 +38,23 @@ class LyricParser {
     // 检测是否是 LRC 格式（包含 [mm:ss.xx] 格式的时间戳）
     if (content.contains(RegExp(r'\[\d{2}:\d{2}\.\d{2}\]'))) {
       result = parseLRC(content);
-    } else {
-      // 尝试 WebVTT 格式
+    }
+    // 检测 ASS/SSA 格式（包含 [Events] 区段和 Dialogue: 行）
+    else if (content.contains('[Events]') &&
+        content.contains(RegExp(r'^Dialogue:', multiLine: true))) {
+      result = parseASS(content);
+    }
+    // 检测 TTML/DFXP 格式（XML 中含 <p begin= 标签）
+    else if (content.contains(RegExp(r'<p\s+begin='))) {
+      result = parseTTML(content);
+    }
+    // 检测 SBV 格式（YouTube，H:MM:SS.mmm,H:MM:SS.mmm 逗号分隔的时间对）
+    else if (content
+        .contains(RegExp(r'^\d+:\d{2}:\d{2}\.\d{3},\d+:\d{2}:\d{2}\.\d{3}', multiLine: true))) {
+      result = parseSBV(content);
+    }
+    // 尝试 WebVTT / SRT 格式
+    else {
       result = parseWebVTT(content);
     }
 
@@ -107,20 +122,20 @@ class LyricParser {
       }
 
       final timeMatch = RegExp(
-              r'(?:(\d{2}):)?(\d{2}):(\d{2}\.\d{3})\s*-->\s*(?:(\d{2}):)?(\d{2}):(\d{2}\.\d{3})')
+              r'(?:(\d{2}):)?(\d{2}):(\d{2}[.,]\d{3})\s*-->\s*(?:(\d{2}):)?(\d{2}):(\d{2}[.,]\d{3})')
           .firstMatch(line);
 
       if (timeMatch != null) {
         final startTime = _parseTime(
           int.parse(timeMatch.group(1) ?? '0'),
           int.parse(timeMatch.group(2)!),
-          double.parse(timeMatch.group(3)!),
+          double.parse(timeMatch.group(3)!.replaceAll(',', '.')),
         );
 
         final endTime = _parseTime(
           int.parse(timeMatch.group(4) ?? '0'),
           int.parse(timeMatch.group(5)!),
-          double.parse(timeMatch.group(6)!),
+          double.parse(timeMatch.group(6)!.replaceAll(',', '.')),
         );
 
         i++;
@@ -141,6 +156,178 @@ class LyricParser {
       } else {
         i++;
       }
+    }
+
+    return _finalizeLyrics(lyrics);
+  }
+
+  /// 解析 ASS/SSA 格式
+  /// 格式: Dialogue: Layer,H:MM:SS.cc,H:MM:SS.cc,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+  static List<LyricLine> parseASS(String content) {
+    final lines = content.split('\n');
+    final List<LyricLine> lyrics = [];
+
+    // ASS 时间格式: H:MM:SS.cc (centiseconds)
+    final timeRegex = RegExp(r'(\d+):(\d{2}):(\d{2})\.(\d{2})');
+
+    for (final line in lines) {
+      final trimmed = line.trim();
+      if (!trimmed.startsWith('Dialogue:')) continue;
+
+      // 找到 Dialogue: 后面的内容，按逗号分割（前9个逗号是字段分隔，第10个字段是文本）
+      final afterDialogue = trimmed.substring(trimmed.indexOf(':') + 1).trim();
+      final parts = afterDialogue.split(',');
+      if (parts.length < 10) continue;
+
+      final startMatch = timeRegex.firstMatch(parts[1].trim());
+      final endMatch = timeRegex.firstMatch(parts[2].trim());
+      if (startMatch == null || endMatch == null) continue;
+
+      final startTime = _parseASSTime(startMatch);
+      final endTime = _parseASSTime(endMatch);
+
+      // 文本是第10个字段之后的所有内容（文本中可能含逗号）
+      var text = parts.sublist(9).join(',');
+
+      // 处理 ASS 特殊标记
+      text = text
+          .replaceAll(RegExp(r'\{[^}]*\}'), '') // 移除 {\\b1} 等内联样式
+          .replaceAll('\\N', '\n')               // 换行符
+          .replaceAll('\\n', '\n')               // 软换行
+          .replaceAll('\\h', ' ')                // 硬空格
+          .trim();
+
+      if (text.isEmpty) continue;
+
+      lyrics.add(LyricLine(
+        startTime: startTime,
+        endTime: endTime,
+        text: text,
+      ));
+    }
+
+    return _finalizeLyrics(lyrics);
+  }
+
+  /// 解析 ASS 时间: H:MM:SS.cc → Duration
+  static Duration _parseASSTime(RegExpMatch match) {
+    final hours = int.parse(match.group(1)!);
+    final minutes = int.parse(match.group(2)!);
+    final seconds = int.parse(match.group(3)!);
+    final centiseconds = int.parse(match.group(4)!);
+    return Duration(
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+      milliseconds: centiseconds * 10,
+    );
+  }
+
+  /// 解析 SBV 格式 (YouTube)
+  /// 格式:
+  /// H:MM:SS.mmm,H:MM:SS.mmm
+  /// Text content
+  static List<LyricLine> parseSBV(String content) {
+    final lines = content.split('\n');
+    final List<LyricLine> lyrics = [];
+
+    final timeRegex =
+        RegExp(r'(\d+):(\d{2}):(\d{2})\.(\d{3}),(\d+):(\d{2}):(\d{2})\.(\d{3})');
+
+    int i = 0;
+    while (i < lines.length) {
+      final line = lines[i].trim();
+
+      final timeMatch = timeRegex.firstMatch(line);
+      if (timeMatch != null) {
+        final startTime = Duration(
+          hours: int.parse(timeMatch.group(1)!),
+          minutes: int.parse(timeMatch.group(2)!),
+          seconds: int.parse(timeMatch.group(3)!),
+          milliseconds: int.parse(timeMatch.group(4)!),
+        );
+        final endTime = Duration(
+          hours: int.parse(timeMatch.group(5)!),
+          minutes: int.parse(timeMatch.group(6)!),
+          seconds: int.parse(timeMatch.group(7)!),
+          milliseconds: int.parse(timeMatch.group(8)!),
+        );
+
+        i++;
+        final textLines = <String>[];
+        while (i < lines.length && lines[i].trim().isNotEmpty) {
+          textLines.add(lines[i].trim());
+          i++;
+        }
+
+        if (textLines.isNotEmpty) {
+          lyrics.add(LyricLine(
+            startTime: startTime,
+            endTime: endTime,
+            text: textLines.join('\n'),
+          ));
+        }
+      } else {
+        i++;
+      }
+    }
+
+    return _finalizeLyrics(lyrics);
+  }
+
+  /// 解析 TTML/DFXP 格式 (XML)
+  /// 格式: <p begin="HH:MM:SS.mmm" end="HH:MM:SS.mmm">Text</p>
+  static List<LyricLine> parseTTML(String content) {
+    final List<LyricLine> lyrics = [];
+
+    // 匹配 <p begin="..." end="...">...</p>（支持跨行）
+    final pRegex = RegExp(
+      r'<p\s+begin="([^"]+)"\s+end="([^"]+)"[^>]*>(.*?)</p>',
+      dotAll: true,
+    );
+
+    // TTML 时间格式: HH:MM:SS.mmm 或 HH:MM:SS:ff
+    final timeRegex = RegExp(r'(\d{2}):(\d{2}):(\d{2})[.:](\d{3})');
+
+    for (final match in pRegex.allMatches(content)) {
+      final beginStr = match.group(1)!;
+      final endStr = match.group(2)!;
+      var text = match.group(3)!;
+
+      final startMatch = timeRegex.firstMatch(beginStr);
+      final endMatch = timeRegex.firstMatch(endStr);
+      if (startMatch == null || endMatch == null) continue;
+
+      final startTime = Duration(
+        hours: int.parse(startMatch.group(1)!),
+        minutes: int.parse(startMatch.group(2)!),
+        seconds: int.parse(startMatch.group(3)!),
+        milliseconds: int.parse(startMatch.group(4)!),
+      );
+      final endTime = Duration(
+        hours: int.parse(endMatch.group(1)!),
+        minutes: int.parse(endMatch.group(2)!),
+        seconds: int.parse(endMatch.group(3)!),
+        milliseconds: int.parse(endMatch.group(4)!),
+      );
+
+      // 移除 XML/HTML 标签，保留文本
+      text = text
+          .replaceAll(RegExp(r'<[^>]+>'), '')
+          .replaceAll('&amp;', '&')
+          .replaceAll('&lt;', '<')
+          .replaceAll('&gt;', '>')
+          .replaceAll('&quot;', '"')
+          .replaceAll('&#39;', "'")
+          .trim();
+
+      if (text.isEmpty) continue;
+
+      lyrics.add(LyricLine(
+        startTime: startTime,
+        endTime: endTime,
+        text: text,
+      ));
     }
 
     return _finalizeLyrics(lyrics);

@@ -60,12 +60,11 @@ class EncodingUtils {
     }
 
     // 4. 尝试 UTF-8 解码（无 BOM）
+    // allowMalformed: false 会对无效 UTF-8 字节序列抛异常
+    // 如果解码成功，即使内容包含 U+FFFD 也是文件原始内容，不应拒绝
     try {
       final decoded = utf8.decode(bytes, allowMalformed: false);
-      // 检查是否有替换字符（通常是解码错误的标志）
-      if (!decoded.contains('\uFFFD') && !decoded.contains('�')) {
-        return (decoded, 'UTF-8');
-      }
+      return (decoded, 'UTF-8');
     } catch (e) {
       // UTF-8 解码失败，继续尝试其他编码
     }
