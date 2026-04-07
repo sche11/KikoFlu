@@ -3,120 +3,115 @@
 
   # KikoFlu
 
-   一个跨平台同人音声客户端，基于Kikoeru 
+  一个跨平台同人音声客户端，支持连接 Kikoeru 自建服务器或在线服务
 
   [![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)](https://flutter.dev)
-  [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS-lightgrey)](https://github.com/Meteor-Sage/Kikoeru-Flutter)
+  [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](#)
   [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
-</div>
+  [English](README_EN.md) | [日本語](README_JA.md) | 简体中文
 
+</div>
 
 <div align="center">
-  <img src="screenshots/8.png" width="900" alt="">
+  <img src="screenshots/8.png" width="900" alt="KikoFlu 截图">
 </div>
-
-
-</div>
-
-
 
 ## 特性
 
-### 🎵 媒体
-- 自动缓存机制
-- 后台播放
+### 🎵 媒体播放
+- 后台播放与自动缓存机制
 - 倍速播放
-- 自动字幕
 - 单曲循环、列表循环、随机播放
-- 支持整个作品或选择性下载
-- 多媒体支持：音频、视频、文本、图片、pdf...
-- 字幕导入、编辑、调轴、翻译、台词自动载入
+- 多媒体支持：音频、视频、文本、图片、PDF 等
+- 支持整个作品或选择性下载，并发下载管理
+- 离线下载搜索与排序
+
+### 📝 字幕系统
+- 自动字幕加载
+- 字幕导入、编辑、调轴
+- 字幕翻译（播放时实时翻译歌词/台词）
+- 字幕库（SQLite 索引，快速检索）
 - 支持保存目录修改，跨硬盘拷贝
 
 ### 🎨 界面
-- 全平台支持
-- 遵循Material Design 3设计规范
-- 支持横屏模式
-- 优化的页面转场和交互反馈
-- 完美适配明暗主题
-- 标题，文件目录，文本文件翻译
+- 全平台支持（Android / iOS / Windows / macOS / Linux）
+- Material Design 3 设计规范
+- 横屏模式支持
+- 明暗主题自适应
+- 标题、文件目录、文本文件翻译
+- 标签自动翻译（中/英/日）
 - 防社死模式
 - 评分系统
+- 推荐作品功能
 
 ### 🔍 搜索
-- 强大的高级搜索机制，支持多标签/排除标签搜索
-- 多维度筛选作品（标签、评分、发售日期等）
-- 完整展示作品信息
+- 高级搜索，支持多标签 / 排除标签
+- 多维度筛选（标签、评分、发售日期等）
+- 完整作品信息展示
+
+### 🌐 国际化
+- 简体中文 / 繁體中文 / English / 日本語 / Русский
 
 ### ⚙️ 设置
 - 多账户支持
-- 支持自定义服务器地址[wiki](https://github.com/Meteor-Sage/KikoFlu/wiki/%E4%BD%BF%E7%94%A8%E8%87%AA%E5%BB%BA%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E5%99%A8)，可测试连接延迟
-- 自定义缓存大小限制和清理策略
+- 自定义服务器地址（[使用指南](https://github.com/Meteor-Sage/KikoFlu/wiki/%E4%BD%BF%E7%94%A8%E8%87%AA%E5%BB%BA%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E5%99%A8)），可测试连接延迟
+- 自定义缓存大小限制与清理策略
 - 主题模式、配色方案自由选择
-- 大量自定义UI，可简洁可详细
+- 丰富的界面自定义选项
+- 应用内日志系统（支持导出）
 - 更新检查
 
+### 📱 Android 特性
+- 悬浮歌词（锁定 / 解锁 / 触控穿透）
 
 ---
 
-## [Releases](https://github.com/Meteor-Sage/Kikoeru-Flutter/releases)
+## 下载
+
+前往 [Releases](https://github.com/Meteor-Sage/KikoFlu/releases) 下载最新版本。
+
+支持平台：Android（universal / arm64 / armeabi-v7a / x86_64）、iOS（未签名 IPA）、Windows（安装包 / 便携版）、macOS（DMG）、Linux（x64 / arm64）
 
 ---
 
 ## 源码构建
 
-- Flutter SDK 3.0 或更高版本
-- Dart SDK 3.0 或更高版本
-- VS Code
+### 环境要求
+- Flutter SDK 3.0+
+- Dart SDK 3.0+
 
 ```bash
-git clone https://github.com/Meteor-Sage/Kikoeru-Flutter.git
-cd Kikoeru-Flutter
-```
-
-```bash
+git clone https://github.com/Meteor-Sage/KikoFlu.git
+cd KikoFlu
 flutter pub get
 ```
 
-### Android
-```bash
-flutter build apk --release --split-per-abi
+### 构建命令
 
-flutter build apk --release
-```
+| 平台 | 命令 |
+|------|------|
+| Android | `flutter build apk --release --split-per-abi` |
+| Windows | `flutter build windows --release` |
+| macOS | `flutter build macos --release` |
+| Linux | `flutter build linux --release` |
+| iOS | `./build_ios_xcode.sh` |
 
-### Windows
-```bash
-flutter build windows --release
-```
+---
 
-### iOS
-```bash
-./build_ios_xcode.sh
-```
+## 相关项目
 
-### macOS
-```bash
-./build_macos.sh
-```
-
+- [Kikoeru](https://github.com/Number178/kikoeru-express) — 自建后端服务器（推荐）
+- [asmr.one](https://www.asmr.one) — 在线服务
 
 ## 开源协议
 
 [GPL-3.0 License](LICENSE)
 
----
-
-## 相关
-- [Kikoeru](https://github.com/Number178/kikoeru-express) - 自建后端服务器
-- [asmr.one](https://www.asmr.one) - 在线服务
----
-
 ## 联系方式
 
-- **项目地址**: [GitHub](https://github.com/Meteor-Sage/Kikoeru-Flutter)
-- **问题反馈**: [Issues](https://github.com/Meteor-Sage/Kikoeru-Flutter/issues) [Telegram](https://t.me/+PrkiN-pZrXs4ZTU1)
+- **问题反馈**：[Issues](https://github.com/Meteor-Sage/KikoFlu/issues)
+- **交流群组**：[Telegram](https://t.me/+PrkiN-pZrXs4ZTU1)
 
 ---
 
