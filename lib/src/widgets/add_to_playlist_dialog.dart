@@ -5,6 +5,7 @@ import '../models/playlist.dart';
 import '../providers/auth_provider.dart';
 import '../providers/playlist_detail_provider.dart';
 import '../providers/playlists_provider.dart';
+import '../services/log_service.dart';
 import '../utils/snackbar_util.dart';
 import '../../l10n/app_localizations.dart';
 import 'responsive_dialog.dart';
@@ -53,8 +54,15 @@ class AddToPlaylistDialog extends ConsumerStatefulWidget {
 }
 
 class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
+  static final _log = LogService.instance;
+
   bool _isAdding = false;
+  bool _isLoadingPlaylists = true;
   bool _isCheckingMembership = false;
+  String? _loadError;
+
+  /// 本地加载的全部播放列表（不依赖分页 provider）
+  List<Playlist> _allPlaylists = [];
 
   /// 记录作品已存在于哪些播放列表（playlistId -> true）
   final Set<String> _inPlaylists = {};
@@ -62,18 +70,60 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
   @override
   void initState() {
     super.initState();
-    // 加载播放列表
-    Future.microtask(() async {
-      await ref.read(playlistsProvider.notifier).load(refresh: true);
-      // 加载完播放列表后，检查作品在哪些播放列表中
-      _checkWorkMembership();
-    });
+    Future.microtask(() => _loadAllPlaylists());
   }
 
-  /// 检查作品在哪些播放列表中
+  /// 加载全部播放列表（遍历所有分页）
+  Future<void> _loadAllPlaylists() async {
+    setState(() {
+      _isLoadingPlaylists = true;
+      _loadError = null;
+    });
+
+    try {
+      final apiService = ref.read(kikoeruApiServiceProvider);
+      final allPlaylists = <Playlist>[];
+      int page = 1;
+      const pageSize = 96; // API 最大数量
+      const maxPages = 5;
+
+      while (page <= maxPages) {
+        final result = await apiService.getUserPlaylists(
+          page: page,
+          pageSize: pageSize,
+          filterBy: 'all',
+        );
+
+        final List<dynamic> rawList = result['playlists'] as List? ?? [];
+        final playlists = rawList
+            .map((item) => Playlist.fromJson(item as Map<String, dynamic>))
+            .toList();
+        allPlaylists.addAll(playlists);
+
+        if (playlists.length < pageSize) break;
+        page++;
+      }
+
+      if (mounted) {
+        setState(() {
+          _allPlaylists = allPlaylists;
+          _isLoadingPlaylists = false;
+        });
+        _checkWorkMembership();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingPlaylists = false;
+          _loadError = e.toString();
+        });
+      }
+    }
+  }
+
+  /// 检查作品在哪些播放列表中（遍历所有页以保证准确性）
   Future<void> _checkWorkMembership() async {
-    final playlists = ref.read(playlistsProvider).playlists;
-    if (playlists.isEmpty) return;
+    if (_allPlaylists.isEmpty) return;
 
     setState(() => _isCheckingMembership = true);
 
@@ -82,22 +132,15 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
 
       // 并行检查所有播放列表
       final results = await Future.wait(
-        playlists.map((playlist) async {
+        _allPlaylists.map((playlist) async {
           try {
-            // 加载播放列表的所有作品来检查
-            // 为了效率，只加载第一页，通常用户不会有太多播放列表
-            final response = await apiService.getPlaylistWorks(
-              playlistId: playlist.id,
-              page: 1,
-              pageSize: 100, // 加载较多以提高准确性
+            return MapEntry(
+              playlist.id,
+              await _isWorkInPlaylist(apiService, playlist),
             );
-
-            final works = response['works'] as List;
-            final containsWork =
-                works.any((work) => work['id'] == widget.workId);
-
-            return MapEntry(playlist.id, containsWork);
           } catch (e) {
+            _log.debug('检查播放列表成员失败: ${playlist.displayName}, $e',
+                tag: 'Playlist');
             return MapEntry(playlist.id, false);
           }
         }),
@@ -119,6 +162,29 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
         setState(() => _isCheckingMembership = false);
       }
     }
+  }
+
+  /// 遍历播放列表所有页检查作品是否存在
+  Future<bool> _isWorkInPlaylist(
+      dynamic apiService, Playlist playlist) async {
+    int page = 1;
+    const pageSize = 96; // API 最大数量
+    const maxPages = 5;
+
+    while (page <= maxPages) {
+      final response = await apiService.getPlaylistWorks(
+        playlistId: playlist.id,
+        page: page,
+        pageSize: pageSize,
+      );
+
+      final works = response['works'] as List;
+      if (works.any((work) => work['id'] == widget.workId)) return true;
+
+      if (works.length < pageSize) return false;
+      page++;
+    }
+    return false;
   }
 
   Future<void> _addToPlaylist(Playlist playlist) async {
@@ -204,7 +270,6 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final playlistsState = ref.watch(playlistsProvider);
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
@@ -266,32 +331,30 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
         ),
         const Divider(height: 1),
         // 播放列表
-        if (playlistsState.isLoading)
+        if (_isLoadingPlaylists)
           const Padding(
             padding: EdgeInsets.all(32),
             child: Center(child: CircularProgressIndicator()),
           )
-        else if (playlistsState.error != null)
+        else if (_loadError != null)
           Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
               children: [
                 Text(
-                  S.of(context).loadFailedWithError(playlistsState.error!),
+                  S.of(context).loadFailedWithError(_loadError!),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
-                  onPressed: () {
-                    ref.read(playlistsProvider.notifier).load(refresh: true);
-                  },
+                  onPressed: _loadAllPlaylists,
                   icon: const Icon(Icons.refresh),
                   label: Text(S.of(context).retry),
                 ),
               ],
             ),
           )
-        else if (playlistsState.playlists.isEmpty)
+        else if (_allPlaylists.isEmpty)
           Padding(
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -315,9 +378,9 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
           Flexible(
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: playlistsState.playlists.length,
+              itemCount: _allPlaylists.length,
               itemBuilder: (context, index) {
-                final playlist = playlistsState.playlists[index];
+                final playlist = _allPlaylists[index];
                 final isInPlaylist = _inPlaylists.contains(playlist.id);
 
                 return ListTile(
