@@ -414,6 +414,7 @@ class DownloadService {
             if (now - lastUpdateTime > updateInterval || received == total) {
               lastUpdateTime = now;
               _updateTask(task.copyWith(
+                status: DownloadStatus.downloading,
                 downloadedBytes: received,
                 totalBytes: total,
               )); // 不立即保存，使用延迟保存
@@ -427,7 +428,9 @@ class DownloadService {
 
       _log.info('下载完成: ${task.fileName}', tag: 'Download');
 
-      final completedTask = task.copyWith(
+      // 从 _tasks 获取当前版本以保留进度数据
+      final currentTask = _tasks.firstWhere((t) => t.id == task.id, orElse: () => task);
+      final completedTask = currentTask.copyWith(
         status: DownloadStatus.completed,
         completedAt: DateTime.now(),
       );
