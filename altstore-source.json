@@ -19,10 +19,10 @@
       "versions": [
         {
           "version": "3.1.1",
-          "date": "2025-01-01",
-          "size": 50000000,
-          "downloadURL": "https://github.com/pa-jesusf/KikoFlu/releases/latest/download/KikoFlu-ios-unsigned.ipa",
-          "localizedDescription": "Latest release"
+          "date": "2026-04-07",
+          "size": 13143146,
+          "downloadURL": "https://github.com/pa-jesusf/KikoFlu/releases/download/v3.1.1/KikoFlu-ios-unsigned_311.ipa",
+          "localizedDescription": "新增：Linux支持、多语言支持、快捷翻译按钮、推荐系统、悬浮字幕触摸开关、已下载搜索排序、日志界面、字幕库索引优化、本地文件扫描、低认同度标签区分显示\n修复：最大并行下载数保护、悬浮字幕多行显示、UI动画修复、字幕解码稳定性、iOS无法保存文件"
         }
       ]
     }
