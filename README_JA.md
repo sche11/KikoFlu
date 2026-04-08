@@ -74,6 +74,14 @@
 
 対応プラットフォーム：Android（universal / arm64 / armeabi-v7a / x86_64）、iOS（未署名 IPA）、Windows（インストーラー / ポータブル）、macOS（DMG）、Linux（x64 / arm64）
 
+### AltStore / SideStore
+
+iOS ユーザーは AltStore または SideStore にソースを追加して、KikoFlu を簡単にインストール・更新できます：
+
+**ソース URL：** `https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json`
+
+ワンクリック追加：[AltStore に追加](altstore://source?url=https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json) | [SideStore に追加](sidestore://source?url=https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json)
+
 ---
 
 ## ソースからビルド

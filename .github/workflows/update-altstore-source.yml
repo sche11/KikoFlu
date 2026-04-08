@@ -1,0 +1,99 @@
+name: Update AltStore Source
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-source:
+    name: Update AltStore Source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Get Release Info
+        id: release_info
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME:-$(gh release view --json tagName -q '.tagName')}"
+          VERSION="${TAG#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+
+          # Get IPA download URL and size
+          RELEASE_JSON=$(gh release view "$TAG" --json assets)
+          IPA_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("ios.*\\.ipa$"; "i")) | .url' | head -1)
+          IPA_SIZE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("ios.*\\.ipa$"; "i")) | .size' | head -1)
+          RELEASE_DATE=$(gh release view "$TAG" --json publishedAt -q '.publishedAt' | cut -dT -f1)
+          RELEASE_NOTES=$(gh release view "$TAG" --json body -q '.body' | head -c 500)
+
+          if [ -z "$IPA_URL" ] || [ "$IPA_URL" = "null" ]; then
+            echo "No IPA found in release $TAG"
+            exit 1
+          fi
+
+          echo "IPA_URL=$IPA_URL" >> "$GITHUB_OUTPUT"
+          echo "IPA_SIZE=${IPA_SIZE:-50000000}" >> "$GITHUB_OUTPUT"
+          echo "RELEASE_DATE=$RELEASE_DATE" >> "$GITHUB_OUTPUT"
+          # Use EOF delimiter for multiline
+          {
+            echo "RELEASE_NOTES<<NOTES_EOF"
+            echo "$RELEASE_NOTES"
+            echo "NOTES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update AltStore Source JSON
+        env:
+          VERSION: ${{ steps.release_info.outputs.VERSION }}
+          IPA_URL: ${{ steps.release_info.outputs.IPA_URL }}
+          IPA_SIZE: ${{ steps.release_info.outputs.IPA_SIZE }}
+          RELEASE_DATE: ${{ steps.release_info.outputs.RELEASE_DATE }}
+          RELEASE_NOTES: ${{ steps.release_info.outputs.RELEASE_NOTES }}
+        run: |
+          # Build the new version entry
+          NEW_VERSION=$(jq -n \
+            --arg version "$VERSION" \
+            --arg date "$RELEASE_DATE" \
+            --argjson size "${IPA_SIZE}" \
+            --arg url "$IPA_URL" \
+            --arg desc "$RELEASE_NOTES" \
+            '{
+              version: $version,
+              date: $date,
+              size: $size,
+              downloadURL: $url,
+              localizedDescription: $desc
+            }')
+
+          # Update the source JSON:
+          # - Prepend new version to the versions array (keep last 5)
+          # - Remove any existing entry with the same version number
+          jq --argjson newVer "$NEW_VERSION" \
+            --arg ver "$VERSION" \
+            '
+            .apps[0].versions = (
+              [$newVer] + [.apps[0].versions[] | select(.version != $ver)]
+              | .[0:5]
+            )
+            ' altstore-source.json > altstore-source-tmp.json
+
+          mv altstore-source-tmp.json altstore-source.json
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add altstore-source.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update AltStore source for ${{ steps.release_info.outputs.TAG }}"
+            git push
+          fi

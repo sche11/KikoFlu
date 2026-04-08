@@ -74,6 +74,14 @@
 
 支持平台：Android（universal / arm64 / armeabi-v7a / x86_64）、iOS（未签名 IPA）、Windows（安装包 / 便携版）、macOS（DMG）、Linux（x64 / arm64）
 
+### AltStore / SideStore
+
+iOS 用户可通过 AltStore 或 SideStore 添加软件源来安装和更新 KikoFlu：
+
+**源地址：** `https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json`
+
+点击一键添加：[添加到 AltStore](altstore://source?url=https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json) | [添加到 SideStore](sidestore://source?url=https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json)
+
 ---
 
 ## 源码构建

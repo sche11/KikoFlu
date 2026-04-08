@@ -74,6 +74,14 @@ Go to [Releases](https://github.com/pa-jesusf/KikoFlu/releases/latest) for the l
 
 Platforms: Android (universal / arm64 / armeabi-v7a / x86_64), iOS (unsigned IPA), Windows (installer / portable), macOS (DMG), Linux (x64 / arm64)
 
+### AltStore / SideStore
+
+iOS users can add the KikoFlu source to AltStore or SideStore for easy installation and updates:
+
+**Source URL:** `https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json`
+
+One-click add: [Add to AltStore](altstore://source?url=https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json) | [Add to SideStore](sidestore://source?url=https://raw.githubusercontent.com/pa-jesusf/KikoFlu/main/altstore-source.json)
+
 ---
 
 ## Build from Source
