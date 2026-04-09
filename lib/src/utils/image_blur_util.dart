@@ -28,7 +28,7 @@ class ImageBlurUtil {
       // 判断是本地文件还是网络URL
       if (imageUrl.startsWith('file://')) {
         // 本地文件
-        final localPath = imageUrl.substring(7); // 移除 'file://' 前缀
+        final localPath = Uri.parse(imageUrl).toFilePath();
         final localFile = File(localPath);
         if (!await localFile.exists()) {
           debugPrint('本地图片文件不存在: $localPath');
@@ -37,7 +37,7 @@ class ImageBlurUtil {
         imageData = await localFile.readAsBytes();
       } else {
         // 网络URL
-        final response = await http.get(Uri.parse(imageUrl));
+        final response = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 30));
         if (response.statusCode != 200) {
           debugPrint('下载图片失败: ${response.statusCode}');
           return null;

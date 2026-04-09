@@ -97,6 +97,7 @@ class FloatingLyricStyleNotifier extends StateNotifier<FloatingLyricStyle>
     with WidgetsBindingObserver {
   static const _keyPrefix = 'floating_lyric_style_';
   final Ref ref;
+  ProviderSubscription? _themeSubscription;
 
   FloatingLyricStyleNotifier(this.ref) : super(const FloatingLyricStyle()) {
     WidgetsBinding.instance.addObserver(this);
@@ -106,6 +107,7 @@ class FloatingLyricStyleNotifier extends StateNotifier<FloatingLyricStyle>
 
   @override
   void dispose() {
+    _themeSubscription?.close();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -116,7 +118,7 @@ class FloatingLyricStyleNotifier extends StateNotifier<FloatingLyricStyle>
   }
 
   void _listenToThemeChanges() {
-    ref.listen<ThemeSettings>(themeSettingsProvider, (previous, next) async {
+    _themeSubscription = ref.listen<ThemeSettings>(themeSettingsProvider, (previous, next) async {
       if (previous == next) return;
       await _updateColorsFromThemeIfDefault();
     });
