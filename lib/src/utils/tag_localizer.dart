@@ -23,7 +23,7 @@ class TagLocalizer {
   /// Get the localized name for a tag, looking up by original name if ID is unknown.
   static String localizeByName(String name, Locale locale) {
     final key = _localeKey(locale);
-    if (key == 'zh') return name; // Already in Chinese, no lookup needed
+    if (key == 'zh') return name; // Already in Simplified Chinese, no lookup needed
 
     // Find tag ID by name
     final id = tagNameToId[name.toLowerCase()];
@@ -41,11 +41,18 @@ class TagLocalizer {
         return 'en';
       case 'ja':
         return 'ja';
+      case 'ru':
+        return 'ru';
       case 'zh':
-        // Traditional Chinese falls back to zh (Simplified)
+        if (locale.scriptCode == 'Hant' ||
+            locale.countryCode == 'TW' ||
+            locale.countryCode == 'HK' ||
+            locale.countryCode == 'MO') {
+          return 'zh_Hant';
+        }
         return 'zh';
       default:
-        // Russian and others: prefer English, fall back to zh
+        // Other languages: prefer English, fall back to zh
         return 'en';
     }
   }

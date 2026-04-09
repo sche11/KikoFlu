@@ -7,11 +7,14 @@ in source control.
 Usage: python3 scripts/generate_tag_translations.py
 """
 import json
+import os
 import urllib.request
 import sys
 import base64
 import zlib
 from datetime import datetime
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 API_URL = "https://api.asmr-200.com/api/tags/"
 
@@ -31,7 +34,22 @@ def get_i18n_name(tag, lang_key):
     name = lang_data.get('name')
     return name  # None if not available
 
+def load_extra_translations():
+    """Load manually maintained translation files (e.g. Russian)."""
+    extra = {}
+    for filename in os.listdir(SCRIPT_DIR):
+        if filename.startswith('tag_translations_') and filename.endswith('.json'):
+            lang = filename[len('tag_translations_'):-len('.json')]  # e.g. 'ru'
+            path = os.path.join(SCRIPT_DIR, filename)
+            with open(path, 'r', encoding='utf-8') as f:
+                extra[lang] = json.load(f)
+            print(f"Loaded {len(extra[lang])} {lang} translations from {filename}", file=sys.stderr)
+    return extra
+
 def generate_dart(tags):
+    # Load extra language translations (manually maintained)
+    extra_langs = load_extra_translations()
+
     # Build translation data as a dict
     translations = {}
     sorted_tags = sorted(tags, key=lambda t: t['id'])
@@ -44,7 +62,14 @@ def generate_dart(tags):
         en_name = get_i18n_name(tag, 'en-us') or default_name
         ja_name = get_i18n_name(tag, 'ja-jp') or default_name
 
-        translations[str(tag_id)] = {'zh': zh_name, 'en': en_name, 'ja': ja_name}
+        entry = {'zh': zh_name, 'en': en_name, 'ja': ja_name}
+
+        # Merge extra language translations
+        for lang, lang_data in extra_langs.items():
+            if str(tag_id) in lang_data:
+                entry[lang] = lang_data[str(tag_id)]
+
+        translations[str(tag_id)] = entry
 
     # Encode: JSON -> UTF-8 -> zlib compress -> base64
     json_bytes = json.dumps(translations, ensure_ascii=False, separators=(',', ':')).encode('utf-8')
@@ -73,19 +98,27 @@ def generate_dart(tags):
         suffix = ";" if i == len(encoded_lines) - 1 else ""
         lines.append(f"    '{line}'{suffix}")
     lines.append("")
+    lang_keys = "'zh' (Simplified Chinese), 'en' (English), 'ja' (Japanese)"
+    if extra_langs:
+        lang_keys += ', ' + ', '.join(f"'{k}'" for k in sorted(extra_langs.keys()))
     lines.append("/// Tag translation map: tag_id -> { locale_key: localized_name }")
-    lines.append("/// Locale keys: 'zh' (Simplified Chinese), 'en' (English), 'ja' (Japanese)")
+    lines.append(f"/// Locale keys: {lang_keys}")
     lines.append("late final Map<int, Map<String, String>> tagTranslations = _decodeTagData();")
     lines.append("")
     lines.append("Map<int, Map<String, String>> _decodeTagData() {")
-    lines.append("  final bytes = base64Decode(_encodedTagData);")
-    lines.append("  final decompressed = zlib.decode(bytes);")
-    lines.append("  final jsonStr = utf8.decode(decompressed);")
-    lines.append("  final Map<String, dynamic> raw = jsonDecode(jsonStr);")
-    lines.append("  return raw.map((key, value) => MapEntry(")
-    lines.append("    int.parse(key),")
-    lines.append("    (value as Map<String, dynamic>).map((k, v) => MapEntry(k, v as String)),")
-    lines.append("  ));")
+    lines.append("  try {")
+    lines.append("    final bytes = base64Decode(_encodedTagData);")
+    lines.append("    final decompressed = zlib.decode(bytes);")
+    lines.append("    final jsonStr = utf8.decode(decompressed);")
+    lines.append("    final Map<String, dynamic> raw = jsonDecode(jsonStr);")
+    lines.append("    return raw.map((key, value) => MapEntry(")
+    lines.append("      int.parse(key),")
+    lines.append("      (value as Map<String, dynamic>).map((k, v) => MapEntry(k, v as String)),")
+    lines.append("    ));")
+    lines.append("  } catch (e) {")
+    lines.append("    print('Failed to decode tag translations: \$e');")
+    lines.append("    return {};")
+    lines.append("  }")
     lines.append("}")
     lines.append("")
     lines.append("/// Reverse lookup: tag name (any language) -> tag_id")

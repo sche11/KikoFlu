@@ -105,4 +105,7 @@ macos/Flutter/GeneratedPluginRegistrant.swift
 kikoeru-express-alpha/
 KikoFlu_Key.pfx
 
+# Tag translation source files (contain raw tag names)
+scripts/tag_translations_*.json
+
 logs
