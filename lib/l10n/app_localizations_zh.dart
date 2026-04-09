@@ -375,6 +375,24 @@ class SZh extends S {
   String get floatingLyricTouchDisabled => '已锁定 - 长按悬浮字幕解锁';
 
   @override
+  String get floatingFPS => '显示帧率';
+
+  @override
+  String get floatingFPSEnabled => '已开启 - 帧率显示在悬浮窗左下角';
+
+  @override
+  String get floatingFPSDisabled => '未开启';
+
+  @override
+  String get floatingNetworkSpeed => '显示网速';
+
+  @override
+  String get floatingNetworkSpeedEnabled => '已开启 - 网速显示在悬浮窗右下角';
+
+  @override
+  String get floatingNetworkSpeedDisabled => '未开启';
+
+  @override
   String get styleSettings => '样式设置';
 
   @override
@@ -3714,6 +3732,24 @@ class SZhHant extends SZh {
 
   @override
   String get floatingLyricTouchDisabled => '已鎖定 - 長按懸浮字幕解鎖';
+
+  @override
+  String get floatingFPS => '顯示幀率';
+
+  @override
+  String get floatingFPSEnabled => '已開啟 - 幀率顯示在懸浮窗左下角';
+
+  @override
+  String get floatingFPSDisabled => '未開啟';
+
+  @override
+  String get floatingNetworkSpeed => '顯示網速';
+
+  @override
+  String get floatingNetworkSpeedEnabled => '已開啟 - 網速顯示在懸浮窗右下角';
+
+  @override
+  String get floatingNetworkSpeedDisabled => '未開啟';
 
   @override
   String get styleSettings => '樣式設定';

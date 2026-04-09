@@ -382,6 +382,26 @@ class SEn extends S {
       'Locked - Long press floating lyrics to unlock';
 
   @override
+  String get floatingFPS => 'Show FPS';
+
+  @override
+  String get floatingFPSEnabled =>
+      'Enabled - FPS shown at bottom-left of floating window';
+
+  @override
+  String get floatingFPSDisabled => 'Disabled';
+
+  @override
+  String get floatingNetworkSpeed => 'Show Network Speed';
+
+  @override
+  String get floatingNetworkSpeedEnabled =>
+      'Enabled - Speed shown at bottom-right of floating window';
+
+  @override
+  String get floatingNetworkSpeedDisabled => 'Disabled';
+
+  @override
   String get styleSettings => 'Style Settings';
 
   @override

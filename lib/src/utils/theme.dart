@@ -3,6 +3,17 @@ import 'package:flutter/material.dart';
 import '../providers/theme_provider.dart';
 
 class AppTheme {
+  // iOS 使用 Cupertino 转场以支持侧滑返回
+  static final _pageTransitionsTheme = PageTransitionsTheme(
+    builders: {
+      TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.android: const FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.linux: const FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.macOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.windows: const FadeUpwardsPageTransitionsBuilder(),
+    },
+  );
+
   // 平台字体配置
   static TextTheme? _getTextTheme() {
     if (Platform.isWindows) {
@@ -102,6 +113,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       textTheme: _getTextTheme(),
+      pageTransitionsTheme: _pageTransitionsTheme,
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
@@ -151,6 +163,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       textTheme: _getTextTheme(),
+      pageTransitionsTheme: _pageTransitionsTheme,
       appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,

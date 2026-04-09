@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -289,61 +290,9 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () {
                                   Navigator.of(context).push(
-                                    PageRouteBuilder(
-                                      pageBuilder: (context, animation,
-                                              secondaryAnimation) =>
+                                    _PlayerPageRoute(
+                                      builder: (context) =>
                                           const AudioPlayerScreen(),
-                                      transitionDuration:
-                                          const Duration(milliseconds: 400),
-                                      reverseTransitionDuration:
-                                          const Duration(milliseconds: 400),
-                                      transitionsBuilder: (context, animation,
-                                          secondaryAnimation, child) {
-                                        // 前进动画：使用渐变和缩放效果，配合 Hero 动画
-                                        // 返回动画：只保留 Hero 动画，其他元素立即消失
-                                        return AnimatedBuilder(
-                                          animation: animation,
-                                          builder: (context, child) {
-                                            // 检测动画方向：reverse 表示返回
-                                            if (animation.status ==
-                                                    AnimationStatus.reverse ||
-                                                animation.status ==
-                                                    AnimationStatus.dismissed) {
-                                              // 返回时：完全透明（让非 Hero 元素不可见），但仍然渲染 child 以保留 Hero 动画
-                                              return Opacity(
-                                                opacity: 0.0,
-                                                child: child,
-                                              );
-                                            }
-
-                                            // 前进时使用缩放和淡入动画
-                                            const begin = 0.0;
-                                            const end = 1.0;
-                                            const curve = Curves.easeOutCubic;
-
-                                            final scale = Tween<double>(
-                                              begin: begin,
-                                              end: end,
-                                            )
-                                                .chain(CurveTween(curve: curve))
-                                                .evaluate(animation);
-
-                                            final opacity =
-                                                CurveTween(curve: Curves.easeIn)
-                                                    .evaluate(animation);
-
-                                            return Transform.scale(
-                                              scale: scale,
-                                              alignment: Alignment.bottomLeft,
-                                              child: Opacity(
-                                                opacity: opacity,
-                                                child: child,
-                                              ),
-                                            );
-                                          },
-                                          child: child,
-                                        );
-                                      },
                                     ),
                                   );
                                 },
@@ -579,6 +528,102 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
     return Hero(
       tag: 'audio_player_artwork_${track.id}',
       child: image,
+    );
+  }
+}
+
+/// Custom page route for the audio player that supports iOS swipe-back gesture
+/// while keeping the custom Hero-friendly transition animation.
+///
+/// - Forward (enter): scale + fade from bottom-left, Hero flies from mini player artwork
+/// - Back via swipe: Cupertino slide transition (natural iOS feel)
+/// - Back via button: fade out (letting Hero fly back when available)
+class _PlayerPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+  _PlayerPageRoute({required this.builder});
+
+  final WidgetBuilder builder;
+
+  @override
+  Widget buildContent(BuildContext context) => builder(context);
+
+  @override
+  String? get title => null;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 400);
+
+  @override
+  Duration get reverseTransitionDuration => const Duration(milliseconds: 400);
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
+    // On iOS, always delegate to CupertinoRouteTransitionMixin so that
+    // the back-gesture detector stays in the widget tree at all times.
+    // This is critical — without it the HorizontalDragGestureRecognizer is
+    // never installed and swipe-back can never trigger.
+    if (Platform.isIOS) {
+      // While the gesture is in progress OR we're playing the dismiss
+      // animation that was started by a gesture, use the standard
+      // Cupertino slide transition for a natural iOS feel.
+      if (popGestureInProgress) {
+        return CupertinoRouteTransitionMixin.buildPageTransitions<T>(
+          this, context, animation, secondaryAnimation, child,
+        );
+      }
+
+      // Programmatic back (button): fade the page out so Hero can fly back.
+      if (animation.status == AnimationStatus.reverse) {
+        return FadeTransition(opacity: animation, child: child);
+      }
+
+      // Forward enter: scale + fade from bottom-left.
+      if (animation.status == AnimationStatus.forward ||
+          animation.status == AnimationStatus.completed) {
+        const curve = Curves.easeOutCubic;
+        final scale = Tween<double>(begin: 0.0, end: 1.0)
+            .chain(CurveTween(curve: curve))
+            .evaluate(animation);
+        final opacity = CurveTween(curve: Curves.easeIn).evaluate(animation);
+
+        // Wrap with the Cupertino gesture detector so swiping can start
+        // even while the forward animation is settling.
+        return _wrapWithGestureDetector(
+          context,
+          Transform.scale(
+            scale: scale,
+            alignment: Alignment.bottomLeft,
+            child: Opacity(opacity: opacity, child: child),
+          ),
+        );
+      }
+    }
+
+    // Fallback / non-iOS: simple scale + fade
+    const curve = Curves.easeOutCubic;
+    final scale = Tween<double>(begin: 0.0, end: 1.0)
+        .chain(CurveTween(curve: curve))
+        .evaluate(animation);
+    final opacity = CurveTween(curve: Curves.easeIn).evaluate(animation);
+    return Transform.scale(
+      scale: scale,
+      alignment: Alignment.bottomLeft,
+      child: Opacity(opacity: opacity, child: child),
+    );
+  }
+
+  /// Wraps [child] with the Cupertino back-gesture detector so that
+  /// the swipe-from-left-edge gesture recognizer is always installed.
+  Widget _wrapWithGestureDetector(BuildContext context, Widget child) {
+    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(
+      this,
+      context,
+      const AlwaysStoppedAnimation(1.0), // pretend fully visible
+      const AlwaysStoppedAnimation(0.0), // no secondary
+      child,
     );
   }
 }

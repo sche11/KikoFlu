@@ -18,12 +18,161 @@ import AVKit
   }
 }
 
+// MARK: - Network Speed Monitor
+class NetworkSpeedMonitor {
+    private var previousBytesIn: UInt64 = 0
+    private var previousBytesOut: UInt64 = 0
+    private var timer: Timer?
+    var onSpeedUpdate: ((String) -> Void)?
+    
+    func start() {
+        // Initialize with current values
+        let (bytesIn, bytesOut) = getNetworkBytes()
+        previousBytesIn = bytesIn
+        previousBytesOut = bytesOut
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.update()
+        }
+    }
+    
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    private func update() {
+        let (bytesIn, bytesOut) = getNetworkBytes()
+        let downloadSpeed = bytesIn >= previousBytesIn ? bytesIn - previousBytesIn : 0
+        let uploadSpeed = bytesOut >= previousBytesOut ? bytesOut - previousBytesOut : 0
+        previousBytesIn = bytesIn
+        previousBytesOut = bytesOut
+        
+        let downStr = formatSpeed(downloadSpeed)
+        let upStr = formatSpeed(uploadSpeed)
+        onSpeedUpdate?("↓\(downStr) ↑\(upStr)")
+    }
+    
+    private func getNetworkBytes() -> (UInt64, UInt64) {
+        var ifaddr: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&ifaddr) == 0, let firstAddr = ifaddr else {
+            return (0, 0)
+        }
+        defer { freeifaddrs(ifaddr) }
+        
+        var bytesIn: UInt64 = 0
+        var bytesOut: UInt64 = 0
+        
+        var ptr = firstAddr
+        while true {
+            let name = String(cString: ptr.pointee.ifa_name)
+            // Include Wi-Fi (en0) and cellular (pdp_ip0) interfaces
+            if name.hasPrefix("en") || name.hasPrefix("pdp_ip") {
+                if let data = ptr.pointee.ifa_data {
+                    let networkData = data.assumingMemoryBound(to: if_data.self)
+                    bytesIn += UInt64(networkData.pointee.ifi_ibytes)
+                    bytesOut += UInt64(networkData.pointee.ifi_obytes)
+                }
+            }
+            if let next = ptr.pointee.ifa_next {
+                ptr = next
+            } else {
+                break
+            }
+        }
+        
+        return (bytesIn, bytesOut)
+    }
+    
+    private func formatSpeed(_ bytesPerSecond: UInt64) -> String {
+        let kb = Double(bytesPerSecond) / 1024.0
+        if kb < 1024 {
+            return String(format: "%.0f KB/s", kb)
+        }
+        let mb = kb / 1024.0
+        return String(format: "%.1f MB/s", mb)
+    }
+}
+
+// MARK: - FPS Monitor
+// Uses Apple's recommended approach: read the display's current frame interval
+// via (targetTimestamp - timestamp) each CADisplayLink callback.
+// This reports the refresh rate the system is actually driving — correctly
+// shows 120Hz on ProMotion when the display is running fast (e.g. during
+// scrolling/animations) and 60Hz when idle.
+// Note: CADisplayLink's presence on the RunLoop keeps ProMotion at ≥60Hz;
+// this is an inherent iOS limitation shared by all CADisplayLink-based monitors.
+class FPSMonitor {
+    private var displayLink: CADisplayLink?
+    private var lastReportTime: CFTimeInterval = 0
+    private var fpsReadings: [Double] = []
+
+    var onFPSUpdate: ((Int) -> Void)?
+
+    func start() {
+        stop()
+        displayLink = CADisplayLink(target: self, selector: #selector(tick))
+        // Request the full range so we receive callbacks at whatever rate the
+        // system is currently driving (up to 120Hz on ProMotion devices).
+        if #available(iOS 15.0, *) {
+            let maxFPS = Float(UIScreen.main.maximumFramesPerSecond)
+            displayLink?.preferredFrameRateRange = CAFrameRateRange(
+                minimum: 1, maximum: maxFPS, preferred: 0)
+        }
+        displayLink?.add(to: .main, forMode: .common)
+        lastReportTime = 0
+        fpsReadings.removeAll()
+    }
+
+    func stop() {
+        displayLink?.invalidate()
+        displayLink = nil
+        fpsReadings.removeAll()
+        lastReportTime = 0
+    }
+
+    @objc private func tick(link: CADisplayLink) {
+        // Apple-recommended way to read the current display refresh rate.
+        let frameDuration = link.targetTimestamp - link.timestamp
+        if frameDuration > 0 {
+            fpsReadings.append(1.0 / frameDuration)
+        }
+
+        let now = CACurrentMediaTime()
+        if lastReportTime == 0 {
+            lastReportTime = now
+            return
+        }
+
+        // Report averaged FPS every ~1 second
+        if now - lastReportTime >= 1.0 {
+            if !fpsReadings.isEmpty {
+                let avg = fpsReadings.reduce(0, +) / Double(fpsReadings.count)
+                onFPSUpdate?(Int(round(avg)))
+                fpsReadings.removeAll()
+            }
+            lastReportTime = now
+        }
+    }
+}
+
 class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
     private var pipController: AVPictureInPictureController?
     private var playerLayer: AVPlayerLayer?
     private var player: AVPlayer?
     private var lyricView: UILabel?
+    private var fpsLabel: UILabel?
+    private var networkSpeedLabel: UILabel?
     private var channel: FlutterMethodChannel
+    
+    private var fpsMonitor = FPSMonitor()
+    private var networkSpeedMonitor = NetworkSpeedMonitor()
+    private var showFPS: Bool = false
+    private var showNetworkSpeed: Bool = false
+    
+    // Cached subtitle style for info labels (follows lyric style except font size)
+    private var infoTextColor: UIColor = .white
+    private var infoCornerRadius: CGFloat = 4
     
     // Base64 of a 1-second black MP4 video
     private let dummyVideoBase64 = "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"
@@ -116,6 +265,16 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
             let args = call.arguments as? [String: Any]
             updateStyle(args: args)
             result(true)
+        case "setFPSEnabled":
+            let args = call.arguments as? [String: Any]
+            let enabled = args?["enabled"] as? Bool ?? false
+            setFPSEnabled(enabled)
+            result(true)
+        case "setNetworkSpeedEnabled":
+            let args = call.arguments as? [String: Any]
+            let enabled = args?["enabled"] as? Bool ?? false
+            setNetworkSpeedEnabled(enabled)
+            result(true)
         case "hasPermission":
             result(true)
         case "requestPermission":
@@ -141,6 +300,146 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
     private func hide() {
         pipController?.stopPictureInPicture()
         player?.pause()
+        stopMonitors()
+    }
+    
+    private func setFPSEnabled(_ enabled: Bool) {
+        showFPS = enabled
+        if enabled {
+            fpsMonitor.onFPSUpdate = { [weak self] fps in
+                self?.updateFPSLabel(fps)
+            }
+            if pipController?.isPictureInPictureActive == true {
+                fpsMonitor.start()
+                ensureFPSLabel()
+            }
+        } else {
+            fpsMonitor.stop()
+            DispatchQueue.main.async {
+                self.fpsLabel?.removeFromSuperview()
+                self.fpsLabel = nil
+            }
+        }
+    }
+    
+    private func setNetworkSpeedEnabled(_ enabled: Bool) {
+        showNetworkSpeed = enabled
+        if enabled {
+            networkSpeedMonitor.onSpeedUpdate = { [weak self] speed in
+                self?.updateNetworkSpeedLabel(speed)
+            }
+            if pipController?.isPictureInPictureActive == true {
+                networkSpeedMonitor.start()
+                ensureNetworkSpeedLabel()
+            }
+        } else {
+            networkSpeedMonitor.stop()
+            DispatchQueue.main.async {
+                self.networkSpeedLabel?.removeFromSuperview()
+                self.networkSpeedLabel = nil
+            }
+        }
+    }
+    
+    private func stopMonitors() {
+        fpsMonitor.stop()
+        networkSpeedMonitor.stop()
+    }
+    
+    private func startMonitorsIfNeeded() {
+        if showFPS {
+            fpsMonitor.onFPSUpdate = { [weak self] fps in
+                self?.updateFPSLabel(fps)
+            }
+            fpsMonitor.start()
+        }
+        if showNetworkSpeed {
+            networkSpeedMonitor.onSpeedUpdate = { [weak self] speed in
+                self?.updateNetworkSpeedLabel(speed)
+            }
+            networkSpeedMonitor.start()
+        }
+    }
+    
+    private func ensureFPSLabel() {
+        DispatchQueue.main.async {
+            guard self.showFPS else { return }
+            if self.fpsLabel == nil {
+                let label = UILabel()
+                label.textColor = self.infoTextColor.withAlphaComponent(0.8)
+                label.backgroundColor = .clear
+                label.font = UIFont.monospacedDigitSystemFont(ofSize: 10, weight: .medium)
+                label.textAlignment = .center
+                label.layer.cornerRadius = self.infoCornerRadius
+                label.clipsToBounds = true
+                self.fpsLabel = label
+            }
+            if let window = UIApplication.shared.windows.first, self.fpsLabel?.superview == nil {
+                if let label = self.fpsLabel {
+                    window.addSubview(label)
+                    window.bringSubviewToFront(label)
+                    self.layoutInfoLabels(in: window)
+                }
+            }
+        }
+    }
+    
+    private func ensureNetworkSpeedLabel() {
+        DispatchQueue.main.async {
+            guard self.showNetworkSpeed else { return }
+            if self.networkSpeedLabel == nil {
+                let label = UILabel()
+                label.textColor = self.infoTextColor.withAlphaComponent(0.8)
+                label.backgroundColor = .clear
+                label.font = UIFont.monospacedDigitSystemFont(ofSize: 10, weight: .medium)
+                label.textAlignment = .center
+                label.layer.cornerRadius = self.infoCornerRadius
+                label.clipsToBounds = true
+                self.networkSpeedLabel = label
+            }
+            if let window = UIApplication.shared.windows.first, self.networkSpeedLabel?.superview == nil {
+                if let label = self.networkSpeedLabel {
+                    window.addSubview(label)
+                    window.bringSubviewToFront(label)
+                    self.layoutInfoLabels(in: window)
+                }
+            }
+        }
+    }
+    
+    private func layoutInfoLabels(in window: UIWindow) {
+        let margin: CGFloat = 4
+        let height: CGFloat = 16
+        if let label = fpsLabel {
+            let width: CGFloat = 50
+            label.frame = CGRect(
+                x: margin,
+                y: window.bounds.height - height - margin,
+                width: width,
+                height: height
+            )
+        }
+        if let label = networkSpeedLabel {
+            let width: CGFloat = 140
+            label.frame = CGRect(
+                x: window.bounds.width - width - margin,
+                y: window.bounds.height - height - margin,
+                width: width,
+                height: height
+            )
+        }
+    }
+    
+    private func updateFPSLabel(_ fps: Int) {
+        DispatchQueue.main.async {
+            self.fpsLabel?.text = "\(fps) FPS"
+        }
+    }
+    
+    private func updateNetworkSpeedLabel(_ speed: String) {
+        DispatchQueue.main.async {
+            self.networkSpeedLabel?.text = speed
+        }
     }
     
     private func updateText(_ text: String) {
@@ -161,7 +460,9 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
             }
             
             if let textColorInt = args["textColor"] as? Int {
-                view.textColor = self.colorFromInt(textColorInt)
+                let color = self.colorFromInt(textColorInt)
+                view.textColor = color
+                self.infoTextColor = color
             }
             
             if let backgroundColorInt = args["backgroundColor"] as? Int {
@@ -170,7 +471,11 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
             
             if let cornerRadius = args["cornerRadius"] as? Double {
                 view.layer.cornerRadius = CGFloat(cornerRadius)
+                self.infoCornerRadius = CGFloat(cornerRadius)
             }
+            
+            // Sync style to info labels (text color + corner radius, no background)
+            self.applyStyleToInfoLabels()
         }
     }
     
@@ -180,6 +485,14 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
         let g = CGFloat((argb >> 8) & 0xFF) / 255.0
         let b = CGFloat(argb & 0xFF) / 255.0
         return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+    
+    private func applyStyleToInfoLabels() {
+        for label in [fpsLabel, networkSpeedLabel] {
+            guard let label = label else { continue }
+            label.textColor = infoTextColor.withAlphaComponent(0.8)
+            label.layer.cornerRadius = infoCornerRadius
+        }
     }
     
     private func prepareLyricView(text: String) {
@@ -212,12 +525,19 @@ class FloatingLyricManager: NSObject, AVPictureInPictureControllerDelegate {
                     window.addSubview(view)
                     window.bringSubviewToFront(view)
                 }
+                // Add info labels and start monitors
+                self.startMonitorsIfNeeded()
+                if self.showFPS { self.ensureFPSLabel() }
+                if self.showNetworkSpeed { self.ensureNetworkSpeedLabel() }
             }
         }
     }
     
     func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
         lyricView?.removeFromSuperview()
+        fpsLabel?.removeFromSuperview()
+        networkSpeedLabel?.removeFromSuperview()
+        stopMonitors()
         player?.pause()
         channel.invokeMethod("onClose", arguments: nil)
     }

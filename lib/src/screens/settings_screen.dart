@@ -342,6 +342,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             _buildFloatingLyricTouchTile(context),
           ],
+          if (Platform.isIOS) ...[
+            Divider(
+              height: 1,
+              color: Theme.of(context).colorScheme.outlineVariant,
+              indent: 72,
+            ),
+            _buildFloatingFPSTile(context),
+            Divider(
+              height: 1,
+              color: Theme.of(context).colorScheme.outlineVariant,
+              indent: 72,
+            ),
+            _buildFloatingNetworkSpeedTile(context),
+          ],
         ],
       ],
     );
@@ -361,6 +375,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       value: !touchEnabled,
       onChanged: (value) async {
         await ref.read(floatingLyricTouchEnabledProvider.notifier).toggle();
+      },
+    );
+  }
+
+  /// 悬浮窗 FPS 显示开关（仅 iOS）
+  Widget _buildFloatingFPSTile(BuildContext context) {
+    final fpsEnabled = ref.watch(floatingLyricFPSEnabledProvider);
+    return SwitchListTile(
+      secondary: const SizedBox(width: 24),
+      title: Text(S.of(context).floatingFPS),
+      subtitle: Text(
+        fpsEnabled
+            ? S.of(context).floatingFPSEnabled
+            : S.of(context).floatingFPSDisabled,
+      ),
+      value: fpsEnabled,
+      onChanged: (value) async {
+        await ref.read(floatingLyricFPSEnabledProvider.notifier).toggle();
+      },
+    );
+  }
+
+  /// 悬浮窗网速显示开关（仅 iOS）
+  Widget _buildFloatingNetworkSpeedTile(BuildContext context) {
+    final networkSpeedEnabled = ref.watch(floatingLyricNetworkSpeedEnabledProvider);
+    return SwitchListTile(
+      secondary: const SizedBox(width: 24),
+      title: Text(S.of(context).floatingNetworkSpeed),
+      subtitle: Text(
+        networkSpeedEnabled
+            ? S.of(context).floatingNetworkSpeedEnabled
+            : S.of(context).floatingNetworkSpeedDisabled,
+      ),
+      value: networkSpeedEnabled,
+      onChanged: (value) async {
+        await ref.read(floatingLyricNetworkSpeedEnabledProvider.notifier).toggle();
       },
     );
   }

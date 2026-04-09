@@ -816,6 +816,42 @@ abstract class S {
   /// **'Locked - Long press floating lyrics to unlock'**
   String get floatingLyricTouchDisabled;
 
+  /// No description provided for @floatingFPS.
+  ///
+  /// In en, this message translates to:
+  /// **'Show FPS'**
+  String get floatingFPS;
+
+  /// No description provided for @floatingFPSEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled - FPS shown at bottom-left of floating window'**
+  String get floatingFPSEnabled;
+
+  /// No description provided for @floatingFPSDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get floatingFPSDisabled;
+
+  /// No description provided for @floatingNetworkSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Network Speed'**
+  String get floatingNetworkSpeed;
+
+  /// No description provided for @floatingNetworkSpeedEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled - Speed shown at bottom-right of floating window'**
+  String get floatingNetworkSpeedEnabled;
+
+  /// No description provided for @floatingNetworkSpeedDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get floatingNetworkSpeedDisabled;
+
   /// No description provided for @styleSettings.
   ///
   /// In en, this message translates to:

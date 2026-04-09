@@ -383,6 +383,26 @@ class SRu extends S {
       'Заблокировано — удерживайте субтитры для разблокировки';
 
   @override
+  String get floatingFPS => 'Показать FPS';
+
+  @override
+  String get floatingFPSEnabled =>
+      'Включено — FPS в левом нижнем углу плавающего окна';
+
+  @override
+  String get floatingFPSDisabled => 'Выключено';
+
+  @override
+  String get floatingNetworkSpeed => 'Показать скорость сети';
+
+  @override
+  String get floatingNetworkSpeedEnabled =>
+      'Включено — скорость в правом нижнем углу плавающего окна';
+
+  @override
+  String get floatingNetworkSpeedDisabled => 'Выключено';
+
+  @override
   String get styleSettings => 'Настройки стиля';
 
   @override

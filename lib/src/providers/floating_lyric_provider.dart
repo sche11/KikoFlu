@@ -21,6 +21,18 @@ final floatingLyricTouchEnabledProvider =
   return FloatingLyricTouchEnabledNotifier(ref);
 });
 
+/// 悬浮窗 FPS 显示开关（仅 iOS）
+final floatingLyricFPSEnabledProvider =
+    StateNotifierProvider<FloatingLyricFPSEnabledNotifier, bool>((ref) {
+  return FloatingLyricFPSEnabledNotifier(ref);
+});
+
+/// 悬浮窗网速显示开关（仅 iOS）
+final floatingLyricNetworkSpeedEnabledProvider =
+    StateNotifierProvider<FloatingLyricNetworkSpeedEnabledNotifier, bool>((ref) {
+  return FloatingLyricNetworkSpeedEnabledNotifier(ref);
+});
+
 class FloatingLyricTouchEnabledNotifier extends StateNotifier<bool> {
   static const _key = 'floating_lyric_touch_enabled';
   final Ref ref;
@@ -67,6 +79,56 @@ class FloatingLyricTouchEnabledNotifier extends StateNotifier<bool> {
 
   Future<void> toggle() async {
     await setEnabled(!state);
+  }
+}
+
+class FloatingLyricFPSEnabledNotifier extends StateNotifier<bool> {
+  static const _key = 'floating_lyric_fps_enabled';
+  final Ref ref;
+
+  FloatingLyricFPSEnabledNotifier(this.ref) : super(false) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = prefs.getBool(_key) ?? false;
+    if (state) {
+      await FloatingLyricService.instance.setFPSEnabled(true);
+    }
+  }
+
+  Future<void> toggle() async {
+    final newValue = !state;
+    state = newValue;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, newValue);
+    await FloatingLyricService.instance.setFPSEnabled(newValue);
+  }
+}
+
+class FloatingLyricNetworkSpeedEnabledNotifier extends StateNotifier<bool> {
+  static const _key = 'floating_lyric_network_speed_enabled';
+  final Ref ref;
+
+  FloatingLyricNetworkSpeedEnabledNotifier(this.ref) : super(false) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = prefs.getBool(_key) ?? false;
+    if (state) {
+      await FloatingLyricService.instance.setNetworkSpeedEnabled(true);
+    }
+  }
+
+  Future<void> toggle() async {
+    final newValue = !state;
+    state = newValue;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, newValue);
+    await FloatingLyricService.instance.setNetworkSpeedEnabled(newValue);
   }
 }
 

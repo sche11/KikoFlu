@@ -288,4 +288,32 @@ class FloatingLyricService {
       return false;
     }
   }
+
+  /// 设置 FPS 显示开关（仅 iOS）
+  Future<bool> setFPSEnabled(bool enabled) async {
+    if (!Platform.isIOS) return false;
+    try {
+      final result = await _platform.invokeMethod('setFPSEnabled', {
+        'enabled': enabled,
+      });
+      return result == true;
+    } catch (e) {
+      print('[FloatingLyric] 设置FPS显示失败: $e');
+      return false;
+    }
+  }
+
+  /// 设置网速显示开关（仅 iOS）
+  Future<bool> setNetworkSpeedEnabled(bool enabled) async {
+    if (!Platform.isIOS) return false;
+    try {
+      final result = await _platform.invokeMethod('setNetworkSpeedEnabled', {
+        'enabled': enabled,
+      });
+      return result == true;
+    } catch (e) {
+      print('[FloatingLyric] 设置网速显示失败: $e');
+      return false;
+    }
+  }
 }

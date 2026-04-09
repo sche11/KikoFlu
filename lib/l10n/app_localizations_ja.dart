@@ -376,6 +376,24 @@ class SJa extends S {
   String get floatingLyricTouchDisabled => 'ロック中 - 長押しでロック解除';
 
   @override
+  String get floatingFPS => 'FPS表示';
+
+  @override
+  String get floatingFPSEnabled => 'オン - フローティングウィンドウの左下にFPSを表示';
+
+  @override
+  String get floatingFPSDisabled => 'オフ';
+
+  @override
+  String get floatingNetworkSpeed => '通信速度表示';
+
+  @override
+  String get floatingNetworkSpeedEnabled => 'オン - フローティングウィンドウの右下に通信速度を表示';
+
+  @override
+  String get floatingNetworkSpeedDisabled => 'オフ';
+
+  @override
   String get styleSettings => 'スタイル設定';
 
   @override
