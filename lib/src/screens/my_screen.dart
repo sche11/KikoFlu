@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../providers/my_reviews_provider.dart';
 import '../providers/my_tabs_display_provider.dart';
+import '../utils/scroll_optimization.dart';
 import '../providers/auth_provider.dart';
 import '../utils/server_utils.dart';
 import '../utils/l10n_extensions.dart';
@@ -499,10 +500,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
         },
         child: CustomScrollView(
           controller: _scrollController,
-          cacheExtent: 500,
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: ClampingScrollPhysics(),
-          ),
+          cacheExtent: ScrollOptimization.cacheExtent,
+          physics: ScrollOptimization.physics,
           slivers: [
             SliverPadding(
               padding: EdgeInsets.fromLTRB(padding, 8, padding, padding),
@@ -567,10 +566,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
         },
         child: CustomScrollView(
           controller: _scrollController,
-          cacheExtent: 500,
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: ClampingScrollPhysics(),
-          ),
+          cacheExtent: ScrollOptimization.cacheExtent,
+          physics: ScrollOptimization.physics,
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.all(8),

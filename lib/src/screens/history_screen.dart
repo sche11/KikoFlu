@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/history_provider.dart';
 import '../widgets/history_work_card.dart';
 import '../widgets/pagination_bar.dart';
+import '../utils/scroll_optimization.dart';
 import '../../l10n/app_localizations.dart';
 
 class HistoryScreen extends ConsumerWidget {
@@ -37,6 +38,8 @@ class HistoryScreen extends ConsumerWidget {
               ),
             )
           : CustomScrollView(
+              cacheExtent: ScrollOptimization.cacheExtent,
+              physics: ScrollOptimization.physics,
               slivers: [
                 SliverPadding(
                   padding: const EdgeInsets.all(16),

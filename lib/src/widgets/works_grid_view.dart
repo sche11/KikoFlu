@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
 import '../providers/works_provider.dart';
 import '../utils/responsive_grid_helper.dart';
+import '../utils/scroll_optimization.dart';
 import 'enhanced_work_card.dart';
 
 class WorksGridView extends StatelessWidget {
@@ -47,7 +48,7 @@ class WorksGridView extends StatelessWidget {
 
   Widget _buildGridView(BuildContext context, {required int crossAxisCount}) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     // 横屏模式下使用更大的间距，让布局更优雅
     final spacing = isLandscape ? 24.0 : 8.0;
@@ -55,7 +56,7 @@ class WorksGridView extends StatelessWidget {
 
     return CustomScrollView(
       controller: scrollController,
-      cacheExtent: 500,
+      cacheExtent: ScrollOptimization.cacheExtent,
       // 移除 physics 设置，让 OverscrollNextPageDetector 处理
       // physics: const AlwaysScrollableScrollPhysics(
       //   parent: ClampingScrollPhysics(),
@@ -128,7 +129,7 @@ class WorksGridView extends StatelessWidget {
   Widget _buildListView(BuildContext context) {
     return CustomScrollView(
       controller: scrollController,
-      cacheExtent: 500,
+      cacheExtent: ScrollOptimization.cacheExtent,
       // 移除 physics 设置，让 OverscrollNextPageDetector 处理
       // physics: const AlwaysScrollableScrollPhysics(
       //   parent: ClampingScrollPhysics(),

@@ -11,6 +11,7 @@ import '../services/translation_service.dart';
 import '../services/subtitle_library_service.dart';
 import '../utils/snackbar_util.dart';
 import '../utils/encoding_utils.dart';
+import '../utils/scroll_optimization.dart';
 import '../../l10n/app_localizations.dart';
 import 'scrollable_appbar.dart';
 
@@ -41,6 +42,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
   String? _translatedContent;
   String? _errorMessage;
   final ScrollController _scrollController = ScrollController();
+  final ScrollThrottler _scrollThrottler = ScrollThrottler();
   double _scrollProgress = 0.0;
   bool _showTranslation = false;
   bool _isTranslating = false;
@@ -63,19 +65,22 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
   void dispose() {
     _scrollController.removeListener(_updateScrollProgress);
     _scrollController.dispose();
+    _scrollThrottler.dispose();
     _textController.dispose();
     _translatedTextController.dispose();
     super.dispose();
   }
 
   void _updateScrollProgress() {
-    if (_scrollController.hasClients) {
-      final maxScroll = _scrollController.position.maxScrollExtent;
-      final currentScroll = _scrollController.position.pixels;
-      setState(() {
-        _scrollProgress = maxScroll > 0 ? currentScroll / maxScroll : 0.0;
-      });
-    }
+    _scrollThrottler.throttle(() {
+      if (_scrollController.hasClients) {
+        final maxScroll = _scrollController.position.maxScrollExtent;
+        final currentScroll = _scrollController.position.pixels;
+        setState(() {
+          _scrollProgress = maxScroll > 0 ? currentScroll / maxScroll : 0.0;
+        });
+      }
+    });
   }
 
   /// 智能检测文件编码并读取内容

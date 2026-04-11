@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/playlists_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/l10n_extensions.dart';
+import '../utils/scroll_optimization.dart';
 import '../widgets/playlist_card.dart';
 import '../widgets/pagination_bar.dart';
 import '../models/playlist.dart' show PlaylistPrivacy;
@@ -547,10 +548,8 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
   Widget _buildListView(PlaylistsState state) {
     return CustomScrollView(
       controller: _scrollController,
-      cacheExtent: 500,
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: ClampingScrollPhysics(),
-      ),
+      cacheExtent: ScrollOptimization.cacheExtent,
+      physics: ScrollOptimization.physics,
       slivers: [
         // 顶部标题栏
         SliverPadding(

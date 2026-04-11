@@ -17,6 +17,7 @@ import '../widgets/sort_dialog.dart';
 import 'offline_work_detail_screen.dart';
 import '../widgets/overscroll_next_page_detector.dart';
 import '../widgets/privacy_blur_cover.dart';
+import '../utils/scroll_optimization.dart';
 
 /// 本地下载屏幕 - 显示已完成的下载内容
 class LocalDownloadsScreen extends ConsumerStatefulWidget {
@@ -667,9 +668,8 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                       },
                       child: CustomScrollView(
                         controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(
-                          parent: ClampingScrollPhysics(),
-                        ),
+                        cacheExtent: ScrollOptimization.cacheExtent,
+                        physics: ScrollOptimization.physics,
                         slivers: [
                           SliverPadding(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),

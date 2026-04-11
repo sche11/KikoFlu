@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
@@ -16,6 +15,7 @@ import '../widgets/scrollable_appbar.dart';
 import '../../l10n/app_localizations.dart';
 import '../widgets/download_fab.dart';
 import '../models/sort_options.dart';
+import '../utils/scroll_optimization.dart';
 
 class WorksScreen extends ConsumerStatefulWidget {
   const WorksScreen({super.key});
@@ -29,9 +29,8 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
   final ScrollController _scrollController = ScrollController();
 
   // 防抖相关（仅用于热门/推荐模式的自动加载）
-  Timer? _scrollDebouncer;
+  final ScrollThrottler _scrollThrottler = ScrollThrottler(positionThreshold: 10);
   bool _isLoadingMore = false;
-  double _lastScrollPosition = 0;
   int _slideDirection = 0;
   final Map<DisplayMode, double> _scrollPositions = {
     for (final mode in DisplayMode.values) mode: 0.0,
@@ -55,57 +54,50 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
 
   @override
   void dispose() {
-    _scrollDebouncer?.cancel();
+    _scrollThrottler.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    // 使用防抖机制,避免频繁调用
-    if (!_scrollController.hasClients) return;
+    _scrollThrottler.throttle(() {
+      if (!_scrollController.hasClients) return;
 
-    final currentPosition = _scrollController.position.pixels;
-    final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      final currentPosition = _scrollController.position.pixels;
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
 
-    // 防止重复触发 - 如果滚动位置变化小于 10 像素则不处理
-    if ((currentPosition - _lastScrollPosition).abs() < 10) return;
-    _lastScrollPosition = currentPosition;
+      final worksState = ref.read(worksProvider);
+      _scrollPositions[worksState.displayMode] = currentPosition;
+      final isNearBottom = currentPosition >= maxScrollExtent - 50;
 
-    final worksState = ref.read(worksProvider);
-    _scrollPositions[worksState.displayMode] = currentPosition;
-    final isNearBottom = currentPosition >= maxScrollExtent - 50;
+      // 热门/推荐模式:自动加载更多（全部模式不需要处理，因为分页控件始终显示）
+      if (worksState.displayMode != DisplayMode.all) {
+        if (isNearBottom &&
+            !worksState.isLoading &&
+            worksState.hasMore &&
+            !_isLoadingMore) {
+          print(
+              '[WorksScreen] Triggering load more - currentPage: ${worksState.currentPage}');
+          _isLoadingMore = true;
 
-    // 取消之前的防抖计时器
-    _scrollDebouncer?.cancel();
-
-    // 热门/推荐模式:自动加载更多（全部模式不需要处理，因为分页控件始终显示）
-    if (worksState.displayMode != DisplayMode.all) {
-      if (isNearBottom &&
-          !worksState.isLoading &&
-          worksState.hasMore &&
-          !_isLoadingMore) {
-        print(
-            '[WorksScreen] Triggering load more - currentPage: ${worksState.currentPage}');
-        _isLoadingMore = true;
-
-        // 立即执行加载，不使用 Timer
-        ref.read(worksProvider.notifier).loadWorks().then((_) {
-          if (mounted) {
-            setState(() {
-              _isLoadingMore = false;
-            });
-            print('[WorksScreen] Load more completed');
-          }
-        }).catchError((error) {
-          if (mounted) {
-            setState(() {
-              _isLoadingMore = false;
-            });
-            print('[WorksScreen] Load more error: $error');
-          }
-        });
+          ref.read(worksProvider.notifier).loadWorks().then((_) {
+            if (mounted) {
+              setState(() {
+                _isLoadingMore = false;
+              });
+              print('[WorksScreen] Load more completed');
+            }
+          }).catchError((error) {
+            if (mounted) {
+              setState(() {
+                _isLoadingMore = false;
+              });
+              print('[WorksScreen] Load more error: $error');
+            }
+          });
+        }
       }
-    }
+    }, controller: _scrollController);
   }
 
   void _showSortDialog(BuildContext context) {
@@ -582,10 +574,8 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
 
     Widget scrollView = CustomScrollView(
       controller: _scrollController,
-      cacheExtent: 500, // 增加缓存范围，预加载更多内容
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: ClampingScrollPhysics(), // 使用更流畅的物理滚动
-      ),
+      cacheExtent: ScrollOptimization.cacheExtent,
+      physics: ScrollOptimization.physics,
       slivers: [
         SliverPadding(
           padding: EdgeInsets.all(padding),
@@ -721,10 +711,8 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
 
     Widget scrollView = CustomScrollView(
       controller: _scrollController,
-      cacheExtent: 500, // 增加缓存范围，预加载更多内容
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: ClampingScrollPhysics(), // 使用更流畅的物理滚动
-      ),
+      cacheExtent: ScrollOptimization.cacheExtent,
+      physics: ScrollOptimization.physics,
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.all(8),
@@ -783,6 +771,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
               childCount: worksState.works.length +
                   (!isAllMode && worksState.hasMore ? 1 : 0) +
                   (!isAllMode && worksState.isLastPage ? 1 : 0),
+              addRepaintBoundaries: false, // 已手动包裹 RepaintBoundary，避免双重开销
             ),
           ),
         ),

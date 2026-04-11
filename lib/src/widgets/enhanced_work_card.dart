@@ -107,7 +107,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
         };
 
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     // 横屏模式：4列显示中等卡片，5列显示紧凑卡片
     // 竖屏模式：2列显示中等卡片，3列显示紧凑卡片
@@ -126,7 +126,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
   Widget _buildCompactCard(BuildContext context, String host, String token,
       VoidCallback cardOnTap, WorkCardDisplaySettings displaySettings) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final titleFontSize = isLandscape ? 13.5 : 11.0;
 
     return Card(
@@ -208,7 +208,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
   Widget _buildMediumCard(BuildContext context, String host, String token,
       VoidCallback cardOnTap, WorkCardDisplaySettings displaySettings) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final titleFontSize = isLandscape ? 14.5 : 12.0;
     final bodyFontSize = isLandscape ? 13.5 : 10.0;
     final priceFontSize = isLandscape ? 13.5 : 10.0;
@@ -373,7 +373,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
   Widget _buildFullCard(BuildContext context, String host, String token,
       VoidCallback cardOnTap, WorkCardDisplaySettings displaySettings) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final rjFontSize = isLandscape ? 11.0 : 10.0;
     final titleFontSize = isLandscape ? 16.0 : 14.0;
 
@@ -581,17 +581,17 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     }
 
     final url = widget.work.getCoverImageUrl(host, token: token);
-    final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
     // 依据不同布局控制图片缓存尺寸，避免加载超大原图导致卡顿
     int targetWidth;
     switch (widget.crossAxisCount) {
       case 3:
         targetWidth =
-            (MediaQuery.of(context).size.width / 3 * devicePixelRatio).round();
+            (MediaQuery.sizeOf(context).width / 3 * devicePixelRatio).round();
         break;
       case 2:
         targetWidth =
-            (MediaQuery.of(context).size.width / 2 * devicePixelRatio).round();
+            (MediaQuery.sizeOf(context).width / 2 * devicePixelRatio).round();
         break;
       default:
         targetWidth = (80 * devicePixelRatio).round(); // 列表模式封面固定宽度
@@ -644,7 +644,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildRjTag() {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final fontSize = isLandscape ? 13.0 : 11.0;
 
     return Container(
@@ -666,7 +666,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildDateTag() {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final fontSize = isLandscape ? 13.0 : 10.0;
 
     return Container(
@@ -688,7 +688,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildSubtitleTag(BuildContext context, {bool isLocal = false}) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final iconSize = isLandscape ? 16.0 : 14.0;
 
     return Container(
@@ -709,7 +709,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildTagsRow(BuildContext context) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final fontSize = isLandscape ? 13.0 : 10.0;
 
     return Container(
@@ -732,7 +732,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildVoiceActorsRow(BuildContext context) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final fontSize = isLandscape ? 13.0 : 10.0;
 
     return Container(
@@ -755,7 +755,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildTagsWrap(BuildContext context) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final fontSize = isLandscape ? 13.0 : 11.0;
 
     return Wrap(
@@ -775,7 +775,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
 
   Widget _buildVoiceActorsWrap(BuildContext context) {
     final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+        MediaQuery.orientationOf(context) == Orientation.landscape;
     final fontSize = isLandscape ? 13.0 : 11.0;
 
     return Wrap(

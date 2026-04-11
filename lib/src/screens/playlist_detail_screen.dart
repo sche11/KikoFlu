@@ -11,6 +11,7 @@ import '../screens/work_detail_screen.dart';
 import '../widgets/overscroll_next_page_detector.dart';
 import '../utils/string_utils.dart';
 import '../widgets/privacy_blur_cover.dart';
+import '../utils/scroll_optimization.dart';
 import '../../l10n/app_localizations.dart';
 
 class PlaylistDetailScreen extends ConsumerStatefulWidget {
@@ -788,9 +789,8 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         },
         child: CustomScrollView(
           controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: ClampingScrollPhysics(),
-          ),
+          cacheExtent: ScrollOptimization.cacheExtent,
+          physics: ScrollOptimization.physics,
           slivers: [
             // 元数据信息
             if (state.metadata != null) _buildMetadataSection(state.metadata!),
