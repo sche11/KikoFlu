@@ -221,10 +221,10 @@ void main(List<String> args) async {
     return;
   }
 
-  // Initialize just_audio_media_kit for desktop platforms
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  // Initialize just_audio_media_kit for desktop and Android platforms
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS || Platform.isAndroid) {
     await _configureMpv();
-    JustAudioMediaKit.ensureInitialized();
+    JustAudioMediaKit.ensureInitialized(android: true);
   }
 
   if (Platform.isWindows || Platform.isLinux) {
