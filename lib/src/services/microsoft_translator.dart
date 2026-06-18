@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'log_service.dart';
 
 class MicrosoftTranslator {
   final Dio _dio = Dio();
@@ -119,7 +120,7 @@ class MicrosoftTranslator {
       }
       return text;
     } catch (e) {
-      print('Microsoft translation error: $e');
+      logOutput('Microsoft translation error: $e');
       return text;
     }
   }

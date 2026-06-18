@@ -69,7 +69,8 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
       setState(() => _isScaled = false);
     } else {
       const newScale = 2.0;
-      controller.value = Matrix4.identity()..scale(newScale);
+      controller.value = Matrix4.identity()
+        ..scaleByDouble(newScale, newScale, newScale, 1);
       setState(() => _isScaled = true);
     }
   }
@@ -100,6 +101,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
   Future<void> _saveImage() async {
     if (_isSaving) return;
 
+    final l10n = S.of(context);
     setState(() => _isSaving = true);
 
     try {
@@ -127,14 +129,13 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
       }
 
       if (Platform.isAndroid) {
-        await _saveToGallery(imageBytes, imageName);
+        await _saveToGallery(imageBytes, imageName, l10n);
       } else {
-        await _saveToFile(imageBytes, imageName);
+        await _saveToFile(imageBytes, imageName, l10n);
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(
-            context, S.of(context).saveFailedWithError(e.toString()));
+        SnackBarUtil.showError(context, l10n.saveFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -143,41 +144,42 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
     }
   }
 
-  Future<void> _saveToGallery(List<int> imageBytes, String imageName) async {
+  Future<void> _saveToGallery(
+      List<int> imageBytes, String imageName, S l10n) async {
     PermissionStatus status = await Permission.photos.request();
 
     if (status.isPermanentlyDenied || status == PermissionStatus.restricted) {
       status = await Permission.storage.request();
     }
 
-    if (!status.isGranted) {
-      if (mounted) {
-        if (status.isPermanentlyDenied) {
-          final shouldOpenSettings = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(S.of(context).storagePermissionRequired),
-              content: Text(S.of(context).storagePermissionForGalleryDesc),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(S.of(context).cancel),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(S.of(context).goToSettings),
-                ),
-              ],
-            ),
-          );
+    if (!mounted) return;
 
-          if (shouldOpenSettings == true) {
-            await openAppSettings();
-          }
-        } else {
-          SnackBarUtil.showWarning(
-              context, S.of(context).storagePermissionRequiredForImage);
+    if (!status.isGranted) {
+      if (status.isPermanentlyDenied) {
+        final shouldOpenSettings = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(l10n.storagePermissionRequired),
+            content: Text(l10n.storagePermissionForGalleryDesc),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(l10n.cancel),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(l10n.goToSettings),
+              ),
+            ],
+          ),
+        );
+
+        if (shouldOpenSettings == true) {
+          await openAppSettings();
         }
+      } else {
+        SnackBarUtil.showWarning(
+            context, l10n.storagePermissionRequiredForImage);
       }
       return;
     }
@@ -189,19 +191,20 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
       androidRelativePath: "Pictures/KikoFlu",
     );
 
-    if (mounted) {
-      if (result.isSuccess) {
-        SnackBarUtil.showSuccess(context, S.of(context).imageSavedToGallery);
-      } else {
-        SnackBarUtil.showError(
-            context,
-            S.of(context).saveFailedWithError(
-                result.errorMessage ?? S.of(context).saveImageFailed));
-      }
+    if (!mounted) return;
+
+    if (result.isSuccess) {
+      SnackBarUtil.showSuccess(context, l10n.imageSavedToGallery);
+    } else {
+      SnackBarUtil.showError(
+          context,
+          l10n.saveFailedWithError(
+              result.errorMessage ?? l10n.saveImageFailed));
     }
   }
 
-  Future<void> _saveToFile(List<int> imageBytes, String imageName) async {
+  Future<void> _saveToFile(
+      List<int> imageBytes, String imageName, S l10n) async {
     String fileName = imageName;
     if (!fileName.toLowerCase().endsWith('.jpg') &&
         !fileName.toLowerCase().endsWith('.jpeg') &&
@@ -215,16 +218,22 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
         final tempDir = await getTemporaryDirectory();
         final tempFile = File('${tempDir.path}/$fileName');
         await tempFile.writeAsBytes(imageBytes);
+        if (!mounted) {
+          if (await tempFile.exists()) {
+            await tempFile.delete();
+          }
+          return;
+        }
 
         final outputFile = await FilePicker.platform.saveFile(
-          dialogTitle: S.of(context).saveImage,
+          dialogTitle: l10n.saveImage,
           fileName: fileName,
           type: FileType.image,
           bytes: Uint8List.fromList(imageBytes),
         );
 
         if (outputFile != null && mounted) {
-          SnackBarUtil.showSuccess(context, S.of(context).imageSavedToGallery);
+          SnackBarUtil.showSuccess(context, l10n.imageSavedToGallery);
         }
 
         if (await tempFile.exists()) {
@@ -233,12 +242,12 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
       } catch (e) {
         if (mounted) {
           SnackBarUtil.showError(
-              context, S.of(context).saveFailedWithError(e.toString()));
+              context, l10n.saveFailedWithError(e.toString()));
         }
       }
     } else {
       final outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: S.of(context).saveImage,
+        dialogTitle: l10n.saveImage,
         fileName: fileName,
         type: FileType.image,
       );
@@ -248,8 +257,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
         await file.writeAsBytes(imageBytes);
 
         if (mounted) {
-          SnackBarUtil.showSuccess(
-              context, S.of(context).imageSavedToPath(outputFile));
+          SnackBarUtil.showSuccess(context, l10n.imageSavedToPath(outputFile));
         }
       }
     }
@@ -272,7 +280,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           scrolledUnderElevation: 0,
-          backgroundColor: Colors.black.withOpacity(0.4),
+          backgroundColor: Colors.black.withValues(alpha: 0.4),
           elevation: 0,
           foregroundColor: Colors.white,
           title: isSingleImage
@@ -498,7 +506,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.55),
+        color: Colors.black.withValues(alpha: 0.55),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

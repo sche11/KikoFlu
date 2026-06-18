@@ -59,7 +59,7 @@ class _OverscrollNextPageDetectorState
                     Theme.of(context)
                         .colorScheme
                         .surfaceContainerHighest
-                        .withOpacity(0.5),
+                        .withValues(alpha: 0.5),
                   ],
                 ),
               ),
@@ -78,8 +78,10 @@ class _OverscrollNextPageDetectorState
                     const SizedBox(width: 8),
                     Text(
                       _isTriggered
-                          ? (widget.releaseText ?? S.of(context).releaseForNextPage)
-                          : (widget.promptText ?? S.of(context).pullDownForNextPage),
+                          ? (widget.releaseText ??
+                              S.of(context).releaseForNextPage)
+                          : (widget.promptText ??
+                              S.of(context).pullDownForNextPage),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -156,7 +158,8 @@ class _OverscrollNextPageDetectorState
   }
 
   bool _isAtBottom(ScrollMetrics metrics) {
-    return metrics.extentAfter == 0 || metrics.pixels >= metrics.maxScrollExtent;
+    return metrics.extentAfter == 0 ||
+        metrics.pixels >= metrics.maxScrollExtent;
   }
 
   double _bottomOverscroll(ScrollMetrics metrics) {
@@ -181,7 +184,9 @@ class _OverscrollNextPageDetectorState
   }
 
   void _resetOverscroll({bool keepDraggingState = false}) {
-    if (_overscroll == 0 && !_isTriggered && (_isUserDragging == keepDraggingState)) {
+    if (_overscroll == 0 &&
+        !_isTriggered &&
+        (_isUserDragging == keepDraggingState)) {
       return;
     }
 

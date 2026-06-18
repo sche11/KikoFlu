@@ -107,7 +107,10 @@ class _PaginationBarState extends State<PaginationBar> {
       size: 18,
       color: enabled
           ? Theme.of(context).colorScheme.onPrimaryContainer
-          : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+          : Theme.of(context)
+              .colorScheme
+              .onSurfaceVariant
+              .withValues(alpha: 0.5),
     );
 
     final textWidget = Text(
@@ -116,7 +119,10 @@ class _PaginationBarState extends State<PaginationBar> {
         fontSize: 13,
         color: enabled
             ? Theme.of(context).colorScheme.onPrimaryContainer
-            : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+            : Theme.of(context)
+                .colorScheme
+                .onSurfaceVariant
+                .withValues(alpha: 0.5),
       ),
     );
 
@@ -218,7 +224,8 @@ class _PaginationBarState extends State<PaginationBar> {
 
     final targetPage = int.tryParse(pageStr);
     if (targetPage == null || targetPage < 1 || targetPage > _maxPage) {
-      SnackBarUtil.showWarning(context, S.of(context).enterValidPageNumber(_maxPage));
+      SnackBarUtil.showWarning(
+          context, S.of(context).enterValidPageNumber(_maxPage));
       return;
     }
 

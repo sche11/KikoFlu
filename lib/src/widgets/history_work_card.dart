@@ -2,19 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/history_record.dart';
-import '../models/audio_track.dart';
 import '../models/download_task.dart';
 import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
 import '../services/audio_player_service.dart';
 import '../services/download_service.dart';
 import '../services/cache_service.dart';
+import '../services/log_service.dart';
+import '../services/audio_file_url_resolver.dart';
+import '../services/audio_track_queue_builder.dart';
 import '../screens/work_detail_screen.dart';
 import '../services/storage_service.dart';
 import '../utils/string_utils.dart';
 import '../providers/lyric_provider.dart';
 import '../../l10n/app_localizations.dart';
 import 'privacy_blur_cover.dart';
+
+final _log = LogService.instance;
 
 class HistoryWorkCard extends ConsumerWidget {
   final HistoryRecord record;
@@ -118,7 +122,7 @@ class HistoryWorkCard extends ConsumerWidget {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withValues(alpha: 0.7),
                           ],
                         ),
                       ),
@@ -247,6 +251,7 @@ class HistoryWorkCard extends ConsumerWidget {
   }
 
   Future<void> _resumePlayback(BuildContext context, WidgetRef ref) async {
+    final l10n = S.of(context);
     final work = record.work;
     final authState = ref.read(authProvider);
     final host = authState.host ?? '';
@@ -259,7 +264,7 @@ class HistoryWorkCard extends ConsumerWidget {
       allFiles = await apiService.getWorkTracks(work.id);
       ref.read(fileListControllerProvider.notifier).updateFiles(allFiles);
     } catch (e) {
-      print('Failed to update file list: $e');
+      _log.captureOutput('Failed to update file list: $e');
 
       // 尝试从已下载的任务中构建文件列表
       try {
@@ -281,7 +286,7 @@ class HistoryWorkCard extends ConsumerWidget {
           }
         }
       } catch (e2) {
-        print('Failed to load downloaded files: $e2');
+        _log.captureOutput('Failed to load downloaded files: $e2');
       }
     }
 
@@ -295,11 +300,10 @@ class HistoryWorkCard extends ConsumerWidget {
           await AudioPlayerService.instance.play();
           ref.read(historyProvider.notifier).addOrUpdate(work);
         } catch (e) {
-          print('Failed to resume playback: $e');
+          _log.captureOutput('Failed to resume playback: $e');
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(S.of(context).playbackFailed(e.toString()))),
+              SnackBar(content: Text(l10n.playbackFailed(e.toString()))),
             );
           }
         }
@@ -383,8 +387,6 @@ class HistoryWorkCard extends ConsumerWidget {
       audioFiles = flattenAudioFiles(allFiles);
     }
 
-    // 3. Build AudioTracks
-    final List<AudioTrack> tracks = [];
     final downloadService = DownloadService.instance;
 
     // Current work cover URL
@@ -399,78 +401,41 @@ class HistoryWorkCard extends ConsumerWidget {
           : '$normalizedUrl/api/cover/${work.id}';
     }
 
-    for (final file in audioFiles) {
-      final fileHash = file['hash'];
-      final fileTitle = file['title'] ?? file['name'] ?? S.of(context).unknown;
+    final audioUrlResolver = AudioFileUrlResolver(
+      resolveDownloadedPath: downloadService.getDownloadedFilePath,
+      downloadRootPath: () async {
+        final downloadDir = await downloadService.getDownloadDirectory();
+        return downloadDir.path;
+      },
+      resolveCachedAudioPath: CacheService.getCachedAudioFile,
+    );
+    final vaNames = work.vas?.map((va) => va.name).toList() ?? [];
+    final artistInfo = vaNames.isNotEmpty ? vaNames.join(', ') : null;
+    final queue = await const AudioTrackQueueBuilder().build(
+      audioFiles: audioFiles,
+      selectedFile:
+          record.lastTrack ?? (audioFiles.isNotEmpty ? audioFiles.first : null),
+      resolveUrl: (file) => audioUrlResolver.resolveOnline(
+        file: file,
+        workId: work.id,
+        host: host,
+        token: token,
+        downloadedFiles: const {},
+        fileRelativePaths: const {},
+      ),
+      workId: work.id,
+      albumTitle: work.title,
+      unknownTitle: l10n.unknown,
+      artist: artistInfo,
+      artworkUrl: coverUrl,
+    );
 
-      // 优先级: 本地下载文件 → 缓存文件 → 网络URL
-      String audioUrl = '';
-      if (fileHash != null) {
-        // 1. 检查是否有本地下载的文件
-        final localPath = await downloadService.getDownloadedFilePath(
-          work.id,
-          fileHash,
-        );
-
-        if (localPath != null) {
-          audioUrl = 'file://$localPath';
-        } else {
-          // 2. 如果没有本地文件，检查缓存
-          final cachedPath = await CacheService.getCachedAudioFile(fileHash);
-          if (cachedPath != null) {
-            audioUrl = 'file://$cachedPath';
-          }
-        }
-      }
-
-      // 3. 如果缓存也没有，使用网络URL
-      if (audioUrl.isEmpty) {
-        if (file['mediaStreamUrl'] != null &&
-            file['mediaStreamUrl'].toString().isNotEmpty) {
-          audioUrl = file['mediaStreamUrl'];
-        } else if (host.isNotEmpty && fileHash != null) {
-          String normalizedUrl = host;
-          if (!host.startsWith('http://') && !host.startsWith('https://')) {
-            normalizedUrl = 'https://$host';
-          }
-          audioUrl = '$normalizedUrl/api/media/stream/$fileHash?token=$token';
-        }
-      }
-
-      if (audioUrl.isNotEmpty) {
-        final vaNames = work.vas?.map((va) => va.name).toList() ?? [];
-        final artistInfo = vaNames.isNotEmpty ? vaNames.join(', ') : null;
-
-        tracks.add(AudioTrack(
-          id: fileHash ?? fileTitle,
-          url: audioUrl,
-          title: fileTitle,
-          artist: artistInfo,
-          album: work.title,
-          artworkUrl: coverUrl,
-          duration: file['duration'] != null
-              ? Duration(milliseconds: (file['duration'] * 1000).round())
-              : null,
-          workId: work.id,
-          hash: fileHash,
-        ));
-      }
-    }
+    var tracks = queue.tracks;
+    var index = queue.startIndex;
 
     if (tracks.isEmpty && record.lastTrack != null) {
-      tracks.add(record.lastTrack!);
-    }
-
-    // 4. Find index
-    final lastTrackId = record.lastTrack?.id;
-    int index = 0;
-    if (lastTrackId != null) {
-      index = tracks.indexWhere((t) => t.id == lastTrackId);
-      if (index == -1) {
-        // Try matching by title if ID/hash mismatch
-        index = tracks.indexWhere((t) => t.title == record.lastTrack!.title);
-      }
-      if (index == -1) index = 0;
+      tracks = [record.lastTrack!];
+      index = 0;
     }
 
     // 5. Play
@@ -483,10 +448,10 @@ class HistoryWorkCard extends ConsumerWidget {
         await AudioPlayerService.instance.play();
         ref.read(historyProvider.notifier).addOrUpdate(work);
       } catch (e) {
-        print('Failed to resume playback: $e');
+        _log.captureOutput('Failed to resume playback: $e');
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(S.of(context).playbackFailed(e.toString()))),
+            SnackBar(content: Text(l10n.playbackFailed(e.toString()))),
           );
         }
       }

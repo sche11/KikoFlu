@@ -10,6 +10,7 @@ import '../utils/l10n_extensions.dart';
 import '../utils/server_utils.dart';
 import '../utils/snackbar_util.dart';
 import '../utils/tag_localizer.dart';
+import '../services/log_service.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../widgets/download_fab.dart';
 import 'search_result_screen.dart';
@@ -140,7 +141,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         _autocompleteKey = UniqueKey();
       });
     } catch (e) {
-      print('加载建议列表失败: $e');
+      logOutput('加载建议列表失败: $e');
     } finally {
       setState(() => _isLoadingSuggestions = false);
     }
@@ -188,7 +189,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
 
   Future<void> _performSearch() async {
     if (_searchConditions.isEmpty) {
-      SnackBarUtil.showWarning(context, S.of(context).addAtLeastOneSearchCondition);
+      SnackBarUtil.showWarning(
+          context, S.of(context).addAtLeastOneSearchCondition);
       return;
     }
 
@@ -240,7 +242,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       final value = c.type == SearchType.rjNumber
           ? 'RJ${c.value}'
           : c.type == SearchType.tag
-              ? TagLocalizer.localizeByName(c.value, Localizations.localeOf(context))
+              ? TagLocalizer.localizeByName(
+                  c.value, Localizations.localeOf(context))
               : c.value;
       return '$prefix${c.type.localizedLabel(context)}: $value';
     }).toList();
@@ -296,7 +299,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       child: Scaffold(
         floatingActionButton: const DownloadFab(),
         appBar: ScrollableAppBar(
-          title: Text(S.of(context).search, style: const TextStyle(fontSize: 18)),
+          title:
+              Text(S.of(context).search, style: const TextStyle(fontSize: 18)),
           actions: [
             // 筛选按钮移到右上角
             IconButton(
@@ -437,7 +441,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
               final displayValue = condition.type == SearchType.rjNumber
                   ? 'RJ${condition.value}'
                   : condition.type == SearchType.tag
-                      ? TagLocalizer.localizeByName(condition.value, Localizations.localeOf(context))
+                      ? TagLocalizer.localizeByName(
+                          condition.value, Localizations.localeOf(context))
                       : condition.value;
 
               return Padding(
@@ -490,48 +495,45 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
 
             return Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: Theme(
-                data: theme.copyWith(useMaterial3: false),
-                child: ChoiceChip(
-                  avatar: isCurrentType && _isExcludeMode && supportsExclude
-                      ? Icon(
-                          Icons.remove_circle_outline,
-                          size: 18,
-                          color: theme.colorScheme.onErrorContainer,
-                        )
-                      : null,
-                  label: Text(type.localizedLabel(context)),
-                  selected: isCurrentType,
-                  showCheckmark:
-                      !(isCurrentType && _isExcludeMode && supportsExclude),
-                  selectedColor:
-                      isCurrentType && _isExcludeMode && supportsExclude
-                          ? theme.colorScheme.errorContainer
-                          : theme.colorScheme.primary,
-                  labelStyle: buttonTextStyle.copyWith(
-                    color: isCurrentType
-                        ? (isCurrentType && _isExcludeMode && supportsExclude
-                            ? theme.colorScheme.onErrorContainer
-                            : theme.colorScheme.onPrimary)
-                        : theme.colorScheme.onSurface,
-                  ),
-                  checkmarkColor: theme.colorScheme.onPrimary,
-                  onSelected: (selected) {
-                    setState(() {
-                      if (isCurrentType && supportsExclude) {
-                        _isExcludeMode = !_isExcludeMode;
-                      } else {
-                        _currentSearchType = type;
-                        _isExcludeMode = false;
-                        _searchController.clear();
-                        _autocompleteKey = UniqueKey();
-                        if (supportsExclude) {
-                          _loadSuggestions();
-                        }
-                      }
-                    });
-                  },
+              child: ChoiceChip(
+                avatar: isCurrentType && _isExcludeMode && supportsExclude
+                    ? Icon(
+                        Icons.remove_circle_outline,
+                        size: 18,
+                        color: theme.colorScheme.onErrorContainer,
+                      )
+                    : null,
+                label: Text(type.localizedLabel(context)),
+                selected: isCurrentType,
+                showCheckmark:
+                    !(isCurrentType && _isExcludeMode && supportsExclude),
+                selectedColor:
+                    isCurrentType && _isExcludeMode && supportsExclude
+                        ? theme.colorScheme.errorContainer
+                        : theme.colorScheme.primary,
+                labelStyle: buttonTextStyle.copyWith(
+                  color: isCurrentType
+                      ? (isCurrentType && _isExcludeMode && supportsExclude
+                          ? theme.colorScheme.onErrorContainer
+                          : theme.colorScheme.onPrimary)
+                      : theme.colorScheme.onSurface,
                 ),
+                checkmarkColor: theme.colorScheme.onPrimary,
+                onSelected: (selected) {
+                  setState(() {
+                    if (isCurrentType && supportsExclude) {
+                      _isExcludeMode = !_isExcludeMode;
+                    } else {
+                      _currentSearchType = type;
+                      _isExcludeMode = false;
+                      _searchController.clear();
+                      _autocompleteKey = UniqueKey();
+                      if (supportsExclude) {
+                        _loadSuggestions();
+                      }
+                    }
+                  });
+                },
               ),
             );
           }).toList(),
@@ -611,7 +613,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                             final id = item['id'] as int?;
                             if (id != null) {
                               final localizedName = TagLocalizer.localize(
-                                id, name, Localizations.localeOf(context),
+                                id,
+                                name,
+                                Localizations.localeOf(context),
                               ).toLowerCase();
                               if (localizedName.contains(query)) return true;
                             }
@@ -624,9 +628,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                         final name =
                             (item['name'] ?? item['title'] ?? '').toString();
                         final count = item['count'] ?? 0;
-                        final displayName = (_currentSearchType == SearchType.tag && item['id'] != null)
-                            ? TagLocalizer.localize(item['id'] as int, name, Localizations.localeOf(context))
-                            : name;
+                        final displayName =
+                            (_currentSearchType == SearchType.tag &&
+                                    item['id'] != null)
+                                ? TagLocalizer.localize(item['id'] as int, name,
+                                    Localizations.localeOf(context))
+                                : name;
                         return '$displayName ($count)';
                       });
                     },
@@ -903,7 +910,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         children: [
           Expanded(
             child: DropdownButtonFormField<AgeRating>(
-              value: _ageRating,
+              initialValue: _ageRating,
               decoration: InputDecoration(
                 labelText: S.of(context).ageRatingLabel,
                 prefixIcon: const Icon(Icons.shield),
@@ -934,7 +941,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<SalesRange>(
-                value: _salesRange,
+                initialValue: _salesRange,
                 decoration: InputDecoration(
                   labelText: S.of(context).salesLabel,
                   prefixIcon: const Icon(Icons.trending_up),

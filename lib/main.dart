@@ -42,12 +42,12 @@ void _setEnv(String key, String value) {
     final keyNative = key.toNativeUtf16();
     final valueNative = value.toNativeUtf16();
     try {
-      final SetEnvironmentVariable = ffi.DynamicLibrary.open('kernel32.dll')
+      final setEnvironmentVariable = ffi.DynamicLibrary.open('kernel32.dll')
           .lookupFunction<
               ffi.Int32 Function(ffi.Pointer<Utf16>, ffi.Pointer<Utf16>),
               int Function(ffi.Pointer<Utf16>,
                   ffi.Pointer<Utf16>)>('SetEnvironmentVariableW');
-      SetEnvironmentVariable(keyNative, valueNative);
+      setEnvironmentVariable(keyNative, valueNative);
     } finally {
       calloc.free(keyNative);
       calloc.free(valueNative);
@@ -131,7 +131,9 @@ Future<void> _configureMpv() async {
 
     // Force set MPV_HOME to ensure config is read
     _setEnv('MPV_HOME', configDir.path);
-    print('[Audio] Set MPV_HOME to: ${configDir.path}');
+    LogService.instance.captureOutput(
+      '[Audio] Set MPV_HOME to: ${configDir.path}',
+    );
 
     if (passthrough) {
       String configContent;
@@ -166,7 +168,9 @@ sub-auto=no
       }
 
       await configFile.writeAsString(configContent);
-      print('[Audio] Updated mpv.conf: Exclusive Mode ENABLED (Forced)');
+      LogService.instance.captureOutput(
+        '[Audio] Updated mpv.conf: Exclusive Mode ENABLED (Forced)',
+      );
     } else {
       // 即使不开启直通，也建议禁用视频输出以避免 Texture 崩溃
       String configContent;
@@ -186,10 +190,11 @@ sub-auto=no
 ''';
       }
       await configFile.writeAsString(configContent);
-      print('[Audio] Updated mpv.conf: Video Disabled');
+      LogService.instance
+          .captureOutput('[Audio] Updated mpv.conf: Video Disabled');
     }
   } catch (e) {
-    print('[Audio] Error configuring mpv: $e');
+    LogService.instance.captureOutput('[Audio] Error configuring mpv: $e');
   }
 }
 
@@ -207,7 +212,9 @@ void main(List<String> args) async {
           ? jsonDecode(args[2]) as Map<String, dynamic>
           : const <String, dynamic>{};
     } catch (e) {
-      print('[MultiWindow] Failed to parse arguments: $e');
+      LogService.instance.captureOutput(
+        '[MultiWindow] Failed to parse arguments: $e',
+      );
       argument = const <String, dynamic>{};
     }
 
@@ -222,7 +229,10 @@ void main(List<String> args) async {
   }
 
   // Initialize just_audio_media_kit for desktop and Android platforms
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS || Platform.isAndroid) {
+  if (Platform.isWindows ||
+      Platform.isLinux ||
+      Platform.isMacOS ||
+      Platform.isAndroid) {
     await _configureMpv();
     JustAudioMediaKit.ensureInitialized(android: true);
   }
@@ -267,7 +277,7 @@ void main(List<String> args) async {
 
   // 启动时检查并清理缓存（如果超过上限）
   CacheService.checkAndCleanCache(force: true).catchError((e) {
-    print('[Cache] 启动时检查缓存失�? $e');
+    LogService.instance.captureOutput('[Cache] 启动时检查缓存失�? $e');
   });
 
   // 初始化下载服�?

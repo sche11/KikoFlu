@@ -2,6 +2,191 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kikoeru_flutter/src/utils/encoding_utils.dart';
 
+const _gbkSubtitleBytes = <int>[
+  213,
+  226,
+  202,
+  199,
+  210,
+  187,
+  182,
+  206,
+  214,
+  208,
+  206,
+  196,
+  215,
+  214,
+  196,
+  187,
+  196,
+  218,
+  200,
+  221,
+  163,
+  172,
+  211,
+  195,
+  211,
+  218,
+  178,
+  226,
+  202,
+  212,
+  177,
+  224,
+  194,
+  235,
+];
+
+const _gbkMixedBytes = <int>[
+  91,
+  48,
+  48,
+  58,
+  48,
+  49,
+  46,
+  48,
+  48,
+  93,
+  181,
+  218,
+  210,
+  187,
+  208,
+  208,
+  184,
+  232,
+  180,
+  202,
+  32,
+  72,
+  101,
+  108,
+  108,
+  111,
+  10,
+  91,
+  48,
+  48,
+  58,
+  48,
+  53,
+  46,
+  48,
+  48,
+  93,
+  181,
+  218,
+  182,
+  254,
+  208,
+  208,
+  32,
+  87,
+  111,
+  114,
+  108,
+  100,
+];
+
+const _gbkPunctuationBytes = <int>[
+  196,
+  227,
+  186,
+  195,
+  44,
+  202,
+  192,
+  189,
+  231,
+  33,
+  213,
+  226,
+  202,
+  199,
+  178,
+  226,
+  202,
+  212,
+  196,
+  218,
+  200,
+  221,
+  46,
+];
+
+const _gbkPriorityBytes = <int>[
+  213,
+  226,
+  202,
+  199,
+  214,
+  208,
+  206,
+  196,
+  178,
+  226,
+  202,
+  212,
+  196,
+  218,
+  200,
+  221,
+];
+
+const _gbkSrtBytes = <int>[
+  49,
+  10,
+  48,
+  48,
+  58,
+  48,
+  48,
+  58,
+  48,
+  49,
+  44,
+  48,
+  48,
+  48,
+  32,
+  45,
+  45,
+  62,
+  32,
+  48,
+  48,
+  58,
+  48,
+  48,
+  58,
+  48,
+  53,
+  44,
+  48,
+  48,
+  48,
+  10,
+  213,
+  226,
+  202,
+  199,
+  210,
+  187,
+  182,
+  206,
+  214,
+  208,
+  206,
+  196,
+  215,
+  214,
+  196,
+  187,
+];
+
 void main() {
   // ============================================================
   // UTF-8 编码
@@ -36,7 +221,7 @@ void main() {
     });
 
     test('UTF-8 BOM (EF BB BF)', () {
-      final text = '带BOM的UTF-8文本';
+      const text = '带BOM的UTF-8文本';
       final bytes = [0xEF, 0xBB, 0xBF, ...utf8.encode(text)];
       final (content, encoding) = EncodingUtils.decodeBytes(bytes);
       expect(encoding, 'UTF-8');
@@ -148,16 +333,14 @@ void main() {
   group('GBK', () {
     test('GBK 中文字幕内容', () {
       const text = '这是一段中文字幕内容，用于测试编码';
-      final encoded = EncodingUtils.encodeString(text, 'GBK');
-      final (content, encoding) = EncodingUtils.decodeBytes(encoded);
+      final (content, encoding) = EncodingUtils.decodeBytes(_gbkSubtitleBytes);
       expect(encoding, 'GBK');
       expect(content, text);
     });
 
     test('GBK 中英混合', () {
       const text = '[00:01.00]第一行歌词 Hello\n[00:05.00]第二行 World';
-      final encoded = EncodingUtils.encodeString(text, 'GBK');
-      final (content, encoding) = EncodingUtils.decodeBytes(encoded);
+      final (content, encoding) = EncodingUtils.decodeBytes(_gbkMixedBytes);
       expect(encoding, 'GBK');
       expect(content, text);
     });
@@ -166,8 +349,8 @@ void main() {
       // 全角标点在 GBK 中编码后，_hasReasonableContent 可能因字符范围判定不通过
       // 测试使用半角或常见标点
       const text = '你好,世界!这是测试内容.';
-      final encoded = EncodingUtils.encodeString(text, 'GBK');
-      final (content, encoding) = EncodingUtils.decodeBytes(encoded);
+      final (content, encoding) =
+          EncodingUtils.decodeBytes(_gbkPunctuationBytes);
       expect(encoding, 'GBK');
       expect(content, text);
     });
@@ -292,8 +475,7 @@ void main() {
     });
 
     test('仅 UTF-8 BOM 无内容', () {
-      final (content, encoding) =
-          EncodingUtils.decodeBytes([0xEF, 0xBB, 0xBF]);
+      final (content, encoding) = EncodingUtils.decodeBytes([0xEF, 0xBB, 0xBF]);
       expect(encoding, 'UTF-8');
       expect(content, isEmpty);
     });
@@ -310,7 +492,8 @@ void main() {
       // 生成约 100KB 的中文内容
       final buf = StringBuffer();
       for (int i = 0; i < 5000; i++) {
-        buf.writeln('[${(i ~/ 60).toString().padLeft(2, '0')}:${(i % 60).toString().padLeft(2, '0')}.00]这是第$i行歌词内容');
+        buf.writeln(
+            '[${(i ~/ 60).toString().padLeft(2, '0')}:${(i % 60).toString().padLeft(2, '0')}.00]这是第$i行歌词内容');
       }
       final bytes = utf8.encode(buf.toString());
 
@@ -359,8 +542,7 @@ void main() {
 
     test('GBK 优先于 Shift-JIS', () {
       // GBK 编码的中文（非有效 UTF-8）
-      final encoded = EncodingUtils.encodeString('这是中文测试内容', 'GBK');
-      final (_, encoding) = EncodingUtils.decodeBytes(encoded);
+      final (_, encoding) = EncodingUtils.decodeBytes(_gbkPriorityBytes);
       expect(encoding, 'GBK');
     });
   });
@@ -387,14 +569,14 @@ void main() {
 
     test('GBK SRT 字幕', () {
       const srt = '1\n00:00:01,000 --> 00:00:05,000\n这是一段中文字幕';
-      final bytes = EncodingUtils.encodeString(srt, 'GBK');
-      final (content, encoding) = EncodingUtils.decodeBytes(bytes);
+      final (content, encoding) = EncodingUtils.decodeBytes(_gbkSrtBytes);
       expect(encoding, 'GBK');
       expect(content, srt);
     });
 
     test('UTF-16LE ASS 字幕', () {
-      const ass = '[Events]\nDialogue: 0,0:00:01.00,0:00:05.00,Default,,0,0,0,,你好世界';
+      const ass =
+          '[Events]\nDialogue: 0,0:00:01.00,0:00:05.00,Default,,0,0,0,,你好世界';
       final bytes = EncodingUtils.encodeString(ass, 'UTF-16LE');
       final (content, encoding) = EncodingUtils.decodeBytes(bytes);
       expect(encoding, 'UTF-16LE');

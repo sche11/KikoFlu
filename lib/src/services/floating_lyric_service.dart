@@ -4,6 +4,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 
+import 'log_service.dart';
+
+final _log = LogService.instance;
+
 /// 悬浮字幕服务
 /// 负责管理桌面悬浮窗显示和字幕更新
 class FloatingLyricService {
@@ -53,7 +57,7 @@ class FloatingLyricService {
   /// [style] 初始样式参数
   Future<bool> show(String text, {Map<String, dynamic>? style}) async {
     if (!isSupported) {
-      print('[FloatingLyric] 当前平台不支持悬浮窗');
+      _log.captureOutput('[FloatingLyric] 当前平台不支持悬浮窗');
       return false;
     }
 
@@ -93,7 +97,7 @@ class FloatingLyricService {
         await controller.show();
         return true;
       } catch (e) {
-        print('[FloatingLyric] Desktop显示悬浮窗失败: $e');
+        _log.captureOutput('[FloatingLyric] Desktop显示悬浮窗失败: $e');
         return false;
       }
     }
@@ -104,10 +108,10 @@ class FloatingLyricService {
         args.addAll(style);
       }
       final result = await _platform.invokeMethod('show', args);
-      print('[FloatingLyric] 显示悬浮窗: $text');
+      _log.captureOutput('[FloatingLyric] 显示悬浮窗: $text');
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 显示悬浮窗失败: $e');
+      _log.captureOutput('[FloatingLyric] 显示悬浮窗失败: $e');
       return false;
     }
   }
@@ -124,7 +128,7 @@ class FloatingLyricService {
           final controller = WindowController.fromWindowId(_windowId!);
           await controller.invokeMethod('close');
         } catch (e) {
-          print('[FloatingLyric] Windows隐藏悬浮窗失败: $e');
+          _log.captureOutput('[FloatingLyric] Windows隐藏悬浮窗失败: $e');
         }
         _windowId = null;
         return true;
@@ -134,10 +138,10 @@ class FloatingLyricService {
 
     try {
       final result = await _platform.invokeMethod('hide');
-      print('[FloatingLyric] 隐藏悬浮窗');
+      _log.captureOutput('[FloatingLyric] 隐藏悬浮窗');
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 隐藏悬浮窗失败: $e');
+      _log.captureOutput('[FloatingLyric] 隐藏悬浮窗失败: $e');
       return false;
     }
   }
@@ -158,14 +162,14 @@ class FloatingLyricService {
     if (Platform.isWindows) {
       if (_windowId != null) {
         try {
-          // print('[FloatingLyric] Updating text for window $_windowId: $text');
+          // _log.captureOutput('[FloatingLyric] Updating text for window $_windowId: $text');
           final controller = WindowController.fromWindowId(_windowId!);
           await controller.invokeMethod('updateText', {
             'text': text,
           });
           return true;
         } catch (e) {
-          print('[FloatingLyric] Windows更新文本失败: $e');
+          _log.captureOutput('[FloatingLyric] Windows更新文本失败: $e');
           // 如果是通道未注册（通常意味着窗口已关闭或未初始化），重置 ID
           if (e.toString().contains('CHANNEL_UNREGISTERED')) {
             _windowId = null;
@@ -182,7 +186,7 @@ class FloatingLyricService {
       });
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 更新文本失败: $e');
+      _log.captureOutput('[FloatingLyric] 更新文本失败: $e');
       return false;
     }
   }
@@ -198,7 +202,7 @@ class FloatingLyricService {
       final result = await _platform.invokeMethod('hasPermission');
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 检查权限失败: $e');
+      _log.captureOutput('[FloatingLyric] 检查权限失败: $e');
       return false;
     }
   }
@@ -212,10 +216,10 @@ class FloatingLyricService {
 
     try {
       final result = await _platform.invokeMethod('requestPermission');
-      print('[FloatingLyric] 请求权限结果: $result');
+      _log.captureOutput('[FloatingLyric] 请求权限结果: $result');
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 请求权限失败: $e');
+      _log.captureOutput('[FloatingLyric] 请求权限失败: $e');
       return false;
     }
   }
@@ -244,8 +248,9 @@ class FloatingLyricService {
     if (textColor != null) params['textColor'] = textColor;
     if (backgroundColor != null) params['backgroundColor'] = backgroundColor;
     if (cornerRadius != null) params['cornerRadius'] = cornerRadius;
-    if (paddingHorizontal != null)
+    if (paddingHorizontal != null) {
       params['paddingHorizontal'] = paddingHorizontal;
+    }
     if (paddingVertical != null) params['paddingVertical'] = paddingVertical;
 
     if (Platform.isWindows) {
@@ -255,7 +260,7 @@ class FloatingLyricService {
           await controller.invokeMethod('updateStyle', params);
           return true;
         } catch (e) {
-          print('[FloatingLyric] Windows更新样式失败: $e');
+          _log.captureOutput('[FloatingLyric] Windows更新样式失败: $e');
           if (e.toString().contains('CHANNEL_UNREGISTERED')) {
             _windowId = null;
           }
@@ -267,10 +272,10 @@ class FloatingLyricService {
 
     try {
       final result = await _platform.invokeMethod('updateStyle', params);
-      print('[FloatingLyric] 更新样式成功');
+      _log.captureOutput('[FloatingLyric] 更新样式成功');
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 更新样式失败: $e');
+      _log.captureOutput('[FloatingLyric] 更新样式失败: $e');
       return false;
     }
   }
@@ -284,7 +289,7 @@ class FloatingLyricService {
       });
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 设置触摸模式失败: $e');
+      _log.captureOutput('[FloatingLyric] 设置触摸模式失败: $e');
       return false;
     }
   }
@@ -298,7 +303,7 @@ class FloatingLyricService {
       });
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 设置FPS显示失败: $e');
+      _log.captureOutput('[FloatingLyric] 设置FPS显示失败: $e');
       return false;
     }
   }
@@ -312,7 +317,7 @@ class FloatingLyricService {
       });
       return result == true;
     } catch (e) {
-      print('[FloatingLyric] 设置网速显示失败: $e');
+      _log.captureOutput('[FloatingLyric] 设置网速显示失败: $e');
       return false;
     }
   }

@@ -9,6 +9,7 @@ import '../widgets/enhanced_work_card.dart';
 import '../widgets/sort_dialog.dart';
 import '../widgets/pagination_bar.dart';
 import '../widgets/overscroll_next_page_detector.dart';
+import '../services/log_service.dart';
 import '../utils/responsive_grid_helper.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
@@ -29,7 +30,8 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
   final ScrollController _scrollController = ScrollController();
 
   // 防抖相关（仅用于热门/推荐模式的自动加载）
-  final ScrollThrottler _scrollThrottler = ScrollThrottler(positionThreshold: 10);
+  final ScrollThrottler _scrollThrottler =
+      ScrollThrottler(positionThreshold: 10);
   bool _isLoadingMore = false;
   int _slideDirection = 0;
   final Map<DisplayMode, double> _scrollPositions = {
@@ -76,7 +78,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
             !worksState.isLoading &&
             worksState.hasMore &&
             !_isLoadingMore) {
-          print(
+          logOutput(
               '[WorksScreen] Triggering load more - currentPage: ${worksState.currentPage}');
           _isLoadingMore = true;
 
@@ -85,14 +87,14 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
               setState(() {
                 _isLoadingMore = false;
               });
-              print('[WorksScreen] Load more completed');
+              logOutput('[WorksScreen] Load more completed');
             }
           }).catchError((error) {
             if (mounted) {
               setState(() {
                 _isLoadingMore = false;
               });
-              print('[WorksScreen] Load more error: $error');
+              logOutput('[WorksScreen] Load more error: $error');
             }
           });
         }
@@ -108,7 +110,9 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     if (isRecommendMode) {
       SnackBarUtil.showInfo(
         context,
-        displayMode == DisplayMode.popular ? S.of(context).popularNoSort : S.of(context).recommendedNoSort,
+        displayMode == DisplayMode.popular
+            ? S.of(context).popularNoSort
+            : S.of(context).recommendedNoSort,
       );
       return;
     }
@@ -254,7 +258,7 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                 color: Theme.of(context)
                     .colorScheme
                     .outlineVariant
-                    .withOpacity(0.5),
+                    .withValues(alpha: 0.5),
                 margin: const EdgeInsets.symmetric(horizontal: 2),
               ),
               // 第二列：布局切换按钮
@@ -282,7 +286,9 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 onPressed: () =>
                     ref.read(worksProvider.notifier).toggleSubtitleFilter(),
-                tooltip: worksState.subtitleFilter == 1 ? S.of(context).showAllWorks : S.of(context).showOnlySubtitled,
+                tooltip: worksState.subtitleFilter == 1
+                    ? S.of(context).showAllWorks
+                    : S.of(context).showOnlySubtitled,
               ),
               // 第四列：排序按钮
               Padding(
@@ -298,7 +304,9 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                       const BoxConstraints(minWidth: 36, minHeight: 36),
                   onPressed:
                       isRecommendMode ? null : () => _showSortDialog(context),
-                  tooltip: isRecommendMode ? S.of(context).recommendedNoSort : S.of(context).sort,
+                  tooltip: isRecommendMode
+                      ? S.of(context).recommendedNoSort
+                      : S.of(context).sort,
                 ),
               ),
             ],
@@ -530,13 +538,13 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
           _buildLayoutView(worksState),
           // 全局加载动画 - 在有数据且正在刷新时显示
           if (worksState.isLoading && worksState.works.isNotEmpty)
-            Positioned(
+            const Positioned(
               top: 0,
               left: 0,
               right: 0,
               child: SizedBox(
                 height: 3,
-                child: const LinearProgressIndicator(),
+                child: LinearProgressIndicator(),
               ),
             ),
         ],
@@ -633,7 +641,8 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                   if (worksState.rawWorks.length > worksState.works.length) ...[
                     const SizedBox(height: 8),
                     Text(
-                      S.of(context).excludedNWorks(worksState.rawWorks.length - worksState.works.length),
+                      S.of(context).excludedNWorks(
+                          worksState.rawWorks.length - worksState.works.length),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,
@@ -674,7 +683,8 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                   if (worksState.rawWorks.length > worksState.works.length) ...[
                     const SizedBox(height: 8),
                     Text(
-                      S.of(context).pageExcludedNWorks(worksState.rawWorks.length - worksState.works.length),
+                      S.of(context).pageExcludedNWorks(
+                          worksState.rawWorks.length - worksState.works.length),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,

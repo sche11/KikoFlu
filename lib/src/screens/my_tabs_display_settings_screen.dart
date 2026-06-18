@@ -55,7 +55,7 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  trailing: Switch(
+                  trailing: const Switch(
                     value: true,
                     onChanged: null,
                   ),
@@ -98,7 +98,7 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  trailing: Switch(
+                  trailing: const Switch(
                     value: true,
                     onChanged: null,
                   ),

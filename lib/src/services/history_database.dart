@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/history_record.dart';
+import 'log_service.dart';
 
 class HistoryDatabase {
   static final HistoryDatabase instance = HistoryDatabase._init();
@@ -66,7 +67,7 @@ class HistoryDatabase {
             'ALTER TABLE history ADD COLUMN playlist_total INTEGER DEFAULT 0');
       } catch (e) {
         // If columns already exist or error, ignore (or handle appropriately)
-        print('Migration error (ignored): $e');
+        logOutput('Migration error (ignored): $e');
       }
     }
   }
@@ -105,7 +106,7 @@ class HistoryDatabase {
     if (result.isEmpty) return null;
     return HistoryRecord.fromMap(result.first);
   }
-  
+
   Future<int> getHistoryCount() async {
     final db = await instance.database;
     final result = await db.rawQuery('SELECT COUNT(*) as count FROM history');

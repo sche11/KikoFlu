@@ -4,6 +4,61 @@ import 'package:flutter/material.dart';
 class SnackBarUtil {
   SnackBarUtil._();
 
+  /// 兼容旧代码中直接构造的 SnackBar，并尽量转成统一样式。
+  static void showFromSnackBar(
+    BuildContext context,
+    SnackBar snackBar, {
+    ScaffoldMessengerState? fallbackMessenger,
+    void Function(Object error, StackTrace stackTrace)? onError,
+  }) {
+    try {
+      final message = _extractMessage(snackBar.content);
+      if (message == null || message.isEmpty) {
+        final messenger =
+            fallbackMessenger ?? ScaffoldMessenger.maybeOf(context);
+        messenger?.showSnackBar(snackBar);
+        return;
+      }
+
+      final backgroundColor = snackBar.backgroundColor;
+      final duration = snackBar.duration;
+      final colorScheme = Theme.of(context).colorScheme;
+
+      if (backgroundColor == Colors.red ||
+          backgroundColor == colorScheme.error) {
+        showError(context, message, duration: duration);
+      } else if (backgroundColor == Colors.green) {
+        showSuccess(context, message, duration: duration);
+      } else if (backgroundColor == Colors.orange) {
+        showWarning(context, message, duration: duration);
+      } else {
+        showInfo(context, message, duration: duration);
+      }
+    } catch (error, stackTrace) {
+      onError?.call(error, stackTrace);
+    }
+  }
+
+  static String? _extractMessage(Widget content) {
+    if (content is Text) {
+      return content.data;
+    }
+
+    if (content is Row) {
+      for (final child in content.children) {
+        if (child is Text) {
+          return child.data;
+        }
+
+        if (child is Expanded && child.child is Text) {
+          return (child.child as Text).data;
+        }
+      }
+    }
+
+    return null;
+  }
+
   /// 显示成功提示
   static void showSuccess(
     BuildContext context,

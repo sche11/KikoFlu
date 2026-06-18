@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,7 +66,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).aboutTitle, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).aboutTitle,
+            style: const TextStyle(fontSize: 18)),
       ),
       body: FutureBuilder<_AboutData>(
         future: _aboutFuture,
@@ -131,7 +131,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                       ),
                     ),
                     subtitle: Text(
-                      S.of(context).newVersionAvailable(updateInfo.latestVersion, updateInfo.currentVersion),
+                      S.of(context).newVersionAvailable(
+                          updateInfo.latestVersion, updateInfo.currentVersion),
                       style: TextStyle(
                         color:
                             Theme.of(context).colorScheme.onSecondaryContainer,
@@ -238,7 +239,8 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
         ref.read(updateInfoProvider.notifier).state = updateInfo;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(S.of(context).foundNewVersion(updateInfo.latestVersion)),
+            content:
+                Text(S.of(context).foundNewVersion(updateInfo.latestVersion)),
             action: SnackBarAction(
               label: S.of(context).view,
               onPressed: () => _openUrl(updateInfo.releaseUrl),
@@ -253,7 +255,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).checkUpdateFailed)),
+        SnackBar(content: Text(S.of(context).checkUpdateFailed)),
       );
     } finally {
       if (mounted) {

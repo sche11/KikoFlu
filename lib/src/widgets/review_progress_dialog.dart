@@ -155,104 +155,108 @@ class ReviewProgressDialog {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // 左列：前3个选项
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: filters.take(3).map((filter) {
-                                          final isSelected =
-                                              selectedProgress == filter.value;
-                                          return RadioListTile<String>(
-                                            title: Text(filter.localizedLabel(context)),
-                                            value: filter.value!,
-                                            groupValue: selectedProgress,
-                                            onChanged: (value) {
-                                              setState(() {
-                                                selectedProgress = value;
-                                              });
-                                            },
-                                            selected: isSelected,
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 8),
-                                          );
-                                        }).toList(),
-                                      ),
-                                    ),
-                                    const VerticalDivider(width: 1),
-                                    // 右列：后2个选项 + 移除按钮
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          ...filters.skip(3).map((filter) {
-                                            final isSelected =
-                                                selectedProgress ==
-                                                    filter.value;
-                                            return RadioListTile<String>(
-                                              title: Text(filter.localizedLabel(context)),
-                                              value: filter.value!,
-                                              groupValue: selectedProgress,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  selectedProgress = value;
-                                                });
-                                              },
-                                              selected: isSelected,
-                                              contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8),
-                                            );
-                                          }),
-                                          if (currentProgress != null ||
-                                              currentRating != null) ...[
-                                            const Divider(height: 1),
-                                            InkWell(
-                                              onTap: () {
-                                                Navigator.of(dialogContext)
-                                                    .pop({
-                                                  'progress': '__REMOVE__',
-                                                  'rating': null,
-                                                });
-                                              },
-                                              child: Padding(
-                                                padding:
+                                RadioGroup<String>(
+                                  groupValue: selectedProgress,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedProgress = value;
+                                    });
+                                  },
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // 左列：前3个选项
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            for (final filter
+                                                in filters.take(3))
+                                              RadioListTile<String>(
+                                                title: Text(
+                                                  filter
+                                                      .localizedLabel(context),
+                                                ),
+                                                value: filter.value!,
+                                                selected: selectedProgress ==
+                                                    filter.value,
+                                                contentPadding:
                                                     const EdgeInsets.symmetric(
-                                                        horizontal: 4,
-                                                        vertical: 12),
-                                                child: Row(
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 40,
-                                                      child: Icon(
-                                                        Icons.delete_outline,
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .error,
+                                                        horizontal: 8),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      const VerticalDivider(width: 1),
+                                      // 右列：后2个选项 + 移除按钮
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            for (final filter
+                                                in filters.skip(3))
+                                              RadioListTile<String>(
+                                                title: Text(
+                                                  filter
+                                                      .localizedLabel(context),
+                                                ),
+                                                value: filter.value!,
+                                                selected: selectedProgress ==
+                                                    filter.value,
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8),
+                                              ),
+                                            if (currentProgress != null ||
+                                                currentRating != null) ...[
+                                              const Divider(height: 1),
+                                              InkWell(
+                                                onTap: () {
+                                                  Navigator.of(dialogContext)
+                                                      .pop({
+                                                    'progress': '__REMOVE__',
+                                                    'rating': null,
+                                                  });
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 4,
+                                                      vertical: 12),
+                                                  child: Row(
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 40,
+                                                        child: Icon(
+                                                          Icons.delete_outline,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .error,
+                                                        ),
                                                       ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      S.of(context).remove,
-                                                      style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .error,
-                                                        fontSize: 16,
+                                                      const SizedBox(width: 8),
+                                                      Text(
+                                                        S.of(context).remove,
+                                                        style: TextStyle(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .error,
+                                                          fontSize: 16,
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
+                                            ],
                                           ],
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -406,7 +410,7 @@ class ReviewProgressDialog {
                           });
                         },
                       );
-                    }).toList(),
+                    }),
                     const SizedBox(height: 8),
                     if (currentProgress != null || currentRating != null)
                       ListTile(

@@ -10,6 +10,7 @@
 
 import 'dart:convert';
 import 'dart:io' show zlib;
+import '../services/log_service.dart';
 
 const String _encodedTagData =
     'eNqdfelyG8eS7qsgzp+xI0YX1mLZnn9avJ0j2bqmjh3n/rnRIlskjkA0B4t9eCYmAiC47xR3cd93'
@@ -328,7 +329,7 @@ const String _encodedTagData =
 
 /// Tag translation map: tag_id -> { locale_key: localized_name }
 /// Locale keys: 'zh' (Simplified Chinese), 'en' (English), 'ja' (Japanese), 'ru', 'zh_Hant'
-late final Map<int, Map<String, String>> tagTranslations = _decodeTagData();
+final Map<int, Map<String, String>> tagTranslations = _decodeTagData();
 
 Map<int, Map<String, String>> _decodeTagData() {
   try {
@@ -337,18 +338,19 @@ Map<int, Map<String, String>> _decodeTagData() {
     final jsonStr = utf8.decode(decompressed);
     final Map<String, dynamic> raw = jsonDecode(jsonStr);
     return raw.map((key, value) => MapEntry(
-      int.parse(key),
-      (value as Map<String, dynamic>).map((k, v) => MapEntry(k, v as String)),
-    ));
+          int.parse(key),
+          (value as Map<String, dynamic>)
+              .map((k, v) => MapEntry(k, v as String)),
+        ));
   } catch (e) {
-    print('Failed to decode tag translations: \$e');
+    logOutput('Failed to decode tag translations: \$e');
     return {};
   }
 }
 
 /// Reverse lookup: tag name (any language) -> tag_id
 /// Used for matching display names back to tag IDs
-late final Map<String, int> tagNameToId = _buildTagNameToId();
+final Map<String, int> tagNameToId = _buildTagNameToId();
 
 Map<String, int> _buildTagNameToId() {
   final map = <String, int>{};

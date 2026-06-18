@@ -56,7 +56,9 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      timerState.waitingForTrackEnd ? S.of(context).aboutToStop : S.of(context).remainingTime,
+                      timerState.waitingForTrackEnd
+                          ? S.of(context).aboutToStop
+                          : S.of(context).remainingTime,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
@@ -87,7 +89,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
                           color: Theme.of(context)
                               .colorScheme
                               .surface
-                              .withOpacity(0.2),
+                              .withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -218,8 +220,7 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
       },
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -341,8 +342,16 @@ class _SleepTimerDialogState extends ConsumerState<SleepTimerDialog> {
     final presetTimes = [
       (const Duration(minutes: 5), S.of(context).nMinutes(5), Icons.timer),
       (const Duration(minutes: 10), S.of(context).nMinutes(10), Icons.timer),
-      (const Duration(minutes: 15), S.of(context).nMinutes(15), Icons.bedtime_outlined),
-      (const Duration(minutes: 30), S.of(context).nMinutes(30), Icons.bedtime_outlined),
+      (
+        const Duration(minutes: 15),
+        S.of(context).nMinutes(15),
+        Icons.bedtime_outlined
+      ),
+      (
+        const Duration(minutes: 30),
+        S.of(context).nMinutes(30),
+        Icons.bedtime_outlined
+      ),
       (const Duration(hours: 1), S.of(context).nHours(1), Icons.bedtime),
       (const Duration(hours: 2), S.of(context).nHours(2), Icons.bedtime),
     ];

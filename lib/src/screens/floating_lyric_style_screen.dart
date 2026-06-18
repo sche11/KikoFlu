@@ -14,7 +14,8 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).floatingLyricStyle, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).floatingLyricStyle,
+            style: const TextStyle(fontSize: 18)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -288,7 +289,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
           spacing: 12,
           runSpacing: 12,
           children: colors.map((color) {
-            final isSelected = color.value == currentColor.value;
+            final isSelected = color.toARGB32() == currentColor.toARGB32();
             return GestureDetector(
               onTap: () => onColorSelected(color),
               child: Container(
@@ -300,7 +301,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
                   border: Border.all(
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary
-                        : Colors.grey.withOpacity(0.3),
+                        : Colors.grey.withValues(alpha: 0.3),
                     width: isSelected ? 3 : 1,
                   ),
                   boxShadow: isSelected
@@ -309,7 +310,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
                             color: Theme.of(context)
                                 .colorScheme
                                 .primary
-                                .withOpacity(0.4),
+                                .withValues(alpha: 0.4),
                             blurRadius: 8,
                             spreadRadius: 2,
                           ),
@@ -351,7 +352,8 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(S.of(context).cornerRadius, style: Theme.of(context).textTheme.bodyMedium),
+                Text(S.of(context).cornerRadius,
+                    style: Theme.of(context).textTheme.bodyMedium),
                 Text(
                   '${style.cornerRadius.toInt()}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -377,7 +379,8 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(S.of(context).horizontalPadding, style: Theme.of(context).textTheme.bodyMedium),
+                Text(S.of(context).horizontalPadding,
+                    style: Theme.of(context).textTheme.bodyMedium),
                 Text(
                   '${style.paddingHorizontal.toInt()}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -403,7 +406,8 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(S.of(context).verticalPadding, style: Theme.of(context).textTheme.bodyMedium),
+                Text(S.of(context).verticalPadding,
+                    style: Theme.of(context).textTheme.bodyMedium),
                 Text(
                   '${style.paddingVertical.toInt()}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(

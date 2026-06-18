@@ -165,8 +165,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
   }
 
   /// 遍历播放列表所有页检查作品是否存在
-  Future<bool> _isWorkInPlaylist(
-      dynamic apiService, Playlist playlist) async {
+  Future<bool> _isWorkInPlaylist(dynamic apiService, Playlist playlist) async {
     int page = 1;
     const pageSize = 96; // API 最大数量
     const maxPages = 5;
@@ -218,7 +217,8 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, S.of(context).addFailedWithError(e.toString()));
+        SnackBarUtil.showError(
+            context, S.of(context).addFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -259,7 +259,8 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, S.of(context).removeFailedWithError(e.toString()));
+        SnackBarUtil.showError(
+            context, S.of(context).removeFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -303,7 +304,7 @@ class _AddToPlaylistDialogState extends ConsumerState<AddToPlaylistDialog> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurface
-                                .withOpacity(0.6),
+                                .withValues(alpha: 0.6),
                           ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

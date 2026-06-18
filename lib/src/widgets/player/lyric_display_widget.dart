@@ -214,7 +214,9 @@ class _FullLyricDisplayState extends ConsumerState<FullLyricDisplay> {
     final displayLyrics = lyricState.displayLyrics;
     if (index >= 0 && index < displayLyrics.length) {
       final targetTime = displayLyrics[index].startTime;
-      ref.read(audioPlayerControllerProvider.notifier).seekAndPersist(targetTime);
+      ref
+          .read(audioPlayerControllerProvider.notifier)
+          .seekAndPersist(targetTime);
 
       setState(() {
         _autoScroll = false;
@@ -280,7 +282,7 @@ class _FullLyricDisplayState extends ConsumerState<FullLyricDisplay> {
                         ? Theme.of(context)
                             .colorScheme
                             .primaryContainer
-                            .withOpacity(0.3)
+                            .withValues(alpha: 0.3)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -293,7 +295,7 @@ class _FullLyricDisplayState extends ConsumerState<FullLyricDisplay> {
                                   ? Theme.of(context)
                                       .colorScheme
                                       .onSurfaceVariant
-                                      .withOpacity(0.5)
+                                      .withValues(alpha: 0.5)
                                   : Theme.of(context)
                                       .colorScheme
                                       .onSurfaceVariant,

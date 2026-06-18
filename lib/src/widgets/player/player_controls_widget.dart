@@ -7,6 +7,7 @@ import '../../providers/audio_provider.dart';
 import '../../providers/floating_lyric_provider.dart';
 import '../../providers/lyric_provider.dart';
 import '../../providers/player_buttons_provider.dart';
+import '../../utils/string_utils.dart';
 import '../responsive_dialog.dart';
 import '../subtitle_adjustment_dialog.dart';
 import '../volume_control.dart';
@@ -55,19 +56,6 @@ class PlayerControlsWidget extends ConsumerStatefulWidget {
 }
 
 class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
-
-    if (hours > 0) {
-      return '$hours:${twoDigits(minutes)}:${twoDigits(seconds)}';
-    } else {
-      return '${twoDigits(minutes)}:${twoDigits(seconds)}';
-    }
-  }
-
   void _showSpeedDialog(
       BuildContext context, WidgetRef ref, double currentSpeed) {
     double localSpeed = currentSpeed;
@@ -608,7 +596,7 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
                     inactiveTrackColor: Theme.of(context)
                         .colorScheme
                         .onSurfaceVariant
-                        .withOpacity(0.15),
+                        .withValues(alpha: 0.15),
                     trackShape: const RoundedRectSliderTrackShape(),
                   ),
                   child: Slider(
@@ -642,11 +630,11 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _formatDuration(displayPos),
+                        formatDuration(displayPos, padHours: false),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       Text(
-                        _formatDuration(dur),
+                        formatDuration(dur, padHours: false),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -724,10 +712,8 @@ class _PlayerControlsWidgetState extends ConsumerState<PlayerControlsWidget> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ...visibleButtons
-                    .map((type) =>
-                        _buildButton(context, ref, type, widget.isLandscape))
-                    .toList(),
+                ...visibleButtons.map((type) =>
+                    _buildButton(context, ref, type, widget.isLandscape)),
                 // More menu button (always visible)
                 Column(
                   mainAxisSize: MainAxisSize.min,

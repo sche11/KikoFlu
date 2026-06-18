@@ -88,7 +88,8 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
       _transformController.value = Matrix4.identity();
     } else {
       const newScale = 2.5;
-      _transformController.value = Matrix4.identity()..scale(newScale);
+      _transformController.value = Matrix4.identity()
+        ..scaleByDouble(newScale, newScale, newScale, 1);
     }
   }
 
@@ -325,7 +326,7 @@ class _CoverPreviewDialogState extends State<CoverPreviewDialog> {
                     child: Text(
                       S.of(context).doubleTapToZoom,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
                       ),

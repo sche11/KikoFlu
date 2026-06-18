@@ -22,6 +22,7 @@ import '../services/translation_service.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../widgets/download_fab.dart';
+import '../widgets/radio_option_group.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -64,48 +65,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showSnackBar(SnackBar snackBar) {
     if (!mounted) return;
 
-    // 提取 SnackBar 内容
-    final content = snackBar.content;
-    String message = '';
-
-    if (content is Text) {
-      message = content.data ?? '';
-    } else if (content is Row) {
-      final children = content.children;
-      for (final child in children) {
-        if (child is Text) {
-          message = child.data ?? '';
-          break;
-        } else if (child is Expanded) {
-          final expandedChild = child.child;
-          if (expandedChild is Text) {
-            message = expandedChild.data ?? '';
-            break;
-          }
-        }
-      }
-    }
-
-    if (message.isEmpty) {
-      final messenger = _scaffoldMessenger ?? ScaffoldMessenger.of(context);
-      messenger.showSnackBar(snackBar);
-      return;
-    }
-
-    // 根据背景色判断类型
-    final backgroundColor = snackBar.backgroundColor;
-    final duration = snackBar.duration;
-
-    if (backgroundColor == Colors.red ||
-        backgroundColor == Theme.of(context).colorScheme.error) {
-      SnackBarUtil.showError(context, message, duration: duration);
-    } else if (backgroundColor == Colors.green) {
-      SnackBarUtil.showSuccess(context, message, duration: duration);
-    } else if (backgroundColor == Colors.orange) {
-      SnackBarUtil.showWarning(context, message, duration: duration);
-    } else {
-      SnackBarUtil.showInfo(context, message, duration: duration);
-    }
+    SnackBarUtil.showFromSnackBar(
+      context,
+      snackBar,
+      fallbackMessenger: _scaffoldMessenger,
+    );
   }
 
   Future<void> _updateCacheSize() async {
@@ -157,7 +121,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       floatingActionButton: const DownloadFab(),
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).settingsTitle, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).settingsTitle,
+            style: const TextStyle(fontSize: 18)),
       ),
       body: isLandscape
           ? _buildLandscapeLayout(cards)
@@ -238,7 +203,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 color: Theme.of(context).colorScheme.primary),
             title: Text(S.of(context).privacyMode),
             subtitle: Text(
-              privacySettings.enabled ? S.of(context).privacyModeEnabled : S.of(context).privacyModeDisabled,
+              privacySettings.enabled
+                  ? S.of(context).privacyModeEnabled
+                  : S.of(context).privacyModeDisabled,
             ),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
@@ -284,6 +251,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// 悬浮字幕开关组件
   Widget _buildFloatingLyricTile(BuildContext context) {
     final isEnabled = ref.watch(floatingLyricEnabledProvider);
+    final l10n = S.of(context);
 
     return Column(
       children: [
@@ -294,10 +262,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           title: Text(S.of(context).desktopFloatingLyric),
           subtitle: Text(
-            isEnabled ? S.of(context).floatingLyricEnabled : S.of(context).privacyModeDisabled,
+            isEnabled
+                ? S.of(context).floatingLyricEnabled
+                : S.of(context).privacyModeDisabled,
             style: TextStyle(
               color: isEnabled
-                  ? Theme.of(context).colorScheme.primary.withOpacity(0.8)
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.8)
                   : null,
             ),
           ),
@@ -306,12 +276,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             try {
               await ref.read(floatingLyricEnabledProvider.notifier).toggle();
             } catch (e) {
-              if (mounted) {
-                SnackBarUtil.showError(
-                  context,
-                  S.of(context).operationFailedWithError(e.toString()),
-                );
-              }
+              if (!context.mounted) return;
+              SnackBarUtil.showError(
+                context,
+                l10n.operationFailedWithError(e.toString()),
+              );
             }
           },
         ),
@@ -399,7 +368,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   /// 悬浮窗网速显示开关（仅 iOS）
   Widget _buildFloatingNetworkSpeedTile(BuildContext context) {
-    final networkSpeedEnabled = ref.watch(floatingLyricNetworkSpeedEnabledProvider);
+    final networkSpeedEnabled =
+        ref.watch(floatingLyricNetworkSpeedEnabledProvider);
     return SwitchListTile(
       secondary: const SizedBox(width: 24),
       title: Text(S.of(context).floatingNetworkSpeed),
@@ -410,7 +380,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       value: networkSpeedEnabled,
       onChanged: (value) async {
-        await ref.read(floatingLyricNetworkSpeedEnabledProvider.notifier).toggle();
+        await ref
+            .read(floatingLyricNetworkSpeedEnabledProvider.notifier)
+            .toggle();
       },
     );
   }
@@ -454,31 +426,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final options = <(String, Locale?)>[
       (S.of(context).languageSystem, null),
       (S.of(context).languageZh, const Locale('zh')),
-      (S.of(context).languageZhTw,
-          const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')),
+      (
+        S.of(context).languageZhTw,
+        const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')
+      ),
       (S.of(context).languageEn, const Locale('en')),
       (S.of(context).languageJa, const Locale('ja')),
       (S.of(context).languageRu, const Locale('ru')),
     ];
+    final selectedIndex = options.indexWhere((option) =>
+        option.$2?.languageCode == currentLocale?.languageCode &&
+        option.$2?.scriptCode == currentLocale?.scriptCode);
 
     showDialog(
       context: context,
       builder: (context) => SimpleDialog(
         title: Text(S.of(context).settingsLanguage),
-        children: options.map((option) {
-          final (label, locale) = option;
-          return RadioListTile<int>(
-            title: Text(label),
-            value: options.indexOf(option),
-            groupValue: options.indexWhere((o) =>
-                o.$2?.languageCode == currentLocale?.languageCode &&
-                o.$2?.scriptCode == currentLocale?.scriptCode),
-            onChanged: (_) {
-              ref.read(localeProvider.notifier).setLocale(locale);
+        children: [
+          RadioOptionGroup<int>(
+            groupValue: selectedIndex >= 0 ? selectedIndex : null,
+            options: [
+              for (var index = 0; index < options.length; index++)
+                RadioOption(
+                  value: index,
+                  title: Text(options[index].$1),
+                ),
+            ],
+            onChanged: (index) {
+              ref.read(localeProvider.notifier).setLocale(options[index].$2);
               Navigator.of(context).pop();
             },
-          );
-        }).toList(),
+          ),
+        ],
       ),
     );
   }
@@ -628,7 +607,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .primary
-                                .withOpacity(0.3),
+                                .withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -667,6 +646,83 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _confirmAndClearCache(BuildContext dialogContext) async {
+    final l10n = S.of(dialogContext);
+    final confirmed = await showDialog<bool>(
+      context: dialogContext,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.confirmClear),
+        content: Text(l10n.confirmClearCacheMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(l10n.confirmClear),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted || !dialogContext.mounted) return;
+
+    final navigator = Navigator.of(dialogContext);
+    showDialog(
+      context: dialogContext,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      await CacheService.clearAllCache();
+      if (!mounted || !dialogContext.mounted) return;
+
+      navigator.pop(); // 关闭加载指示器
+      navigator.pop(); // 关闭缓存管理对话框
+      await _updateCacheSize();
+
+      _showSnackBar(
+        SnackBar(
+          content: Text(l10n.cacheCleared),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted || !dialogContext.mounted) return;
+      navigator.pop(); // 关闭加载指示器
+      _showSnackBar(
+        SnackBar(
+          content: Text(l10n.clearCacheFailedWithError(e.toString())),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _clearTranslationCache(BuildContext dialogContext) async {
+    final l10n = S.of(dialogContext);
+    final navigator = Navigator.of(dialogContext);
+
+    await TranslationService().clearCache();
+    if (!mounted || !dialogContext.mounted) return;
+
+    navigator.pop();
+    _showSnackBar(
+      SnackBar(
+        content: Text(l10n.translationCacheCleared),
+        backgroundColor: Colors.green,
       ),
     );
   }
@@ -731,7 +787,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: Row(
               children: [
                 Expanded(
-                  child: Text(S.of(context).cacheManagement, style: const TextStyle(fontSize: 18)),
+                  child: Text(S.of(context).cacheManagement,
+                      style: const TextStyle(fontSize: 18)),
                 ),
                 if (isLandscape)
                   IconButton(
@@ -805,7 +862,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          S.of(context).cacheLimitLabelMB(currentLimit),
+                                          S
+                                              .of(context)
+                                              .cacheLimitLabelMB(currentLimit),
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey[600],
@@ -938,7 +997,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue.withOpacity(0.1),
+                                    color: Colors.blue.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Column(
@@ -1083,7 +1142,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
+                            color: Colors.blue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -1091,22 +1150,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.info_outline,
+                                  const Icon(Icons.info_outline,
                                       size: 16, color: Colors.blue),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
                                     S.of(context).autoCleanTitle,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.w500,
                                       color: Colors.blue,
                                     ),
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
                                 S.of(context).autoCleanDescriptionShort,
-                                style: TextStyle(fontSize: 12),
+                                style: const TextStyle(fontSize: 12),
                               ),
                             ],
                           ),
@@ -1123,67 +1182,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: Text(S.of(context).close),
                 ),
               ElevatedButton.icon(
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(S.of(context).confirmClear),
-                      content: Text(S.of(context).confirmClearCacheMessage),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text(S.of(context).cancel),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: Text(S.of(context).confirmClear),
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (confirmed == true && mounted) {
-                    // 显示加载指示器
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-
-                    try {
-                      await CacheService.clearAllCache();
-
-                      if (mounted) {
-                        Navigator.of(context).pop(); // 关闭加载指示器
-                        Navigator.of(context).pop(); // 关闭缓存管理对话框
-                        await _updateCacheSize(); // 更新缓存大小
-
-                        _showSnackBar(
-                          SnackBar(
-                            content: Text(S.of(context).cacheCleared),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        Navigator.of(context).pop(); // 关闭加载指示器
-                        _showSnackBar(
-                          SnackBar(
-                            content: Text(S.of(context).clearCacheFailedWithError(e.toString())),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  }
-                },
+                onPressed: () => _confirmAndClearCache(context),
                 icon: const Icon(Icons.delete_outline),
                 label: Text(S.of(context).clearCache),
                 style: ElevatedButton.styleFrom(
@@ -1192,18 +1191,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
               TextButton.icon(
-                onPressed: () async {
-                  await TranslationService().clearCache();
-                  if (mounted) {
-                    Navigator.of(context).pop();
-                    _showSnackBar(
-                      SnackBar(
-                        content: Text(S.of(context).translationCacheCleared),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                },
+                onPressed: () => _clearTranslationCache(context),
                 icon: const Icon(Icons.translate),
                 label: Text(S.of(context).clearTranslationCache),
               ),

@@ -5,6 +5,7 @@ import '../models/history_record.dart';
 import '../models/audio_track.dart';
 import '../services/history_database.dart';
 import '../services/audio_player_service.dart' as import_service;
+import '../services/log_service.dart';
 import '../services/playback_history_service.dart';
 
 class HistoryState {
@@ -84,7 +85,7 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
       );
     } catch (e) {
       state = state.copyWith(isLoading: false);
-      print('Failed to load history: $e');
+      logOutput('Failed to load history: $e');
     }
   }
 

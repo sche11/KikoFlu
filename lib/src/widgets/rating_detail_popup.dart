@@ -28,7 +28,7 @@ class RatingDetailPopup extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -41,7 +41,7 @@ class RatingDetailPopup extends StatelessWidget {
           // 标题
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.star,
                 color: Colors.amber,
                 size: 20,
@@ -105,7 +105,7 @@ class RatingDetailPopup extends StatelessWidget {
                           ),
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.star,
                     color: Colors.amber,
                     size: 16,
@@ -130,7 +130,7 @@ class RatingDetailPopup extends StatelessWidget {
                           child: Container(
                             height: 20,
                             decoration: BoxDecoration(
-                              color: Colors.amber.withOpacity(0.7),
+                              color: Colors.amber.withValues(alpha: 0.7),
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
@@ -154,7 +154,7 @@ class RatingDetailPopup extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

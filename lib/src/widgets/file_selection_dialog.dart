@@ -314,7 +314,10 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
     if (mounted) {
       Navigator.of(context).pop();
       SnackBarUtil.showSuccess(
-          context, S.of(context).addedNFilesToDownloadQueue(selectedFilesWithPaths.length));
+          context,
+          S
+              .of(context)
+              .addedNFilesToDownloadQueue(selectedFilesWithPaths.length));
     }
   }
 
@@ -370,7 +373,11 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                           if (!_isCheckingDownloads) ...[
                             const SizedBox(height: 2),
                             Text(
-                              S.of(context).downloadedAndSelected(_downloadedFiles.values.where((v) => v).length, _selectedFiles.values.where((v) => v).length),
+                              S.of(context).downloadedAndSelected(
+                                  _downloadedFiles.values
+                                      .where((v) => v)
+                                      .length,
+                                  _selectedFiles.values.where((v) => v).length),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onPrimaryContainer
                                     .withAlpha(179),
@@ -406,7 +413,8 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                     FilledButton.icon(
                       onPressed: _startDownload,
                       icon: const Icon(Icons.download, size: 16),
-                      label: Text(S.of(context).downloadN(_getSelectedFiles().length)),
+                      label: Text(
+                          S.of(context).downloadN(_getSelectedFiles().length)),
                       style: FilledButton.styleFrom(
                         backgroundColor: theme.colorScheme.onPrimaryContainer,
                         foregroundColor: theme.colorScheme.primaryContainer,
@@ -540,7 +548,8 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                   const Spacer(),
                   if (!_isCheckingDownloads) ...[
                     Text(
-                      S.of(context).downloadedNCount(_downloadedFiles.values.where((v) => v).length),
+                      S.of(context).downloadedNCount(
+                          _downloadedFiles.values.where((v) => v).length),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.green[700],
                       ),
@@ -553,7 +562,8 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      S.of(context).selectedNCount(_selectedFiles.values.where((v) => v).length),
+                      S.of(context).selectedNCount(
+                          _selectedFiles.values.where((v) => v).length),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withAlpha(153),
                       ),
@@ -604,7 +614,8 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                   FilledButton.icon(
                     onPressed: _startDownload,
                     icon: const Icon(Icons.download),
-                    label: Text(S.of(context).downloadN(_getSelectedFiles().length)),
+                    label: Text(
+                        S.of(context).downloadN(_getSelectedFiles().length)),
                   ),
                 ],
               ),
@@ -712,7 +723,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
                     width: 32,
                     height: 40,
                     child: isDownloaded
-                        ? Icon(
+                        ? const Icon(
                             Icons.check_circle,
                             color: Colors.green,
                             size: 20,

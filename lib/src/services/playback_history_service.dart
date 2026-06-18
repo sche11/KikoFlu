@@ -3,7 +3,8 @@ import '../models/audio_track.dart';
 import '../models/history_record.dart';
 import '../models/work.dart';
 import 'audio_player_service.dart';
-import 'history_database.dart';
+import 'log_service.dart';
+import 'playback_history_store.dart';
 
 /// 历史写入触发原因
 enum FlushReason {
@@ -22,14 +23,18 @@ enum FlushReason {
 /// 1. 管理当前播放会话 snapshot
 /// 2. 接收播放器事件 (position tick, seek, pause, stop, track change)
 /// 3. 周期性 checkpoint (5s) + 关键事件立即 flush
-/// 4. 统一调用 HistoryDatabase 写入
+/// 4. 通过 PlaybackHistoryStore 写入历史
 /// 5. 对外发出轻量 "历史已更新" 通知
 class PlaybackHistoryService {
   static PlaybackHistoryService? _instance;
   static PlaybackHistoryService get instance =>
       _instance ??= PlaybackHistoryService._();
 
-  PlaybackHistoryService._();
+  PlaybackHistoryService._({
+    PlaybackHistoryStore store = const DatabasePlaybackHistoryStore(),
+  }) : _store = store;
+
+  final PlaybackHistoryStore _store;
 
   // --- 当前播放会话 snapshot ---
   int? _currentWorkId;
@@ -38,7 +43,6 @@ class PlaybackHistoryService {
   int _playlistTotal = 0;
   int _lastKnownPositionMs = 0;
   int _lastPersistedPositionMs = 0;
-  DateTime? _lastPersistedAt;
   Work? _currentWork;
   bool _dirty = false;
 
@@ -63,8 +67,7 @@ class PlaybackHistoryService {
     detach(); // 先清理旧监听
 
     // 监听轨道变化
-    _trackSubscription =
-        playerService.currentTrackStream.listen((track) {
+    _trackSubscription = playerService.currentTrackStream.listen((track) {
       if (track != null && track.workId != null) {
         _onTrackChanged(track, playerService);
       }
@@ -106,7 +109,6 @@ class PlaybackHistoryService {
     _playlistTotal = playerService.queue.length;
     _lastKnownPositionMs = playerService.position.inMilliseconds;
     _lastPersistedPositionMs = 0;
-    _lastPersistedAt = null;
     _dirty = true;
 
     // 获取 Work 数据
@@ -118,13 +120,13 @@ class PlaybackHistoryService {
     }
   }
 
-  /// 确保有 Work 对象（先从 DB 查，再从 API 拉）
+  /// 确保有 Work 对象（先从历史存储查，再从 API 拉）
   Future<void> _ensureWork(int workId) async {
     // 如果当前已有且 id 匹配，直接用
     if (_currentWork != null && _currentWork!.id == workId) return;
 
-    // 从 DB 获取
-    final dbRecord = await HistoryDatabase.instance.getHistoryByWorkId(workId);
+    // 从历史存储获取
+    final dbRecord = await _store.getByWorkId(workId);
     if (dbRecord != null) {
       _currentWork = dbRecord.work;
       return;
@@ -135,7 +137,7 @@ class PlaybackHistoryService {
       try {
         _currentWork = await onFetchWork!(workId);
       } catch (e) {
-        print('[PlaybackHistoryService] Failed to fetch work $workId: $e');
+        logOutput('[PlaybackHistoryService] Failed to fetch work $workId: $e');
         _currentWork = null;
       }
     }
@@ -169,7 +171,8 @@ class PlaybackHistoryService {
   }
 
   /// 应用进入后台时调用
-  Future<void> flushNow({FlushReason reason = FlushReason.appBackground}) async {
+  Future<void> flushNow(
+      {FlushReason reason = FlushReason.appBackground}) async {
     if (_currentWorkId == null || _currentWork == null) return;
 
     final playerService = AudioPlayerService.instance;
@@ -197,15 +200,14 @@ class PlaybackHistoryService {
     );
 
     try {
-      await HistoryDatabase.instance.addOrUpdate(record);
+      await _store.addOrUpdate(record);
       _lastPersistedPositionMs = _lastKnownPositionMs;
-      _lastPersistedAt = now;
       _dirty = false;
 
       // 通知外部历史已更新
       _historyUpdatedController.add(_currentWorkId);
     } catch (e) {
-      print('[PlaybackHistoryService] Failed to persist ($reason): $e');
+      logOutput('[PlaybackHistoryService] Failed to persist ($reason): $e');
     }
   }
 
@@ -234,9 +236,9 @@ class PlaybackHistoryService {
   // ==========================================================================
 
   /// 仅用于测试：重置单例
-  static void resetForTest() {
+  static void resetForTest({PlaybackHistoryStore? store}) {
     _instance?.detach();
-    _instance = null;
+    _instance = store == null ? null : PlaybackHistoryService._(store: store);
   }
 
   /// 仅用于测试：获取当前 session 状态

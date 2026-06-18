@@ -105,32 +105,31 @@ class _ScrollableAppBarState extends State<ScrollableAppBar> {
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
       titleSpacing: widget.titleSpacing,
       centerTitle: widget.centerTitle,
-      bottom: widget.bottom != null
-          ? widget.bottom
-          : PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                height: 1,
-                decoration: BoxDecoration(
-                  gradient: _scrolledUnder
-                      ? LinearGradient(
-                          colors: [
-                            Colors.grey.withOpacity(0.1),
-                            Colors.grey.withOpacity(0.3),
-                            Colors.grey.withOpacity(0.1),
-                          ],
-                        )
-                      : LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            Colors.transparent,
-                            Colors.transparent,
-                          ],
-                        ),
-                ),
+      bottom: widget.bottom ??
+          PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: _scrolledUnder
+                    ? LinearGradient(
+                        colors: [
+                          Colors.grey.withValues(alpha: 0.1),
+                          Colors.grey.withValues(alpha: 0.3),
+                          Colors.grey.withValues(alpha: 0.1),
+                        ],
+                      )
+                    : const LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.transparent,
+                        ],
+                      ),
               ),
             ),
+          ),
     );
   }
 }

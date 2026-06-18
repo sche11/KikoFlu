@@ -4,9 +4,12 @@ import 'dart:async';
 import 'dart:io';
 import '../services/floating_lyric_service.dart';
 import '../services/audio_player_service.dart';
+import '../services/log_service.dart';
 import '../models/lyric.dart';
 import 'lyric_provider.dart';
 import 'floating_lyric_style_provider.dart';
+
+final _log = LogService.instance;
 
 /// 悬浮字幕开关状态
 /// 使用后台 Stream 监听机制自动更新，无需依赖 UI Provider
@@ -29,7 +32,8 @@ final floatingLyricFPSEnabledProvider =
 
 /// 悬浮窗网速显示开关（仅 iOS）
 final floatingLyricNetworkSpeedEnabledProvider =
-    StateNotifierProvider<FloatingLyricNetworkSpeedEnabledNotifier, bool>((ref) {
+    StateNotifierProvider<FloatingLyricNetworkSpeedEnabledNotifier, bool>(
+        (ref) {
   return FloatingLyricNetworkSpeedEnabledNotifier(ref);
 });
 
@@ -57,8 +61,9 @@ class FloatingLyricTouchEnabledNotifier extends StateNotifier<bool> {
   void _listenToNativeChanges() {
     if (!Platform.isAndroid) return;
 
-    _touchEnabledSubscription =
-        FloatingLyricService.instance.onTouchEnabledChanged.listen((enabled) async {
+    _touchEnabledSubscription = FloatingLyricService
+        .instance.onTouchEnabledChanged
+        .listen((enabled) async {
       if (state == enabled) return;
 
       state = enabled;
@@ -185,7 +190,7 @@ class FloatingLyricEnabledNotifier extends StateNotifier<bool> {
       if (!hasPermission) {
         final granted = await FloatingLyricService.instance.requestPermission();
         if (!granted) {
-          print('[FloatingLyric] 用户未授予悬浮窗权限');
+          _log.captureOutput('[FloatingLyric] 用户未授予悬浮窗权限');
           return;
         }
       }
@@ -244,7 +249,7 @@ class FloatingLyricEnabledNotifier extends StateNotifier<bool> {
   /// 启动后台更新监听
   void _startBackgroundUpdate() {
     _stopBackgroundUpdate();
-    print('[FloatingLyric] 启动后台更新监听');
+    _log.captureOutput('[FloatingLyric] 启动后台更新监听');
 
     // 确保字幕自动加载器始终激活（即使在后台）
     ref.read(lyricAutoLoaderProvider);
@@ -264,11 +269,11 @@ class FloatingLyricEnabledNotifier extends StateNotifier<bool> {
     // 监听音轨变化
     _trackSubscription =
         AudioPlayerService.instance.currentTrackStream.listen((track) {
-      print(
+      _log.captureOutput(
           '[FloatingLyric] 收到音轨事件: id=${track?.id}, title=${track?.title}, lastId=$_lastTrackId');
       if (track?.id != _lastTrackId) {
         _lastTrackId = track?.id;
-        print('[FloatingLyric] ✓ 音轨切换确认: ${track?.title}');
+        _log.captureOutput('[FloatingLyric] ✓ 音轨切换确认: ${track?.title}');
         // 音轨切换时先显示"加载中"
         FloatingLyricService.instance.updateText('♪ 加载字幕中 ♪');
 
@@ -276,17 +281,17 @@ class FloatingLyricEnabledNotifier extends StateNotifier<bool> {
         if (track != null) {
           final fileListState = ref.read(fileListControllerProvider);
           if (fileListState.files.isNotEmpty) {
-            print('[FloatingLyric] 主动触发字幕加载');
+            _log.captureOutput('[FloatingLyric] 主动触发字幕加载');
             ref.read(lyricControllerProvider.notifier).loadLyricForTrack(
                   track,
                   fileListState.files,
                 );
           } else {
-            print('[FloatingLyric] 文件列表为空，无法加载字幕');
+            _log.captureOutput('[FloatingLyric] 文件列表为空，无法加载字幕');
           }
         }
       } else {
-        print('[FloatingLyric] ✗ 相同音轨，忽略');
+        _log.captureOutput('[FloatingLyric] ✗ 相同音轨，忽略');
       }
     });
 
@@ -296,12 +301,12 @@ class FloatingLyricEnabledNotifier extends StateNotifier<bool> {
       (previous, next) {
         // 当字幕加载完成（isLoading 从 true 变为 false）时更新
         if (previous?.isLoading == true && next.isLoading == false) {
-          print('[FloatingLyric] 字幕加载完成，更新悬浮窗');
+          _log.captureOutput('[FloatingLyric] 字幕加载完成，更新悬浮窗');
           _updateLyricInBackground();
         }
         // 或者字幕内容发生变化时也更新
         else if (previous?.lyrics != next.lyrics && !next.isLoading) {
-          print('[FloatingLyric] 字幕内容变化，更新悬浮窗');
+          _log.captureOutput('[FloatingLyric] 字幕内容变化，更新悬浮窗');
           _updateLyricInBackground();
         }
       },

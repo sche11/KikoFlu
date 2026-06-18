@@ -16,15 +16,16 @@ import '../services/translation_service.dart';
 import '../services/download_service.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
-import '../widgets/tag_chip.dart';
-import '../widgets/va_chip.dart';
-import '../widgets/circle_chip.dart';
 import '../widgets/offline_file_explorer_widget.dart';
 import '../widgets/global_audio_player_wrapper.dart';
 import '../widgets/download_fab.dart';
 import '../utils/string_utils.dart';
-import '../widgets/privacy_blur_cover.dart';
 import '../widgets/image_gallery_screen.dart';
+import '../widgets/work_detail/work_title_header.dart';
+import '../widgets/work_detail/work_metadata_sections.dart';
+import '../widgets/work_detail/work_extra_sections.dart';
+import '../widgets/work_detail/work_cover_frame.dart';
+import '../widgets/work_detail/work_detail_responsive_layout.dart';
 
 /// 离线作品详情页 - 使用下载时保存的元数据展示作品信息
 /// 不依赖网络请求，完全离线可用
@@ -88,7 +89,8 @@ class _OfflineWorkDetailScreenState
           _isTranslating = false;
         });
 
-        SnackBarUtil.showError(context, S.of(context).translationFailed(e.toString()));
+        SnackBarUtil.showError(
+            context, S.of(context).translationFailed(e.toString()));
       }
     }
   }
@@ -105,6 +107,8 @@ class _OfflineWorkDetailScreenState
 
   // 导出作品为ZIP
   Future<void> _exportWork() async {
+    final l10n = S.of(context);
+
     try {
       // 显示进度对话框
       if (!mounted) return;
@@ -119,7 +123,7 @@ class _OfflineWorkDetailScreenState
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                Text(S.of(context).packingWork),
+                Text(l10n.packingWork),
               ],
             ),
           ),
@@ -137,7 +141,7 @@ class _OfflineWorkDetailScreenState
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              SnackBarUtil.showError(context, S.of(context).workDirectoryNotExist);
+              SnackBarUtil.showError(context, l10n.workDirectoryNotExist);
             }
           });
         }
@@ -158,7 +162,7 @@ class _OfflineWorkDetailScreenState
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              SnackBarUtil.showError(context, S.of(context).packingFailed);
+              SnackBarUtil.showError(context, l10n.packingFailed);
             }
           });
         }
@@ -176,13 +180,14 @@ class _OfflineWorkDetailScreenState
         final tempDir = await getTemporaryDirectory();
         final tempFile = File('${tempDir.path}/$fileName');
         await tempFile.writeAsBytes(zipBytes);
+        if (!mounted) return;
         try {
           final box = context.findRenderObject() as RenderBox?;
           await Share.shareXFiles(
             [XFile(tempFile.path)],
             sharePositionOrigin: box != null
                 ? box.localToGlobal(Offset.zero) & box.size
-                : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, 80),
+                : Rect.fromLTWH(0, 0, MediaQuery.sizeOf(context).width, 80),
           );
         } finally {
           if (await tempFile.exists()) {
@@ -200,34 +205,33 @@ class _OfflineWorkDetailScreenState
         final file = File(savePath);
         await file.writeAsBytes(zipBytes);
 
-        if (mounted) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              SnackBarUtil.showSuccess(
-                context,
-                S.of(context).exportSuccess(savePath),
-                duration: const Duration(seconds: 3),
-              );
-            }
-          });
-        }
-      }
-    } catch (e) {
-      // 在 catch 块中也需要安全处理
-      if (mounted) {
-        // 尝试关闭可能存在的进度对话框
-        try {
-          Navigator.of(context).pop();
-        } catch (_) {
-          // 如果对话框已经关闭，忽略错误
-        }
-
+        if (!mounted) return;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            SnackBarUtil.showError(context, S.of(context).exportFailed(e.toString()));
+            SnackBarUtil.showSuccess(
+              context,
+              l10n.exportSuccess(savePath),
+              duration: const Duration(seconds: 3),
+            );
           }
         });
       }
+    } catch (e) {
+      // 在 catch 块中也需要安全处理
+      if (!mounted) return;
+
+      // 尝试关闭可能存在的进度对话框
+      try {
+        Navigator.of(context).pop();
+      } catch (_) {
+        // 如果对话框已经关闭，忽略错误
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          SnackBarUtil.showError(context, l10n.exportFailed(e.toString()));
+        }
+      });
     }
   }
 
@@ -298,8 +302,8 @@ class _OfflineWorkDetailScreenState
               ),
             ],
             title: GestureDetector(
-              onLongPress: () =>
-                  _copyToClipboard(formatRJCode(widget.work.id), S.of(context).rjNumberLabel),
+              onLongPress: () => _copyToClipboard(
+                  formatRJCode(widget.work.id), S.of(context).rjNumberLabel),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -316,7 +320,7 @@ class _OfflineWorkDetailScreenState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.2),
+                        color: Colors.orange.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(color: Colors.orange, width: 1),
                       ),
@@ -328,7 +332,7 @@ class _OfflineWorkDetailScreenState
                           const SizedBox(width: 2),
                           Text(
                             S.of(context).offlineBadge,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 10,
                               color: Colors.orange,
                               fontWeight: FontWeight.bold,
@@ -354,77 +358,15 @@ class _OfflineWorkDetailScreenState
     final authState = ref.watch(authProvider);
     final host = authState.host ?? '';
     final token = authState.token ?? '';
-    final isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
 
     final work = widget.work;
 
     // 封面图片组件
-    final coverWidget = GestureDetector(
-      onLongPress: () {
-        final imageUrl = widget.localCoverPath != null
-            ? 'file://${widget.localCoverPath}'
-            : '$host/api/cover/${work.id}';
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => ImageGalleryScreen(
-              images: [
-                {
-                  'url': imageUrl,
-                  'title': work.title,
-                  'hash': '',
-                },
-              ],
-              initialIndex: 0,
-            ),
-          ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: Hero(
-          tag: 'offline_work_cover_${widget.work.id}',
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            clipBehavior: Clip.antiAlias,
-            child: Container(
-              width: isLandscape ? null : double.infinity,
-              constraints: BoxConstraints(
-                maxHeight: isLandscape
-                    ? MediaQuery.of(context).size.height * 0.8
-                    : 500,
-                maxWidth: isLandscape
-                    ? MediaQuery.of(context).size.width * 0.45
-                    : double.infinity,
-              ),
-              child: PrivacyBlurCover(
-                borderRadius: BorderRadius.circular(12),
-                child: Stack(
-                  fit: StackFit.passthrough,
-                  children: [
-                    // 优先使用本地封面图片
-                    if (widget.localCoverPath != null &&
-                        File(widget.localCoverPath!).existsSync())
-                      Image.file(
-                        File(widget.localCoverPath!),
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          // 如果本地图片加载失败，回退到网络图片
-                          return _buildNetworkCover(work, host, token);
-                        },
-                      )
-                    else
-                      // 回退到网络图片（缓存）
-                      _buildNetworkCover(work, host, token),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    final coverUrl = widget.localCoverPath != null
+        ? 'file://${widget.localCoverPath}'
+        : '$host/api/cover/${work.id}';
+    final hasLocalCover = widget.localCoverPath != null &&
+        File(widget.localCoverPath!).existsSync();
 
     // 信息内容组件
     final infoWidget = Padding(
@@ -433,210 +375,85 @@ class _OfflineWorkDetailScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 标题（可长按复制）+ 翻译按钮
-          GestureDetector(
-            onLongPress: () => _copyToClipboard(
-              _showTranslation && _translatedTitle != null
-                  ? _translatedTitle!
-                  : work.title,
+          WorkTitleHeader(
+            title: work.title,
+            translatedTitle: _translatedTitle,
+            showTranslation: _showTranslation,
+            isTranslating: _isTranslating,
+            onTranslate: _translateTitle,
+            onCopy: (title) => _copyToClipboard(
+              title,
               S.of(context).titleLabel,
-            ),
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: _showTranslation && _translatedTitle != null
-                        ? _translatedTitle
-                        : work.title,
-                  ),
-                  // 翻译按钮
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: MouseRegion(
-                        cursor: _isTranslating
-                            ? SystemMouseCursors.basic
-                            : SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: _isTranslating ? null : _translateTitle,
-                          child: _isTranslating
-                              ? SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.g_translate,
-                                  size: 18,
-                                  color: _showTranslation
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withOpacity(0.6),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-              textAlign: TextAlign.start,
-              softWrap: true,
             ),
           ),
           const SizedBox(height: 16),
 
-          // 社团和声优信息
-          if ((work.name != null && work.name!.isNotEmpty) ||
-              (work.vas != null && work.vas!.isNotEmpty)) ...[
-            Text(
-              S.of(context).circleAndVaSection,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: [
-                if (work.name != null && work.name!.isNotEmpty)
-                  CircleChip(
-                    circleId: work.circleId ?? 0,
-                    circleName: work.name!,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    borderRadius: 6,
-                    fontWeight: FontWeight.w500,
-                    onLongPress: () => _copyToClipboard(work.name!, S.of(context).circleLabel),
-                  ),
-                if (work.vas != null)
-                  ...work.vas!.map((va) {
-                    return VaChip(
-                      va: va,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      borderRadius: 6,
-                      fontWeight: FontWeight.w500,
-                      onLongPress: () => _copyToClipboard(va.name, S.of(context).vaLabel),
-                    );
-                  }).toList(),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
+          WorkCreatorChipsSection(
+            work: work,
+            onCopy: _copyToClipboard,
+          ),
 
-          // 标签信息
-          if (work.tags != null && work.tags!.isNotEmpty) ...[
-            Text(
-              S.of(context).tagLabel,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: work.tags!
-                  .map((tag) => TagChip(
-                        tag: tag,
-                        fontSize: 12,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        borderRadius: 6,
-                        fontWeight: FontWeight.w500,
-                        onLongPress: () => _copyToClipboard(tag.name, S.of(context).tagLabel),
-                      ))
-                  .toList(),
-            ),
-            const SizedBox(height: 16),
-          ],
+          WorkTagChipsSection(
+            tags: work.tags,
+            onTagLongPress: (tag) =>
+                _copyToClipboard(tag.name, S.of(context).tagLabel),
+          ),
 
-          // 发布日期
-          if (work.release != null) ...[
-            Text(
-              S.of(context).releaseDate,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              work.release!.split('T')[0],
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
-                  ),
-            ),
-            const SizedBox(height: 16),
-          ],
+          WorkReleaseDateSection(release: work.release),
 
           // 文件浏览器
           OfflineFileExplorerWidget(
             work: work,
-            fileTree: work.children != null
-                ? work.children!.map((e) {
-                    if (e is Map<String, dynamic>) {
-                      return e;
-                    }
-                    // 如果是 AudioFile 对象，转换为 Map
-                    return e.toJson();
-                  }).toList()
-                : null,
+            fileTree: work.children?.map((e) {
+              if (e is Map<String, dynamic>) {
+                return e;
+              }
+              // 如果是 AudioFile 对象，转换为 Map
+              return e.toJson();
+            }).toList(),
           ),
         ],
       ),
     );
 
-    // 根据屏幕方向返回不同布局
-    if (isLandscape) {
-      // 横屏布局：左右分栏
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 左侧：封面
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: coverWidget,
-            ),
-          ),
-          // 右侧：信息（可滚动）
-          Expanded(
-            flex: 3,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(0),
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: infoWidget,
-            ),
-          ),
-        ],
-      );
-    } else {
-      // 竖屏布局：上下排列
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(0),
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            coverWidget,
-            infoWidget,
+    return WorkDetailResponsiveLayout(
+      coverBuilder: (context, isLandscape) {
+        return WorkCoverFrame(
+          heroTag: 'offline_work_cover_${widget.work.id}',
+          isLandscape: isLandscape,
+          onLongPress: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ImageGalleryScreen(
+                  images: [
+                    {
+                      'url': coverUrl,
+                      'title': work.title,
+                      'hash': '',
+                    },
+                  ],
+                  initialIndex: 0,
+                ),
+              ),
+            );
+          },
+          layers: [
+            if (hasLocalCover)
+              Image.file(
+                File(widget.localCoverPath!),
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  // 如果本地图片加载失败，回退到网络图片
+                  return _buildNetworkCover(work, host, token);
+                },
+              )
+            else
+              // 回退到网络图片（缓存）
+              _buildNetworkCover(work, host, token),
           ],
-        ),
-      );
-    }
+        );
+      },
+      info: infoWidget,
+    );
   }
 }

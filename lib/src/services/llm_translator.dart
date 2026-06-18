@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'log_service.dart';
 import 'translation_service.dart';
 
 class LLMTranslator {
@@ -18,8 +19,7 @@ class LLMTranslator {
       final model = prefs.getString('llm_settings_model') ?? 'gpt-3.5-turbo';
       final savedPrompt = prefs.getString('llm_settings_prompt');
       final prompt = (savedPrompt == null || savedPrompt.isEmpty)
-          ? TranslationService.getDefaultLLMPrompt(
-              locale ?? const Locale('zh'))
+          ? TranslationService.getDefaultLLMPrompt(locale ?? const Locale('zh'))
           : savedPrompt;
 
       if (apiKey.isEmpty) {
@@ -58,10 +58,10 @@ class LLMTranslator {
       }
       return text;
     } catch (e) {
-      print('LLM translation error: $e');
+      logOutput('LLM translation error: $e');
       if (e is DioException) {
         if (e.response != null) {
-          print('Response data: ${e.response?.data}');
+          logOutput('Response data: ${e.response?.data}');
           return 'Error: ${e.response?.statusCode} - ${e.response?.statusMessage}';
         }
       }

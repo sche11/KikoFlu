@@ -23,8 +23,7 @@ class PrivacyBlurCover extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(privacyModeSettingsProvider);
-    final shouldBlur =
-        enabled && settings.enabled && settings.blurCoverInApp;
+    final shouldBlur = enabled && settings.enabled && settings.blurCoverInApp;
 
     if (!shouldBlur) {
       return child;
@@ -45,7 +44,7 @@ class PrivacyBlurCover extends ConsumerWidget {
           child: IgnorePointer(
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.12),
+                color: Colors.black.withValues(alpha: 0.12),
               ),
             ),
           ),

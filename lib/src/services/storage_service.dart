@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'log_service.dart';
 
 class StorageService {
   static late Box _settingsBox;
@@ -114,7 +115,7 @@ class StorageService {
       try {
         return jsonDecode(jsonString) as Map<String, dynamic>;
       } catch (e) {
-        print('Error decoding JSON for key $key: $e');
+        logOutput('Error decoding JSON for key $key: $e');
         return null;
       }
     }

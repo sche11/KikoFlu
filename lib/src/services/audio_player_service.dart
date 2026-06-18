@@ -9,8 +9,11 @@ import 'package:smtc_windows/smtc_windows.dart';
 import '../models/audio_track.dart';
 import 'cache_service.dart';
 import 'caching_stream_audio_source.dart';
+import 'log_service.dart';
 import 'playback_history_service.dart';
 import '../utils/image_blur_util.dart';
+
+final _log = LogService.instance;
 
 class AudioPlayerService {
   static AudioPlayerService? _instance;
@@ -118,7 +121,8 @@ class AudioPlayerService {
         // Enable SMTC
         _smtc!.enableSmtc();
       } catch (e) {
-        print('[AudioPlayerService] Failed to initialize SMTC: $e');
+        _log.captureOutput(
+            '[AudioPlayerService] Failed to initialize SMTC: $e');
       }
     }
 
@@ -135,11 +139,11 @@ class AudioPlayerService {
     if (Platform.isIOS && enablePassthrough) {
       // 如果用户明确说 iOS 不支持，我们可以选择在这里直接返回，或者应用一个"无害"的配置
       // 暂时保持与 Android 一致的逻辑，但如果用户反馈有问题，可以随时禁用
-      // print('[AudioPlayerService] iOS passthrough requested but might not be fully supported.');
+      // _log.captureOutput('[AudioPlayerService] iOS passthrough requested but might not be fully supported.');
     }
 
     try {
-      print(
+      _log.captureOutput(
           '[AudioPlayerService] Updating AudioSession config. Passthrough enabled: $enablePassthrough');
       final session = await AudioSession.instance;
 
@@ -174,9 +178,11 @@ class AudioPlayerService {
           androidWillPauseWhenDucked: true,
         ));
       }
-      print('[AudioPlayerService] AudioSession updated successfully.');
+      _log.captureOutput(
+          '[AudioPlayerService] AudioSession updated successfully.');
     } catch (e) {
-      print('[AudioPlayerService] Error updating AudioSession: $e');
+      _log.captureOutput(
+          '[AudioPlayerService] Error updating AudioSession: $e');
     }
   }
 
@@ -302,7 +308,8 @@ class AudioPlayerService {
   }
 
   Future<void> _loadTrack(AudioTrack track) async {
-    print('[Audio] _loadTrack: title="${track.title}", url="${track.url}"');
+    _log.captureOutput(
+        '[Audio] _loadTrack: title="${track.title}", url="${track.url}"');
 
     // Emit track immediately so MiniPlayer appears right away
     _currentTrackController.add(track);
@@ -339,19 +346,19 @@ class AudioPlayerService {
         final rawPath = track.url.substring(7);
         final localPath = p.normalize(rawPath);
         final localFile = File(localPath);
-        print('[Audio] 检查本地文件: $localPath');
+        _log.captureOutput('[Audio] 检查本地文件: $localPath');
 
         if (await localFile.exists()) {
           final fileStat = await localFile.stat();
-          print(
+          _log.captureOutput(
               '[Audio] 本地文件存在: size=${fileStat.size} bytes, modified=${fileStat.modified}');
           final isolatedPath =
               await _prepareLocalPlaybackPath(localPath) ?? localPath;
           await _player.setFilePath(isolatedPath);
-          print('[Audio] 使用本地文件播放: ${track.title}');
+          _log.captureOutput('[Audio] 使用本地文件播放: ${track.title}');
           loaded = true;
         } else {
-          print('[Audio] 本地文件不存在: $localPath');
+          _log.captureOutput('[Audio] 本地文件不存在: $localPath');
         }
       }
 
@@ -361,7 +368,7 @@ class AudioPlayerService {
 
         if (audioFilePath != null) {
           await _player.setFilePath(audioFilePath);
-          print('[Audio] 使用缓存文件播放: ${track.title}');
+          _log.captureOutput('[Audio] 使用缓存文件播放: ${track.title}');
           loaded = true;
         } else {
           try {
@@ -371,21 +378,20 @@ class AudioPlayerService {
               hash: track.hash!,
             );
             await _player.setAudioSource(source);
-            print('[Audio] 流式播放并写入缓存: ${track.title}');
+            _log.captureOutput('[Audio] 流式播放并写入缓存: ${track.title}');
             loaded = true;
           } catch (error) {
-            print('[Audio] 构建缓存流失败，回退到直接流式: $error');
+            _log.captureOutput('[Audio] 构建缓存流失败，回退到直接流式: $error');
           }
         }
       }
 
       if (!loaded) {
         await _player.setUrl(track.url);
-        print('[Audio] 流式播放: ${track.url}');
+        _log.captureOutput('[Audio] 流式播放: ${track.url}');
       }
-
     } catch (e) {
-      print('Error loading audio source: $e');
+      _log.captureOutput('Error loading audio source: $e');
     } finally {
       _isSwitchingTrack = false;
       _trackLoadingController.add(false);
@@ -427,7 +433,7 @@ class AudioPlayerService {
             displayArtworkUrl = null;
           }
         } catch (e) {
-          print('模糊封面失败: $e');
+          _log.captureOutput('模糊封面失败: $e');
           displayArtworkUrl = null;
         }
       }
@@ -799,10 +805,10 @@ class AudioPlayerService {
       final tempFile = File(_tempPlaybackFilePath!);
       if (await tempFile.exists()) {
         await tempFile.delete();
-        print('[Audio] 已删除临时音频文件: $_tempPlaybackFilePath');
+        _log.captureOutput('[Audio] 已删除临时音频文件: $_tempPlaybackFilePath');
       }
     } catch (e) {
-      print('[Audio] 删除临时音频文件失败: $e');
+      _log.captureOutput('[Audio] 删除临时音频文件失败: $e');
     } finally {
       _tempPlaybackFilePath = null;
     }
@@ -837,7 +843,7 @@ class AudioPlayerService {
       final lyricFile = File(lyricPath);
       if (await lyricFile.exists()) {
         hasLyricFile = true;
-        print('[Audio] 检测到同名字幕文件: $lyricPath');
+        _log.captureOutput('[Audio] 检测到同名字幕文件: $lyricPath');
         break;
       }
     }
@@ -845,7 +851,7 @@ class AudioPlayerService {
     // 如果有非 ASCII 字符或同名字幕文件，复制到临时目录使用纯 ASCII 文件名
     if (hasNonAscii || hasLyricFile) {
       final reason = hasNonAscii ? '文件名含非ASCII字符' : '存在同名字幕文件';
-      print('[Audio] $reason，需要使用临时文件');
+      _log.captureOutput('[Audio] $reason，需要使用临时文件');
 
       final tempDir = await _getTempAudioDirectory();
       // 使用纯 ASCII 文件名：时间戳 + 简单哈希
@@ -857,10 +863,10 @@ class AudioPlayerService {
       try {
         await file.copy(tempPath);
         _tempPlaybackFilePath = tempPath;
-        print('[Audio] 已复制音频到临时路径: $tempPath');
+        _log.captureOutput('[Audio] 已复制音频到临时路径: $tempPath');
         return tempPath;
       } catch (e) {
-        print('[Audio] 复制文件失败: $e');
+        _log.captureOutput('[Audio] 复制文件失败: $e');
         return null;
       }
     }

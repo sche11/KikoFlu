@@ -63,7 +63,9 @@ class PlaylistDialog extends ConsumerWidget {
                         ),
                       ),
                     IconButton(
-                      tooltip: audioState.appendMode ? S.of(context).appendModeStatusOn : S.of(context).appendModeStatusOff,
+                      tooltip: audioState.appendMode
+                          ? S.of(context).appendModeStatusOn
+                          : S.of(context).appendModeStatusOff,
                       icon: Icon(
                         Icons.playlist_add,
                         color: audioState.appendMode

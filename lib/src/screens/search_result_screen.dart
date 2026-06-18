@@ -8,6 +8,7 @@ import '../models/sort_options.dart';
 import '../providers/search_result_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../services/log_service.dart';
 import '../widgets/works_grid_view.dart';
 import '../widgets/sort_dialog.dart';
 import '../widgets/pagination_bar.dart';
@@ -77,11 +78,11 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
   @override
   void initState() {
     super.initState();
-    print(
+    logOutput(
         '[SearchResult] Screen initialized with keyword: ${widget.keyword}, type: ${widget.searchTypeLabel}');
     // Load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      print(
+      logOutput(
           '[SearchResult] Starting search with params: ${widget.searchParams}');
       ref.read(searchResultProvider.notifier).initializeSearch(
             keyword: widget.keyword,
@@ -189,7 +190,9 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
               onPressed: () => ref
                   .read(searchResultProvider.notifier)
                   .toggleSubtitleFilter(),
-              tooltip: searchState.subtitleFilter == 1 ? S.of(context).showAllWorks : S.of(context).showOnlySubtitled,
+              tooltip: searchState.subtitleFilter == 1
+                  ? S.of(context).showAllWorks
+                  : S.of(context).showOnlySubtitled,
             ),
             Padding(
               padding: EdgeInsets.only(

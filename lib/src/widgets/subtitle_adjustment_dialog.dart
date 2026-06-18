@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -59,21 +58,23 @@ class _SubtitleAdjustmentDialogState
   }
 
   Future<void> _saveToLocal() async {
+    final s = S.of(context);
     setState(() => _isSaving = true);
 
     try {
       final currentTrack = await ref.read(currentTrackProvider.future);
+      if (!mounted) return;
       if (currentTrack == null) {
-        throw Exception(S.of(context).noAudioPlaying);
+        throw Exception(s.noAudioPlaying);
       }
 
       // 选择保存目录
       final selectedDirectory = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: S.of(context).selectSaveDirectory,
+        dialogTitle: s.selectSaveDirectory,
       );
+      if (!mounted) return;
 
       if (selectedDirectory == null) {
-        setState(() => _isSaving = false);
         return;
       }
 
@@ -88,22 +89,24 @@ class _SubtitleAdjustmentDialogState
       final vttContent = lyricController.exportLyrics(format: 'vtt');
 
       if (lrcContent.isEmpty && vttContent.isEmpty) {
-        throw Exception(S.of(context).noSubtitleContentToSave);
+        throw Exception(s.noSubtitleContentToSave);
       }
 
       // 保存文件 (默认LRC格式)
       final filePath = path.join(selectedDirectory, '$audioNameWithoutExt.lrc');
       final file = File(filePath);
       await file.writeAsString(lrcContent);
+      if (!mounted) return;
 
-      if (mounted) {
-        Navigator.pop(context);
-        SnackBarUtil.showSuccess(context, S.of(context).savedToPath(filePath),
-            duration: const Duration(seconds: 3));
-      }
+      SnackBarUtil.showSuccess(
+        context,
+        s.savedToPath(filePath),
+        duration: const Duration(seconds: 3),
+      );
+      Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
+        SnackBarUtil.showError(context, s.saveFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {
@@ -113,21 +116,26 @@ class _SubtitleAdjustmentDialogState
   }
 
   Future<void> _saveToLibrary() async {
+    final s = S.of(context);
     setState(() => _isSaving = true);
 
     try {
       final currentTrack = await ref.read(currentTrackProvider.future);
+      if (!mounted) return;
       if (currentTrack == null) {
-        throw Exception(S.of(context).noAudioPlaying);
+        throw Exception(s.noAudioPlaying);
       }
 
       // 获取字幕库目录
       final libraryDir =
           await SubtitleLibraryService.getSubtitleLibraryDirectory();
-      final savedDir = Directory('${libraryDir.path}/${SubtitleLibraryService.savedFolderName}');
+      if (!mounted) return;
+      final savedDir = Directory(
+          '${libraryDir.path}/${SubtitleLibraryService.savedFolderName}');
       if (!await savedDir.exists()) {
         await savedDir.create(recursive: true);
       }
+      if (!mounted) return;
 
       // 生成文件名
       final trackTitle = currentTrack.title;
@@ -139,24 +147,24 @@ class _SubtitleAdjustmentDialogState
       final lrcContent = lyricController.exportLyrics(format: 'lrc');
 
       if (lrcContent.isEmpty) {
-        throw Exception(S.of(context).noSubtitleContentToSave);
+        throw Exception(s.noSubtitleContentToSave);
       }
 
       // 保存到字幕库
       final filePath = path.join(savedDir.path, '$audioNameWithoutExt.lrc');
       final file = File(filePath);
       await file.writeAsString(lrcContent);
+      if (!mounted) return;
 
       // 局部刷新缓存以便字幕库更新该目录
       await SubtitleLibraryService.refreshDirectoryCache(savedDir.path);
+      if (!mounted) return;
 
-      if (mounted) {
-        Navigator.pop(context);
-        SnackBarUtil.showSuccess(context, S.of(context).savedToSubtitleLibrary);
-      }
+      SnackBarUtil.showSuccess(context, s.savedToSubtitleLibrary);
+      Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, S.of(context).saveFailedWithError(e.toString()));
+        SnackBarUtil.showError(context, s.saveFailedWithError(e.toString()));
       }
     } finally {
       if (mounted) {

@@ -27,84 +27,98 @@ class WorkBookmarkManager {
     required Function(String? newProgress, int? newRating) onChanged,
     String? workTitle,
   }) async {
+    final s = S.of(context);
     final result = await ReviewProgressDialog.show(
       context: context,
       currentProgress: currentProgress,
       currentRating: currentRating,
-      title: S.of(context).markWork,
+      title: s.markWork,
       workId: workId,
       workTitle: workTitle,
     );
 
-    if (result != null && context.mounted) {
-      try {
-        final apiService = ref.read(kikoeruApiServiceProvider);
+    if (result == null || !context.mounted) {
+      return null;
+    }
 
-        if (result['progress'] == '__REMOVE__') {
-          // 删除标记
-          await apiService.deleteReview(workId);
+    try {
+      final apiService = ref.read(kikoeruApiServiceProvider);
 
-          if (context.mounted) {
-            SnackBarUtil.showSuccess(context, S.of(context).bookmarkRemoved);
-          }
+      if (result['progress'] == '__REMOVE__') {
+        // 删除标记
+        await apiService.deleteReview(workId);
+        if (!context.mounted) return null;
 
-          // 更新状态
-          onChanged(null, null);
+        SnackBarUtil.showSuccess(context, s.bookmarkRemoved);
 
-          // 刷新我的评论列表
-          ref.read(myReviewsProvider.notifier).load(refresh: true);
+        // 更新状态
+        onChanged(null, null);
 
-          return {'progress': null, 'rating': null};
-        } else {
-          // 更新标记（包括进度和评分）
-          await apiService.updateReviewProgress(
-            workId,
-            progress: result['progress'],
-            rating: result['rating'],
-          );
+        // 刷新我的评论列表
+        ref.read(myReviewsProvider.notifier).load(refresh: true);
 
-          // 构建提示消息
-          final newProgress = result['progress'];
-          final newRating = result['rating'];
-          String message;
+        return {'progress': null, 'rating': null};
+      } else {
+        // 构建提示消息
+        final newProgress = result['progress'] as String?;
+        final newRating = result['rating'] as int?;
+        final message = _buildUpdateMessage(
+          context,
+          s,
+          newProgress: newProgress,
+          newRating: newRating,
+        );
 
-          if (newProgress != null && newRating != null) {
-            // 同时设置了进度和评分
-            final filterLabel =
-                ReviewProgressDialog.getProgressLabel(newProgress, context);
-            message = S.of(context).setProgressAndRating(filterLabel, newRating);
-          } else if (newProgress != null) {
-            // 只设置了进度
-            final filterLabel =
-                ReviewProgressDialog.getProgressLabel(newProgress, context);
-            message = S.of(context).setProgressTo(filterLabel);
-          } else if (newRating != null) {
-            // 只设置了评分
-            message = S.of(context).ratingSetTo(newRating);
-          } else {
-            // 都没设置（理论上不应该到这里）
-            message = S.of(context).updated;
-          }
+        // 更新标记（包括进度和评分）
+        await apiService.updateReviewProgress(
+          workId,
+          progress: newProgress,
+          rating: newRating,
+        );
+        if (!context.mounted) return null;
 
-          if (context.mounted) {
-            SnackBarUtil.showSuccess(context, message);
-          }
+        SnackBarUtil.showSuccess(context, message);
 
-          // 更新状态
-          onChanged(result['progress'], result['rating']);
+        // 更新状态
+        onChanged(newProgress, newRating);
 
-          // 刷新我的评论列表
-          ref.read(myReviewsProvider.notifier).load(refresh: true);
+        // 刷新我的评论列表
+        ref.read(myReviewsProvider.notifier).load(refresh: true);
 
-          return result;
-        }
-      } catch (e) {
-        if (context.mounted) {
-          SnackBarUtil.showError(context, S.of(context).operationFailedWithError(e.toString()));
-        }
+        return result;
+      }
+    } catch (e) {
+      if (context.mounted) {
+        SnackBarUtil.showError(
+            context, s.operationFailedWithError(e.toString()));
       }
     }
 
     return null;
+  }
+
+  String _buildUpdateMessage(
+    BuildContext context,
+    S s, {
+    required String? newProgress,
+    required int? newRating,
+  }) {
+    if (newProgress != null && newRating != null) {
+      // 同时设置了进度和评分
+      final filterLabel =
+          ReviewProgressDialog.getProgressLabel(newProgress, context);
+      return s.setProgressAndRating(filterLabel, newRating);
+    } else if (newProgress != null) {
+      // 只设置了进度
+      final filterLabel =
+          ReviewProgressDialog.getProgressLabel(newProgress, context);
+      return s.setProgressTo(filterLabel);
+    } else if (newRating != null) {
+      // 只设置了评分
+      return s.ratingSetTo(newRating);
+    } else {
+      // 都没设置（理论上不应该到这里）
+      return s.updated;
+    }
   }
 }

@@ -1,17 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../providers/theme_provider.dart';
-import 'package:flutter/cupertino.dart';
 
 class AppTheme {
   // iOS 使用 Cupertino 转场以支持侧滑返回
-  static final _pageTransitionsTheme = PageTransitionsTheme(
+  static const _pageTransitionsTheme = PageTransitionsTheme(
     builders: {
-      TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
-      TargetPlatform.android: const FadeUpwardsPageTransitionsBuilder(),
-      TargetPlatform.linux: const FadeUpwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: const CupertinoPageTransitionsBuilder(),
-      TargetPlatform.windows: const FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
     },
   );
 
@@ -65,36 +64,36 @@ class AppTheme {
         'Droid Sans Fallback',
       ];
       return const TextTheme(
-        displayLarge:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        displayMedium:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        displaySmall:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        headlineLarge:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        headlineMedium:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        headlineSmall:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        titleLarge:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
-        titleMedium:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
-        titleSmall:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
-        bodyLarge:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        bodyMedium:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        bodySmall:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
-        labelLarge:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
-        labelMedium:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
-        labelSmall:
-            TextStyle(fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        displayLarge: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        displayMedium: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        displaySmall: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        headlineLarge: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        headlineMedium: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        headlineSmall: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        titleLarge: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        titleMedium: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        titleSmall: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        bodyLarge: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        bodyMedium: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        bodySmall: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w400),
+        labelLarge: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        labelMedium: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
+        labelSmall: TextStyle(
+            fontFamilyFallback: fallback, fontWeight: FontWeight.w500),
       );
     }
     return null;

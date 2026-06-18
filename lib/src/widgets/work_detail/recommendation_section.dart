@@ -21,8 +21,7 @@ class RecommendationSection extends ConsumerStatefulWidget {
       _RecommendationSectionState();
 }
 
-class _RecommendationSectionState
-    extends ConsumerState<RecommendationSection> {
+class _RecommendationSectionState extends ConsumerState<RecommendationSection> {
   @override
   void initState() {
     super.initState();
@@ -130,7 +129,7 @@ class _RecommendationSectionState
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
@@ -140,7 +139,7 @@ class _RecommendationSectionState
             height: 14,
             width: 100,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -149,7 +148,7 @@ class _RecommendationSectionState
             height: 12,
             width: 60,
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -221,9 +220,7 @@ class _RecommendationCard extends ConsumerWidget {
                   Text(
                     work.rateAverage!.toStringAsFixed(1),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 11,
                         ),
                   ),

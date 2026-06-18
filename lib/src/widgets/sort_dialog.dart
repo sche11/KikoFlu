@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../models/sort_options.dart';
 import '../utils/l10n_extensions.dart';
+import 'radio_option_group.dart';
 import 'responsive_dialog.dart';
 
 /// 通用排序对话框
@@ -93,7 +94,7 @@ class _CommonSortDialogState extends State<CommonSortDialog> {
                       padding: const EdgeInsets.only(left: 8, bottom: 8),
                       child: Text(
                         S.of(context).sortField,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -101,23 +102,20 @@ class _CommonSortDialogState extends State<CommonSortDialog> {
                     ),
                     Flexible(
                       child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: options.map((option) {
-                            return RadioListTile<SortOrder>(
-                              title: Text(option.localizedLabel(context)),
-                              value: option,
-                              groupValue: _currentOption,
-                              onChanged: (value) {
-                                if (value != null) {
-                                  _handleSort(value, _currentDirection);
-                                }
-                              },
-                              dense: true,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                            );
-                          }).toList(),
+                        child: RadioOptionGroup<SortOrder>(
+                          groupValue: _currentOption,
+                          dense: true,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          options: [
+                            for (final option in options)
+                              RadioOption(
+                                value: option,
+                                title: Text(option.localizedLabel(context)),
+                              ),
+                          ],
+                          onChanged: (value) =>
+                              _handleSort(value, _currentDirection),
                         ),
                       ),
                     ),
@@ -135,7 +133,7 @@ class _CommonSortDialogState extends State<CommonSortDialog> {
                       padding: const EdgeInsets.only(left: 8, bottom: 8),
                       child: Text(
                         S.of(context).sortDirection,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -143,23 +141,20 @@ class _CommonSortDialogState extends State<CommonSortDialog> {
                     ),
                     Flexible(
                       child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: SortDirection.values.map((direction) {
-                            return RadioListTile<SortDirection>(
-                              title: Text(direction.localizedLabel(context)),
-                              value: direction,
-                              groupValue: _currentDirection,
-                              onChanged: (value) {
-                                if (value != null) {
-                                  _handleSort(_currentOption, value);
-                                }
-                              },
-                              dense: true,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                            );
-                          }).toList(),
+                        child: RadioOptionGroup<SortDirection>(
+                          groupValue: _currentDirection,
+                          dense: true,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          options: [
+                            for (final direction in SortDirection.values)
+                              RadioOption(
+                                value: direction,
+                                title: Text(direction.localizedLabel(context)),
+                              ),
+                          ],
+                          onChanged: (value) =>
+                              _handleSort(_currentOption, value),
                         ),
                       ),
                     ),
@@ -193,19 +188,18 @@ class _CommonSortDialogState extends State<CommonSortDialog> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ...options.map((option) {
-              return RadioListTile<SortOrder>(
-                title: Text(option.localizedLabel(context)),
-                value: option,
-                groupValue: _currentOption,
-                onChanged: (value) {
-                  if (value != null) {
-                    _handleSort(value, _currentDirection);
-                  }
-                },
-                dense: true,
-              );
-            }),
+            RadioOptionGroup<SortOrder>(
+              groupValue: _currentOption,
+              dense: true,
+              options: [
+                for (final option in options)
+                  RadioOption(
+                    value: option,
+                    title: Text(option.localizedLabel(context)),
+                  ),
+              ],
+              onChanged: (value) => _handleSort(value, _currentDirection),
+            ),
             const Divider(),
             // 排序方向选择
             Text(
@@ -213,26 +207,26 @@ class _CommonSortDialogState extends State<CommonSortDialog> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ...SortDirection.values.map((direction) {
-              return RadioListTile<SortDirection>(
-                title: Text(direction.localizedLabel(context)),
-                value: direction,
-                groupValue: _currentDirection,
-                onChanged: (value) {
-                  if (value != null) {
-                    _handleSort(_currentOption, value);
-                  }
-                },
-                dense: true,
-              );
-            }),
+            RadioOptionGroup<SortDirection>(
+              groupValue: _currentDirection,
+              dense: true,
+              options: [
+                for (final direction in SortDirection.values)
+                  RadioOption(
+                    value: direction,
+                    title: Text(direction.localizedLabel(context)),
+                  ),
+              ],
+              onChanged: (value) => _handleSort(_currentOption, value),
+            ),
           ],
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(widget.autoClose ? S.of(context).cancel : S.of(context).close),
+          child: Text(
+              widget.autoClose ? S.of(context).cancel : S.of(context).close),
         ),
       ],
     );

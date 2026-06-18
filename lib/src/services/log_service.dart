@@ -32,8 +32,7 @@ class LogEntry {
   }
 
   String format() {
-    final time =
-        '${timestamp.hour.toString().padLeft(2, '0')}:'
+    final time = '${timestamp.hour.toString().padLeft(2, '0')}:'
         '${timestamp.minute.toString().padLeft(2, '0')}:'
         '${timestamp.second.toString().padLeft(2, '0')}.'
         '${timestamp.millisecond.toString().padLeft(3, '0')}';
@@ -70,7 +69,8 @@ class LogService {
         ? LogEntry(
             timestamp: entry.timestamp,
             level: entry.level,
-            message: '${entry.message.substring(0, _maxMessageLength)}... (截断, 原长${entry.message.length})',
+            message:
+                '${entry.message.substring(0, _maxMessageLength)}... (截断, 原长${entry.message.length})',
             tag: entry.tag,
           )
         : entry;
@@ -134,7 +134,9 @@ class LogService {
 
     LogLevel level = LogLevel.debug;
     final lower = line.toLowerCase();
-    if (lower.contains('error') || lower.contains('exception') || lower.contains('failed')) {
+    if (lower.contains('error') ||
+        lower.contains('exception') ||
+        lower.contains('failed')) {
       level = LogLevel.error;
     } else if (lower.contains('warning') || lower.contains('warn')) {
       level = LogLevel.warning;
@@ -156,7 +158,8 @@ class LogService {
     final buffer = StringBuffer();
     buffer.writeln('=== KikoFlu Logs ===');
     buffer.writeln('Exported: ${DateTime.now().toIso8601String()}');
-    buffer.writeln('Platform: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}');
+    buffer.writeln(
+        'Platform: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}');
     buffer.writeln('Entries: ${_logs.length}');
     buffer.writeln('');
     for (final entry in _logs) {
@@ -166,7 +169,8 @@ class LogService {
   }
 
   Future<String> exportToFile([String? outputPath]) async {
-    final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
+    final timestamp =
+        DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
     final fileName = 'kikoflu_log_$timestamp.txt';
 
     if (outputPath != null) {
@@ -183,7 +187,8 @@ class LogService {
 
   /// 生成默认导出文件名
   String get exportFileName {
-    final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
+    final timestamp =
+        DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
     return 'kikoflu_log_$timestamp.txt';
   }
 }
@@ -191,4 +196,8 @@ class LogService {
 /// 初始化日志系统
 void setupLogCapture() {
   LogService.instance.initialize();
+}
+
+void logOutput(Object? object) {
+  LogService.instance.captureOutput(object.toString());
 }

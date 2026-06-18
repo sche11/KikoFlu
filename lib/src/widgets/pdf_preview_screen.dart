@@ -50,6 +50,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
   }
 
   Future<void> _loadPdf() async {
+    final s = S.of(context);
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -62,16 +63,8 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
         final localFile = File(localPath);
 
         if (await localFile.exists()) {
-          if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-            final uri = Uri.file(localPath);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri);
-              if (mounted) {
-                Navigator.of(context).pop();
-              }
-              return;
-            }
-          }
+          if (!mounted) return;
+          if (await _openDesktopPdf(localPath)) return;
 
           setState(() {
             _localFilePath = localPath;
@@ -79,8 +72,9 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
           });
           return;
         } else {
+          if (!mounted) return;
           setState(() {
-            _errorMessage = S.of(context).localPdfNotExist;
+            _errorMessage = s.localPdfNotExist;
             _isLoading = false;
           });
           return;
@@ -95,18 +89,10 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
           hash: widget.hash!,
           fileType: 'pdf',
         );
+        if (!mounted) return;
 
         if (cachedPath != null) {
-          if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-            final uri = Uri.file(cachedPath);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri);
-              if (mounted) {
-                Navigator.of(context).pop();
-              }
-              return;
-            }
-          }
+          if (await _openDesktopPdf(cachedPath)) return;
 
           setState(() {
             _localFilePath = cachedPath;
@@ -125,18 +111,10 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
           url: widget.pdfUrl,
           dio: dio,
         );
+        if (!mounted) return;
 
         if (newCachedPath != null) {
-          if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-            final uri = Uri.file(newCachedPath);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri);
-              if (mounted) {
-                Navigator.of(context).pop();
-              }
-              return;
-            }
-          }
+          if (await _openDesktopPdf(newCachedPath)) return;
 
           setState(() {
             _localFilePath = newCachedPath;
@@ -148,6 +126,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
 
       final dio = Dio();
       final tempDir = await getTemporaryDirectory();
+      if (!mounted) return;
       final fileName = 'temp_pdf_${DateTime.now().millisecondsSinceEpoch}.pdf';
       final filePath = '${tempDir.path}/$fileName';
 
@@ -164,18 +143,11 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
           }
         },
       );
+      if (!mounted) return;
 
       if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-        final uri = Uri.file(filePath);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri);
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-          return;
-        } else {
-          throw Exception(S.of(context).cannotOpenPdf);
-        }
+        if (await _openDesktopPdf(filePath)) return;
+        throw Exception(s.cannotOpenPdf);
       }
 
       setState(() {
@@ -183,11 +155,29 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = S.of(context).loadPdfFailed(e.toString());
+        _errorMessage = s.loadPdfFailed(e.toString());
         _isLoading = false;
       });
     }
+  }
+
+  Future<bool> _openDesktopPdf(String filePath) async {
+    if (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS) {
+      return false;
+    }
+
+    final uri = Uri.file(filePath);
+    if (!await canLaunchUrl(uri)) {
+      return false;
+    }
+
+    await launchUrl(uri);
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+    return true;
   }
 
   @override

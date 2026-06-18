@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -83,6 +82,61 @@ class _LogScreenState extends State<LogScreen> {
     }
   }
 
+  Future<void> _handleLogAction(String action, S l10n) async {
+    switch (action) {
+      case 'copy':
+        await _copyLogs(l10n);
+        break;
+      case 'export':
+        await _exportLogs(l10n);
+        break;
+      case 'clear':
+        LogService.instance.clear();
+        _updateFilteredLogs();
+        break;
+    }
+  }
+
+  Future<void> _copyLogs(S l10n) async {
+    await Clipboard.setData(
+      ClipboardData(text: LogService.instance.exportAsText()),
+    );
+    if (!mounted) return;
+    SnackBarUtil.showSuccess(context, l10n.logCopied);
+  }
+
+  Future<void> _exportLogs(S l10n) async {
+    try {
+      final logService = LogService.instance;
+      final content = logService.exportAsText();
+      final fileName = logService.exportFileName;
+
+      if (Platform.isIOS) {
+        final result = await FilePicker.platform.saveFile(
+          dialogTitle: l10n.logExport,
+          fileName: fileName,
+          bytes: Uint8List.fromList(content.codeUnits),
+        );
+        if (!mounted || result == null) return;
+        SnackBarUtil.showSuccess(context, l10n.logExported(result));
+        return;
+      }
+
+      final result = await FilePicker.platform.saveFile(
+        dialogTitle: l10n.logExport,
+        fileName: fileName,
+      );
+      if (result == null) return;
+
+      await File(result).writeAsString(content);
+      if (!mounted) return;
+      SnackBarUtil.showSuccess(context, l10n.logExported(result));
+    } catch (e) {
+      if (!mounted) return;
+      SnackBarUtil.showError(context, e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
@@ -153,57 +207,7 @@ class _LogScreenState extends State<LogScreen> {
             ],
           ),
           PopupMenuButton<String>(
-            onSelected: (action) async {
-              switch (action) {
-                case 'copy':
-                  await Clipboard.setData(
-                    ClipboardData(text: LogService.instance.exportAsText()),
-                  );
-                  if (mounted) {
-                    SnackBarUtil.showSuccess(context, l10n.logCopied);
-                  }
-                  break;
-                case 'export':
-                  try {
-                    final logService = LogService.instance;
-                    final content = logService.exportAsText();
-                    final fileName = logService.exportFileName;
-
-                    if (Platform.isIOS) {
-                      // iOS: 通过 saveFile 的 bytes 参数直接保存
-                      final result = await FilePicker.platform.saveFile(
-                        dialogTitle: l10n.logExport,
-                        fileName: fileName,
-                        bytes: Uint8List.fromList(content.codeUnits),
-                      );
-                      if (result != null && mounted) {
-                        SnackBarUtil.showSuccess(context, l10n.logExported(result));
-                      }
-                    } else {
-                      // Android/Windows/macOS/Linux: 选择路径后写入
-                      final result = await FilePicker.platform.saveFile(
-                        dialogTitle: l10n.logExport,
-                        fileName: fileName,
-                      );
-                      if (result != null) {
-                        await File(result).writeAsString(content);
-                        if (mounted) {
-                          SnackBarUtil.showSuccess(context, l10n.logExported(result));
-                        }
-                      }
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      SnackBarUtil.showError(context, e.toString());
-                    }
-                  }
-                  break;
-                case 'clear':
-                  LogService.instance.clear();
-                  _updateFilteredLogs();
-                  break;
-              }
-            },
+            onSelected: (action) => _handleLogAction(action, l10n),
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'copy',
@@ -264,9 +268,7 @@ class _LogScreenState extends State<LogScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        _autoScroll
-                            ? Icons.vertical_align_bottom
-                            : Icons.pause,
+                        _autoScroll ? Icons.vertical_align_bottom : Icons.pause,
                         size: 14,
                         color: _autoScroll
                             ? Theme.of(context).colorScheme.primary
@@ -294,9 +296,8 @@ class _LogScreenState extends State<LogScreen> {
                     child: Text(
                       l10n.logEmpty,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   )
@@ -330,8 +331,7 @@ class _LogEntryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final time =
-        '${entry.timestamp.hour.toString().padLeft(2, '0')}:'
+    final time = '${entry.timestamp.hour.toString().padLeft(2, '0')}:'
         '${entry.timestamp.minute.toString().padLeft(2, '0')}:'
         '${entry.timestamp.second.toString().padLeft(2, '0')}';
 

@@ -104,7 +104,7 @@ class PlaylistCard extends ConsumerWidget {
                             Icons.person_outline,
                             size: 12,
                             color: theme.colorScheme.onSurfaceVariant
-                                .withOpacity(0.7),
+                                .withValues(alpha: 0.7),
                           ),
                           const SizedBox(width: 3),
                           Flexible(
@@ -112,7 +112,7 @@ class PlaylistCard extends ConsumerWidget {
                               playlist.userName,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant
-                                    .withOpacity(0.8),
+                                    .withValues(alpha: 0.8),
                                 fontSize: 11,
                               ),
                               maxLines: 1,
@@ -125,7 +125,7 @@ class PlaylistCard extends ConsumerWidget {
                               '•',
                               style: TextStyle(
                                 color: theme.colorScheme.onSurfaceVariant
-                                    .withOpacity(0.5),
+                                    .withValues(alpha: 0.5),
                                 fontSize: 11,
                               ),
                             ),
@@ -134,14 +134,14 @@ class PlaylistCard extends ConsumerWidget {
                             Icons.audiotrack,
                             size: 12,
                             color: theme.colorScheme.onSurfaceVariant
-                                .withOpacity(0.7),
+                                .withValues(alpha: 0.7),
                           ),
                           const SizedBox(width: 3),
                           Text(
                             '${playlist.worksCount}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant
-                                  .withOpacity(0.8),
+                                  .withValues(alpha: 0.8),
                               fontSize: 11,
                             ),
                           ),
@@ -155,7 +155,7 @@ class PlaylistCard extends ConsumerWidget {
                           playlist.description,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant
-                                .withOpacity(0.6),
+                                .withValues(alpha: 0.6),
                             fontSize: 11,
                             height: 1.3,
                           ),
@@ -176,7 +176,7 @@ class PlaylistCard extends ConsumerWidget {
                         icon: Icon(
                           Icons.delete_outline,
                           size: 20,
-                          color: theme.colorScheme.error.withOpacity(0.7),
+                          color: theme.colorScheme.error.withValues(alpha: 0.7),
                         ),
                         onPressed: onDelete,
                         tooltip: S.of(context).delete,
@@ -187,7 +187,7 @@ class PlaylistCard extends ConsumerWidget {
                           Icons.chevron_right,
                           size: 20,
                           color: theme.colorScheme.onSurfaceVariant
-                              .withOpacity(0.4),
+                              .withValues(alpha: 0.4),
                         ),
                       ),
               ),

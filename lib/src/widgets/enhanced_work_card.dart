@@ -412,7 +412,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 4, vertical: 1),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.7),
+                              color: Colors.black.withValues(alpha: 0.7),
                               borderRadius: BorderRadius.circular(3),
                             ),
                             child: Text(
@@ -655,7 +655,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -677,7 +677,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.7),
+        color: Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -700,8 +700,8 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: isLocal
-            ? Colors.green.withOpacity(0.9)
-            : Colors.black.withOpacity(0.7),
+            ? Colors.green.withValues(alpha: 0.9)
+            : Colors.black.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Icon(

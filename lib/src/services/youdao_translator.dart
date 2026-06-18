@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'log_service.dart';
 
 class YoudaoTranslator {
   final Dio _dio = Dio();
@@ -76,7 +77,7 @@ class YoudaoTranslator {
       }
       return text;
     } catch (e) {
-      print('Youdao translation error: $e');
+      logOutput('Youdao translation error: $e');
       return text;
     }
   }

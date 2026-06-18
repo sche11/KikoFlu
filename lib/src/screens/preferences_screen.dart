@@ -9,6 +9,7 @@ import '../models/sort_options.dart';
 import '../providers/settings_provider.dart';
 import '../utils/l10n_extensions.dart';
 import '../utils/snackbar_util.dart';
+import '../widgets/radio_option_group.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../widgets/sort_dialog.dart';
 
@@ -16,14 +17,15 @@ import '../widgets/sort_dialog.dart';
 class PreferencesScreen extends ConsumerWidget {
   const PreferencesScreen({super.key});
 
-  void _showSubtitleLibraryPriorityDialog(BuildContext context, WidgetRef ref) {
+  void _showSubtitleLibraryPriorityDialog(
+      BuildContext pageContext, WidgetRef ref) {
     final currentPriority = ref.read(subtitleLibraryPriorityProvider);
 
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+      context: pageContext,
+      builder: (dialogContext) => AlertDialog(
         title: Text(
-          S.of(context).subtitleLibraryPriority,
+          S.of(dialogContext).subtitleLibraryPriority,
           style: const TextStyle(fontSize: 18),
         ),
         content: Column(
@@ -31,44 +33,49 @@ class PreferencesScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              S.of(context).selectSubtitlePriority,
+              S.of(dialogContext).selectSubtitlePriority,
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
-            ...SubtitleLibraryPriority.values.map((priority) {
-              return RadioListTile<SubtitleLibraryPriority>(
-                title: Text(priority.localizedName(context)),
-                subtitle: Text(
-                  priority == SubtitleLibraryPriority.highest
-                      ? S.of(context).subtitlePriorityHighestDesc
-                      : S.of(context).subtitlePriorityLowestDesc,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+            RadioOptionGroup<SubtitleLibraryPriority>(
+              groupValue: currentPriority,
+              options: [
+                for (final priority in SubtitleLibraryPriority.values)
+                  RadioOption(
+                    value: priority,
+                    title: Text(priority.localizedName(dialogContext)),
+                    subtitle: Text(
+                      priority == SubtitleLibraryPriority.highest
+                          ? S.of(dialogContext).subtitlePriorityHighestDesc
+                          : S.of(dialogContext).subtitlePriorityLowestDesc,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(dialogContext)
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
+                    ),
                   ),
-                ),
-                value: priority,
-                groupValue: currentPriority,
-                onChanged: (value) {
-                  if (value != null) {
-                    ref
-                        .read(subtitleLibraryPriorityProvider.notifier)
-                        .updatePriority(value);
-                    Navigator.pop(context);
-                    SnackBarUtil.showSuccess(
-                      context,
-                      S.of(context).setToValue(value.localizedName(context)),
-                    );
-                  }
-                },
-              );
-            }),
+              ],
+              onChanged: (value) {
+                ref
+                    .read(subtitleLibraryPriorityProvider.notifier)
+                    .updatePriority(value);
+                Navigator.pop(dialogContext);
+                SnackBarUtil.showSuccess(
+                  pageContext,
+                  S
+                      .of(pageContext)
+                      .setToValue(value.localizedName(pageContext)),
+                );
+              },
+            ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(S.of(context).close),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(S.of(dialogContext).close),
           ),
         ],
       ),
@@ -101,14 +108,14 @@ class PreferencesScreen extends ConsumerWidget {
     );
   }
 
-  void _showTranslationSourceDialog(BuildContext context, WidgetRef ref) {
+  void _showTranslationSourceDialog(BuildContext pageContext, WidgetRef ref) {
     final currentSource = ref.read(translationSourceProvider);
 
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+      context: pageContext,
+      builder: (dialogContext) => AlertDialog(
         title: Text(
-          S.of(context).translationSourceSettings,
+          S.of(dialogContext).translationSourceSettings,
           style: const TextStyle(fontSize: 18),
         ),
         content: Column(
@@ -116,100 +123,104 @@ class PreferencesScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              S.of(context).selectTranslationProvider,
+              S.of(dialogContext).selectTranslationProvider,
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
-            ...TranslationSource.values.map((source) {
-              return RadioListTile<TranslationSource>(
-                title: Text(source.localizedName(context)),
-                subtitle: Text(
-                  _getTranslationSourceDescription(context, source),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+            RadioOptionGroup<TranslationSource>(
+              groupValue: currentSource,
+              options: [
+                for (final source in TranslationSource.values)
+                  RadioOption(
+                    value: source,
+                    title: Text(source.localizedName(dialogContext)),
+                    subtitle: Text(
+                      _getTranslationSourceDescription(dialogContext, source),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(dialogContext)
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
+                    ),
                   ),
-                ),
-                value: source,
-                groupValue: currentSource,
-                onChanged: (value) {
-                  if (value != null) {
-                    if (value == TranslationSource.llm) {
-                      final llmSettings = ref.read(llmSettingsProvider);
-                      if (llmSettings.apiKey.isEmpty) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(S.of(context).needsConfiguration),
-                            content:
-                                Text(S.of(context).llmConfigRequiredMessage),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text(S.of(context).cancel),
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  Navigator.pop(context); // Close alert dialog
-                                  Navigator.pop(
-                                      context); // Close source selection dialog
-                                  await Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LLMSettingsScreen(),
-                                    ),
-                                  );
-
-                                  // Check if configured successfully
-                                  final newSettings =
-                                      ref.read(llmSettingsProvider);
-                                  if (newSettings.apiKey.isNotEmpty) {
-                                    ref
-                                        .read(
-                                            translationSourceProvider.notifier)
-                                        .updateSource(TranslationSource.llm);
-                                    if (context.mounted) {
-                                      SnackBarUtil.showSuccess(
-                                        context,
-                                        S.of(context).autoSwitchedToLlm,
-                                      );
-                                    }
-                                  }
-                                },
-                                child: Text(S.of(context).goToConfigure),
-                              ),
-                            ],
+              ],
+              onChanged: (value) {
+                if (value == TranslationSource.llm) {
+                  final llmSettings = ref.read(llmSettingsProvider);
+                  if (llmSettings.apiKey.isEmpty) {
+                    showDialog(
+                      context: dialogContext,
+                      builder: (configContext) => AlertDialog(
+                        title: Text(S.of(configContext).needsConfiguration),
+                        content:
+                            Text(S.of(configContext).llmConfigRequiredMessage),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(configContext),
+                            child: Text(S.of(configContext).cancel),
                           ),
-                        );
-                        return;
-                      }
-                    }
+                          TextButton(
+                            onPressed: () async {
+                              final navigator = Navigator.of(configContext);
+                              navigator.pop(); // Close alert dialog
+                              navigator.pop(); // Close source selection dialog
+                              await navigator.push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const LLMSettingsScreen(),
+                                ),
+                              );
 
-                    ref
-                        .read(translationSourceProvider.notifier)
-                        .updateSource(value);
-                    Navigator.pop(context);
-                    SnackBarUtil.showSuccess(
-                      context,
-                      S.of(context).setToValue(value.localizedName(context)),
+                              // Check if configured successfully
+                              final newSettings = ref.read(llmSettingsProvider);
+                              if (newSettings.apiKey.isNotEmpty) {
+                                ref
+                                    .read(translationSourceProvider.notifier)
+                                    .updateSource(TranslationSource.llm);
+                                if (pageContext.mounted) {
+                                  SnackBarUtil.showSuccess(
+                                    pageContext,
+                                    S.of(pageContext).autoSwitchedToLlm,
+                                  );
+                                }
+                              }
+                            },
+                            child: Text(S.of(configContext).goToConfigure),
+                          ),
+                        ],
+                      ),
                     );
+                    return;
                   }
-                },
-              );
-            }),
+                }
+
+                ref
+                    .read(translationSourceProvider.notifier)
+                    .updateSource(value);
+                Navigator.pop(dialogContext);
+                SnackBarUtil.showSuccess(
+                  pageContext,
+                  S
+                      .of(pageContext)
+                      .setToValue(value.localizedName(pageContext)),
+                );
+              },
+            ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(S.of(context).close),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(S.of(dialogContext).close),
           ),
         ],
       ),
     );
   }
 
-  String _getTranslationSourceDescription(BuildContext context, TranslationSource source) {
+  String _getTranslationSourceDescription(
+      BuildContext context, TranslationSource source) {
     final s = S.of(context);
     switch (source) {
       case TranslationSource.google:
@@ -231,7 +242,8 @@ class PreferencesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).preferenceSettings, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).preferenceSettings,
+            style: const TextStyle(fontSize: 18)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -243,7 +255,9 @@ class PreferencesScreen extends ConsumerWidget {
                   leading: Icon(Icons.library_books,
                       color: Theme.of(context).colorScheme.primary),
                   title: Text(S.of(context).subtitleLibraryPriority),
-                  subtitle: Text(S.of(context).currentSettingLabel(priority.localizedName(context))),
+                  subtitle: Text(S
+                      .of(context)
+                      .currentSettingLabel(priority.localizedName(context))),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     _showSubtitleLibraryPriorityDialog(context, ref);
@@ -266,7 +280,8 @@ class PreferencesScreen extends ConsumerWidget {
                   leading: Icon(Icons.translate,
                       color: Theme.of(context).colorScheme.primary),
                   title: Text(S.of(context).translationSource),
-                  subtitle: Text(S.of(context).currentSettingLabel(translationSource.localizedName(context))),
+                  subtitle: Text(S.of(context).currentSettingLabel(
+                      translationSource.localizedName(context))),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     _showTranslationSourceDialog(context, ref);

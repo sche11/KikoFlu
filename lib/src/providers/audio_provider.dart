@@ -6,10 +6,13 @@ import 'package:permission_handler/permission_handler.dart';
 import '../models/audio_track.dart';
 import '../models/work.dart';
 import '../services/audio_player_service.dart';
+import '../services/log_service.dart';
 import '../services/playback_history_service.dart';
 import 'settings_provider.dart';
 import 'history_provider.dart';
 import 'auth_provider.dart' show kikoeruApiServiceProvider;
+
+final _log = LogService.instance;
 
 // Audio Player Service Provider
 final audioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
@@ -176,7 +179,7 @@ class AudioPlayerController extends StateNotifier<AudioPlayerState> {
         _ref.read(historyProvider.notifier).addOrUpdate(work,
             track: track, positionMs: _service.position.inMilliseconds);
       } catch (e) {
-        print(
+        _log.captureOutput(
             'Failed to record history for playTrack (id=${track.workId}): $e');
       }
     }
@@ -184,9 +187,9 @@ class AudioPlayerController extends StateNotifier<AudioPlayerState> {
 
   Future<void> playTracks(List<AudioTrack> tracks,
       {int startIndex = 0, Work? work}) async {
-    print(
+    _log.captureOutput(
         '[AudioController] playTracks调用: ${tracks.length}个轨道, startIndex=$startIndex');
-    print(
+    _log.captureOutput(
         '[AudioController] 第一个轨道: title="${tracks.first.title}", url="${tracks.first.url}"');
 
     final shouldAppend = state.appendMode && queue.isNotEmpty;
@@ -200,9 +203,9 @@ class AudioPlayerController extends StateNotifier<AudioPlayerState> {
       }
     } else {
       await _service.updateQueue(tracks, startIndex: startIndex);
-      print('[AudioController] updateQueue完成');
+      _log.captureOutput('[AudioController] updateQueue完成');
       await _service.play();
-      print('[AudioController] play完成');
+      _log.captureOutput('[AudioController] play完成');
     }
 
     if (work != null) {
@@ -535,9 +538,9 @@ class SleepTimerState {
     final seconds = remainingTime!.inSeconds.remainder(60);
 
     if (hours > 0) {
-      return '${hours}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      return '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     } else {
-      return '${minutes}:${seconds.toString().padLeft(2, '0')}';
+      return '$minutes:${seconds.toString().padLeft(2, '0')}';
     }
   }
 }

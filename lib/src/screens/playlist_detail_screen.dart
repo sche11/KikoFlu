@@ -3,9 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/playlist_detail_provider.dart';
 import '../providers/auth_provider.dart';
+import '../models/playlist.dart';
 import '../models/work.dart';
 import '../services/storage_service.dart';
 import '../widgets/pagination_bar.dart';
+import '../widgets/playlist_add_works_dialog.dart';
+import '../widgets/playlist_edit_dialog.dart';
+import '../widgets/playlist_metadata_section.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../utils/snackbar_util.dart';
 import '../screens/work_detail_screen.dart';
@@ -55,17 +59,6 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
-    }
-  }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '';
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} '
-          '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateStr;
     }
   }
 
@@ -168,375 +161,33 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       return;
     }
 
-    final nameController = TextEditingController(text: metadata.displayName);
-    final descriptionController =
-        TextEditingController(text: metadata.description);
-    int selectedPrivacy = metadata.privacy;
-
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        final isLandscape =
-            MediaQuery.of(dialogContext).orientation == Orientation.landscape;
-        final screenWidth = MediaQuery.of(dialogContext).size.width;
-        final dialogWidth = isLandscape ? screenWidth * 0.6 : screenWidth * 0.9;
-
-        return StatefulBuilder(
-          builder: (context, setDialogState) => Dialog(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: dialogWidth.clamp(300.0, 600.0),
-                maxHeight: MediaQuery.of(context).size.height * 0.85,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 标题栏
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                      child: Row(
-                        children: [
-                          Text(
-                            S.of(context).editPlaylist,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // 内容区域
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 名称输入
-                          TextField(
-                            controller: nameController,
-                            decoration: InputDecoration(
-                              labelText: S.of(context).playlistName,
-                              hintText: S.of(context).enterPlaylistName,
-                              border: const OutlineInputBorder(),
-                              prefixIcon: const Icon(Icons.title),
-                            ),
-                            autofocus: true,
-                            maxLength: 50,
-                          ),
-                          const SizedBox(height: 16),
-
-                          // 隐私设置
-                          DropdownButtonFormField<int>(
-                            value: selectedPrivacy,
-                            decoration: InputDecoration(
-                              labelText: S.of(context).privacySetting,
-                              border: const OutlineInputBorder(),
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              helperText:
-                                  _getPrivacyDescription(selectedPrivacy),
-                              helperMaxLines: 2,
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: 0,
-                                child:
-                                    Text(S.of(context).playlistPrivacyPrivate),
-                              ),
-                              DropdownMenuItem(
-                                value: 1,
-                                child:
-                                    Text(S.of(context).playlistPrivacyUnlisted),
-                              ),
-                              DropdownMenuItem(
-                                value: 2,
-                                child:
-                                    Text(S.of(context).playlistPrivacyPublic),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              if (value != null) {
-                                setDialogState(() {
-                                  selectedPrivacy = value;
-                                });
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // 描述输入
-                          TextField(
-                            controller: descriptionController,
-                            decoration: InputDecoration(
-                              labelText: S.of(context).playlistDescription,
-                              hintText: S.of(context).addDescription,
-                              border: const OutlineInputBorder(),
-                              prefixIcon: const Icon(Icons.description),
-                            ),
-                            maxLines: 1,
-                            maxLength: 200,
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                      ),
-                    ),
-
-                    // 操作按钮
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(S.of(context).cancel),
-                          ),
-                          const SizedBox(width: 8),
-                          FilledButton(
-                            onPressed: () {
-                              final name = nameController.text.trim();
-                              if (name.isEmpty) {
-                                SnackBarUtil.showWarning(context,
-                                    S.of(context).playlistNameRequired);
-                                return;
-                              }
-                              Navigator.of(context).pop();
-                              _updateMetadata(
-                                name: name,
-                                privacy: selectedPrivacy,
-                                description: descriptionController.text.trim(),
-                              );
-                            },
-                            child: Text(S.of(context).save),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+      builder: (dialogContext) => PlaylistEditDialog(
+        initialName: metadata.displayName,
+        initialPrivacy: metadata.privacy,
+        initialDescription: metadata.description,
+        onSave: (draft) {
+          _updateMetadata(
+            name: draft.name,
+            privacy: draft.privacy,
+            description: draft.description,
+          );
+        },
+      ),
     );
-  }
-
-  /// 获取隐私设置描述
-  String _getPrivacyDescription(int privacy) {
-    switch (privacy) {
-      case 0:
-        return S.of(context).privacyDescPrivate;
-      case 1:
-        return S.of(context).privacyDescUnlisted;
-      case 2:
-        return S.of(context).privacyDescPublic;
-      default:
-        return '';
-    }
   }
 
   /// 显示添加作品对话框
   void _showAddWorksDialog() {
-    final textController = TextEditingController();
-    List<String> parsedWorkIds = [];
-
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        final isLandscape =
-            MediaQuery.of(dialogContext).orientation == Orientation.landscape;
-        final screenWidth = MediaQuery.of(dialogContext).size.width;
-        final dialogWidth = isLandscape ? screenWidth * 0.6 : screenWidth * 0.9;
-
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: dialogWidth.clamp(300.0, 600.0),
-                  maxHeight: MediaQuery.of(context).size.height * 0.85,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 标题栏
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                        child: Row(
-                          children: [
-                            Text(
-                              S.of(context).addWorks,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // 内容区域
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 提示文本
-                            Text(
-                              S.of(context).addWorksInputHint,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-
-                            // 输入框
-                            TextField(
-                              controller: textController,
-                              decoration: InputDecoration(
-                                labelText: S.of(context).workId,
-                                hintText: S.of(context).workIdHint,
-                                border: const OutlineInputBorder(),
-                                prefixIcon: const Icon(Icons.music_note),
-                              ),
-                              maxLines: 5,
-                              autofocus: true,
-                              onChanged: (text) {
-                                // 实时解析RJ号
-                                final parsed = _parseWorkIds(text);
-                                setDialogState(() {
-                                  parsedWorkIds = parsed;
-                                });
-                              },
-                            ),
-                            const SizedBox(height: 8),
-
-                            // 显示解析结果
-                            if (parsedWorkIds.isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer
-                                      .withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withOpacity(0.5),
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.check_circle_outline,
-                                          size: 16,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          S.of(context).detectedNWorkIds(
-                                              parsedWorkIds.length),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: parsedWorkIds.map((id) {
-                                        return Chip(
-                                          label: Text(
-                                            id,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
-                                          ),
-                                          visualDensity: VisualDensity.compact,
-                                          backgroundColor: Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer,
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-
-                      // 操作按钮
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text(S.of(context).cancel),
-                            ),
-                            const SizedBox(width: 8),
-                            FilledButton(
-                              onPressed: parsedWorkIds.isEmpty
-                                  ? null
-                                  : () {
-                                      Navigator.of(context).pop();
-                                      _addWorks(parsedWorkIds);
-                                    },
-                              child: Text(parsedWorkIds.isEmpty
-                                  ? S.of(context).add
-                                  : S
-                                      .of(context)
-                                      .addNWorks(parsedWorkIds.length)),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
+      builder: (dialogContext) => PlaylistAddWorksDialog(
+        onAddWorks: (ids) {
+          _addWorks(ids);
+        },
+      ),
     );
-  }
-
-  /// 解析文本中的RJ号
-  List<String> _parseWorkIds(String text) {
-    if (text.isEmpty) return [];
-
-    // 使用正则表达式提取所有RJ开头的作品号（不区分大小写）
-    final rjPattern = RegExp(r'RJ\d+', caseSensitive: false);
-    final matches = rjPattern.allMatches(text.toUpperCase());
-
-    // 去重并返回
-    return matches.map((m) => m.group(0)!).toSet().toList();
   }
 
   /// 添加作品到播放列表
@@ -876,160 +527,20 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     );
   }
 
-  Widget _buildMetadataSection(metadata) {
-    // 获取更新时间，如果没有则使用创建时间
-    final displayDate = metadata.updatedAt.isNotEmpty &&
-            metadata.updatedAt != metadata.createdAt
-        ? _formatDate(metadata.updatedAt)
-        : _formatDate(metadata.createdAt);
-
-    final dateLabel = metadata.updatedAt.isNotEmpty &&
-            metadata.updatedAt != metadata.createdAt
-        ? S.of(context).lastUpdated
-        : S.of(context).createdTime;
-
+  Widget _buildMetadataSection(Playlist metadata) {
     return SliverToBoxAdapter(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          border: Border(
-            bottom: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
-              width: 1,
-            ),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 标题栏
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        metadata.displayName,
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        metadata.userName,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
+      child: Builder(
+        builder: (context) {
+          final authState = ref.watch(authProvider);
+          final currentUserName = authState.currentUser?.name ?? '';
 
-                // 操作按钮
-                Builder(
-                  builder: (context) {
-                    final authState = ref.watch(authProvider);
-                    final currentUserName = authState.currentUser?.name ?? '';
-                    final isOwner = metadata.userName == currentUserName;
-
-                    if (isOwner) {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            onPressed: () => _showEditDialog(metadata),
-                            icon: const Icon(Icons.edit_outlined),
-                            tooltip: S.of(context).edit,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          IconButton(
-                            onPressed: _showDeleteConfirmDialog,
-                            icon: const Icon(Icons.delete_outline),
-                            tooltip: S.of(context).delete,
-                            visualDensity: VisualDensity.compact,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        ],
-                      );
-                    } else {
-                      return IconButton(
-                        onPressed: _showDeleteConfirmDialog,
-                        icon: const Icon(Icons.delete_outline),
-                        tooltip: S.of(context).unfavorite,
-                        visualDensity: VisualDensity.compact,
-                        color: Theme.of(context).colorScheme.error,
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
-
-            // 描述（如果有）
-            if (metadata.description.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                metadata.description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-            ],
-
-            // 底部信息栏
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                // 统计信息
-                Icon(
-                  Icons.music_note,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  S.of(context).nWorksCount(metadata.worksCount),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-
-                if (metadata.playbackCount > 0) ...[
-                  const SizedBox(width: 16),
-                  Icon(
-                    Icons.play_circle_outline,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    S.of(context).nPlaysCount(metadata.playbackCount),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-
-                const Spacer(),
-
-                // 时间信息
-                if (displayDate.isNotEmpty)
-                  Text(
-                    '$dateLabel: $displayDate',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          return PlaylistMetadataSection(
+            metadata: metadata,
+            isOwner: metadata.userName == currentUserName,
+            onEdit: () => _showEditDialog(metadata),
+            onDelete: _showDeleteConfirmDialog,
+          );
+        },
       ),
     );
   }
@@ -1057,7 +568,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
           color: colorScheme.surface,
           border: Border(
             bottom: BorderSide(
-              color: colorScheme.outlineVariant.withOpacity(0.5),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
               width: 1,
             ),
           ),
@@ -1190,7 +701,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
             if (isOwner) ...[
               const SizedBox(width: 8),
               IconButton(
-                icon: Icon(Icons.remove_circle_outline, size: 20),
+                icon: const Icon(Icons.remove_circle_outline, size: 20),
                 color: colorScheme.error,
                 visualDensity: VisualDensity.compact,
                 onPressed: () => _showRemoveWorkConfirmDialog(work),

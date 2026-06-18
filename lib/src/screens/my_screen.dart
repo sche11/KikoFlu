@@ -338,7 +338,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
           color: Theme.of(context)
               .colorScheme
               .surfaceContainerHighest
-              .withOpacity(0.5),
+              .withValues(alpha: 0.5),
           child: Row(
             children: [
               // 可滚动的筛选按钮
@@ -352,7 +352,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
                       for (int i = 0; i < MyReviewFilter.values.length; i++)
                         _buildFilterButton(
                           icon: _getFilterIcon(MyReviewFilter.values[i]),
-                          label: MyReviewFilter.values[i].localizedLabel(context),
+                          label:
+                              MyReviewFilter.values[i].localizedLabel(context),
                           isSelected: state.filter == MyReviewFilter.values[i],
                           onTap: () => ref
                               .read(myReviewsProvider.notifier)
@@ -438,13 +439,13 @@ class _MyScreenState extends ConsumerState<MyScreen>
                     _buildBody(state),
                     // 全局加载动画 - 在有数据且正在刷新时显示顶部进度条
                     if (state.isLoading && state.works.isNotEmpty)
-                      Positioned(
+                      const Positioned(
                         top: 0,
                         left: 0,
                         right: 0,
                         child: SizedBox(
                           height: 3,
-                          child: const LinearProgressIndicator(),
+                          child: LinearProgressIndicator(),
                         ),
                       ),
                   ],

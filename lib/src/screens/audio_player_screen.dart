@@ -168,7 +168,9 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
       _seekingPosition = newPosition;
     });
 
-    ref.read(audioPlayerControllerProvider.notifier).seekAndPersist(newPosition);
+    ref
+        .read(audioPlayerControllerProvider.notifier)
+        .seekAndPersist(newPosition);
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
@@ -404,7 +406,8 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(child: Text(S.of(context).errorWithMessage(error.toString()))),
+          error: (error, stack) => Center(
+              child: Text(S.of(context).errorWithMessage(error.toString()))),
         ),
         if (_showLyricHint) _buildLyricHintBanner(),
       ],
@@ -596,7 +599,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurfaceVariant
-                                .withOpacity(0.5),
+                                .withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -632,7 +635,8 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text(S.of(context).errorWithMessage(error.toString()))),
+      error: (error, stack) =>
+          Center(child: Text(S.of(context).errorWithMessage(error.toString()))),
     );
   }
 
@@ -664,11 +668,11 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainerHighest
-                            .withOpacity(0.9),
+                            .withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -754,8 +758,8 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         if (lyricState.lyrics.isEmpty) return const SizedBox.shrink();
 
         // 获取应用 locale
-        final appLocale = ref.watch(localeProvider) ??
-            Localizations.localeOf(context);
+        final appLocale =
+            ref.watch(localeProvider) ?? Localizations.localeOf(context);
 
         // 歌词大部分已经是当前语言，不显示翻译按钮
         if (!lyricState.needsTranslation(appLocale) &&
@@ -847,7 +851,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                 color: Theme.of(context).colorScheme.primaryContainer,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -944,7 +948,8 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         Navigator.of(context).pop();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(S.of(context).loadFailedWithError(e.toString()))),
+          SnackBar(
+              content: Text(S.of(context).loadFailedWithError(e.toString()))),
         );
       }
     }

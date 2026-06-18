@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../services/cache_service.dart';
+import '../services/log_service.dart';
 import '../services/translation_service.dart';
 import '../services/subtitle_library_service.dart';
 import '../services/storage_service.dart';
@@ -15,6 +16,7 @@ import '../utils/encoding_utils.dart';
 import '../utils/scroll_optimization.dart';
 import '../../l10n/app_localizations.dart';
 import 'scrollable_appbar.dart';
+import 'translation_toggle_button.dart';
 
 /// 文本预览屏幕
 class TextPreviewScreen extends StatefulWidget {
@@ -74,7 +76,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
 
   void _updateScrollProgress() {
     _scrollThrottler.throttle(() {
-      if (_scrollController.hasClients) {
+      if (mounted && _scrollController.hasClients) {
         final maxScroll = _scrollController.position.maxScrollExtent;
         final currentScroll = _scrollController.position.pixels;
         setState(() {
@@ -91,10 +93,10 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       final (content, encoding) =
           await EncodingUtils.readFileWithEncoding(file);
       _detectedEncoding = encoding;
-      print('[TextPreview] 检测到文件编码: $encoding');
+      LogService.instance.debug('检测到文件编码: $encoding', tag: 'TextPreview');
       return content;
     } catch (e) {
-      print('[TextPreview] 读取文件失败: $e');
+      LogService.instance.error('读取文件失败: $e', tag: 'TextPreview');
       rethrow;
     }
   }
@@ -104,14 +106,14 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
   String _decodeBytes(List<int> bytes) {
     final (content, encoding) = EncodingUtils.decodeBytes(bytes);
     _detectedEncoding = encoding;
-    print('[TextPreview] 检测到编码: $encoding');
+    LogService.instance.debug('检测到编码: $encoding', tag: 'TextPreview');
     return content;
   }
 
   /// 将字符串编码为字节数组
   /// 使用检测到的原始编码，保持文件编码一致性
   List<int> _encodeString(String content) {
-    print('[TextPreview] 使用 $_detectedEncoding 编码保存');
+    LogService.instance.debug('使用 $_detectedEncoding 编码保存', tag: 'TextPreview');
     return EncodingUtils.encodeString(content, _detectedEncoding);
   }
 
@@ -148,11 +150,12 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
   }
 
   Future<void> _saveToLocal() async {
+    final l10n = S.of(context);
     // 获取当前显示的内容（可能是编辑后的）
     final contentToSave = _getCurrentContent();
     if (contentToSave == null || contentToSave.isEmpty) {
       if (mounted) {
-        SnackBarUtil.showWarning(context, S.of(context).noContentToSave);
+        SnackBarUtil.showWarning(context, l10n.noContentToSave);
       }
       return;
     }
@@ -170,13 +173,14 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
         final tempFile = File('${tempDir.path}/$fileName');
         final bytes = _encodeString(contentToSave);
         await tempFile.writeAsBytes(bytes);
+        if (!mounted) return;
         try {
           final box = context.findRenderObject() as RenderBox?;
           await Share.shareXFiles(
             [XFile(tempFile.path)],
             sharePositionOrigin: box != null
                 ? box.localToGlobal(Offset.zero) & box.size
-                : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, 80),
+                : Rect.fromLTWH(0, 0, MediaQuery.sizeOf(context).width, 80),
           );
         } finally {
           if (await tempFile.exists()) {
@@ -204,25 +208,25 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
         final bytes = _encodeString(contentToSave);
         await file.writeAsBytes(bytes);
 
-        if (mounted) {
-          SnackBarUtil.showSuccess(
-              context, S.of(context).fileSavedToPath(finalPath));
-        }
+        if (!mounted) return;
+        SnackBarUtil.showSuccess(context, l10n.fileSavedToPath(finalPath));
       }
     } catch (e) {
-      if (mounted) {
-        SnackBarUtil.showError(
-            context, S.of(context).saveFailedWithError(e.toString()));
-      }
+      if (!mounted) return;
+      SnackBarUtil.showError(
+        context,
+        l10n.saveFailedWithError(e.toString()),
+      );
     }
   }
 
   Future<void> _saveToSubtitleLibrary() async {
+    final l10n = S.of(context);
     // 获取当前显示的内容（可能是编辑后的）
     final contentToSave = _getCurrentContent();
     if (contentToSave == null || contentToSave.isEmpty) {
       if (mounted) {
-        SnackBarUtil.showWarning(context, S.of(context).noContentToSave);
+        SnackBarUtil.showWarning(context, l10n.noContentToSave);
       }
       return;
     }
@@ -265,22 +269,21 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       await SubtitleLibraryService.refreshDirectoryCache(savedDir.path);
 
       // 触发字幕库重载回调
+      if (!mounted) return;
       widget.onSavedToLibrary?.call();
 
       // 等待下一帧再显示成功提示
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            SnackBarUtil.showSuccess(
-                context, S.of(context).savedToSubtitleLibrary);
-          }
-        });
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          SnackBarUtil.showSuccess(context, l10n.savedToSubtitleLibrary);
+        }
+      });
     } catch (e) {
-      if (mounted) {
-        SnackBarUtil.showError(
-            context, S.of(context).saveFailedWithError(e.toString()));
-      }
+      if (!mounted) return;
+      SnackBarUtil.showError(
+        context,
+        l10n.saveFailedWithError(e.toString()),
+      );
     }
   }
 
@@ -293,6 +296,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
   }
 
   Future<void> _loadTextContent() async {
+    final l10n = S.of(context);
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -307,6 +311,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
         if (await localFile.exists()) {
           // 使用智能编码检测读取文件
           final content = await _readFileWithEncoding(localFile);
+          if (!mounted) return;
           setState(() {
             _content = content;
             _textController.text = content;
@@ -314,8 +319,9 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
           });
           return;
         } else {
+          if (!mounted) return;
           setState(() {
-            _errorMessage = S.of(context).localFileNotExist;
+            _errorMessage = l10n.localFileNotExist;
             _isLoading = false;
           });
           return;
@@ -332,6 +338,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
         );
 
         if (cachedContent != null) {
+          if (!mounted) return;
           setState(() {
             _content = cachedContent;
             _textController.text = cachedContent;
@@ -366,6 +373,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
           );
         }
 
+        if (!mounted) return;
         setState(() {
           _content = content;
           _textController.text = content;
@@ -376,8 +384,9 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
             'HTTP ${response.statusCode}: ${response.statusMessage}');
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = S.of(context).loadTextFailed(e.toString());
+        _errorMessage = l10n.loadTextFailed(e.toString());
         _isLoading = false;
       });
     }
@@ -386,9 +395,10 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
   Future<void> _translateContent() async {
     if (_content == null || _content!.isEmpty) return;
 
+    final l10n = S.of(context);
     setState(() {
       _isTranslating = true;
-      _translationProgress = S.of(context).preparingTranslation;
+      _translationProgress = l10n.preparingTranslation;
     });
 
     try {
@@ -396,13 +406,14 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       final translated = await translationService.translateLongText(
         _content!,
         onProgress: (current, total) {
+          if (!mounted) return;
           setState(() {
-            _translationProgress =
-                S.of(context).translatingProgress(current, total);
+            _translationProgress = l10n.translatingProgress(current, total);
           });
         },
       );
 
+      if (!mounted) return;
       setState(() {
         _translatedContent = translated;
         _translatedTextController.text = translated;
@@ -411,14 +422,12 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
         _translationProgress = '';
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isTranslating = false;
         _translationProgress = '';
       });
-      if (mounted) {
-        SnackBarUtil.showError(
-            context, S.of(context).translationFailed(e.toString()));
-      }
+      SnackBarUtil.showError(context, l10n.translationFailed(e.toString()));
     }
   }
 
@@ -445,22 +454,9 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
                   : S.of(context).editMode,
             ),
           if (_content != null && _content!.isNotEmpty)
-            IconButton(
-              icon: _isTranslating
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    )
-                  : Icon(
-                      Icons.g_translate,
-                      color: _showTranslation
-                          ? Theme.of(context).colorScheme.primary
-                          : null,
-                    ),
+            TranslationToolbarButton(
+              isTranslated: _showTranslation,
+              isLoading: _isTranslating,
               onPressed: _isTranslating
                   ? null
                   : () {

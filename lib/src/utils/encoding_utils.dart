@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:gbk_codec/gbk_codec.dart';
 import 'package:charset/charset.dart';
 
 /// 文件编码检测和解码工具类
@@ -72,7 +71,7 @@ class EncodingUtils {
     // 5. 尝试 GBK 解码（简体中文）
     // GBK 比 Shift-JIS 优先，因为字幕文件更多是中文
     try {
-      final decoded = gbk_bytes.decode(bytes);
+      final decoded = gbk.decode(bytes);
       // 验证：检查是否有替换字符
       if (decoded.isNotEmpty &&
           !decoded.contains('\uFFFD') &&
@@ -181,7 +180,7 @@ class EncodingUtils {
           }
           return bytes;
         case 'GBK':
-          return gbk_bytes.encode(content);
+          return gbk.encode(content);
         case 'Shift-JIS':
           return shiftJis.encode(content);
         case 'Latin1':

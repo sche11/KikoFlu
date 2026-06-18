@@ -33,7 +33,8 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
   Widget build(BuildContext context) {
     final currentTrack = ref.watch(currentTrackProvider);
     final isPlaying = ref.watch(isPlayingProvider);
-    final isTrackLoading = ref.watch(isTrackLoadingProvider).valueOrNull ?? false;
+    final isTrackLoading =
+        ref.watch(isTrackLoadingProvider).valueOrNull ?? false;
     final position = ref.watch(positionProvider);
     final duration = ref.watch(durationProvider);
     final authState = ref.watch(authProvider);
@@ -125,7 +126,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                       color: Theme.of(context)
                           .colorScheme
                           .outline
-                          .withOpacity(0.2),
+                          .withValues(alpha: 0.2),
                       width: 1,
                     ),
                   ),
@@ -245,7 +246,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                                 inactiveTrackColor: Theme.of(context)
                                     .colorScheme
                                     .outline
-                                    .withOpacity(0.2),
+                                    .withValues(alpha: 0.2),
                               ),
                               child: Slider(
                                 value: displayProgress.clamp(0.0, 1.0),
@@ -359,7 +360,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                                               .notifier)
                                           .skipToPrevious();
                                     } catch (e) {
-                                      if (!mounted) return;
+                                      if (!context.mounted) return;
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
@@ -380,29 +381,30 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                                     height: 28,
                                     child: Padding(
                                       padding: EdgeInsets.all(2),
-                                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2.5),
                                     ),
                                   )
                                 else
-                                IconButton(
-                                  onPressed: () {
-                                    if (isPlaying) {
-                                      ref
-                                          .read(audioPlayerControllerProvider
-                                              .notifier)
-                                          .pause();
-                                    } else {
-                                      ref
-                                          .read(audioPlayerControllerProvider
-                                              .notifier)
-                                          .play();
-                                    }
-                                  },
-                                  icon: Icon(isPlaying
-                                      ? Icons.pause
-                                      : Icons.play_arrow),
-                                  iconSize: 28,
-                                ),
+                                  IconButton(
+                                    onPressed: () {
+                                      if (isPlaying) {
+                                        ref
+                                            .read(audioPlayerControllerProvider
+                                                .notifier)
+                                            .pause();
+                                      } else {
+                                        ref
+                                            .read(audioPlayerControllerProvider
+                                                .notifier)
+                                            .play();
+                                      }
+                                    },
+                                    icon: Icon(isPlaying
+                                        ? Icons.pause
+                                        : Icons.play_arrow),
+                                    iconSize: 28,
+                                  ),
                                 IconButton(
                                   onPressed: () async {
                                     try {
@@ -411,7 +413,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
                                               .notifier)
                                           .skipToNext();
                                     } catch (e) {
-                                      if (!mounted) return;
+                                      if (!context.mounted) return;
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
@@ -473,7 +475,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
       error: (error, stack) => const SizedBox.shrink(),
     );
   }
-  
+
   Widget _buildArtwork(
     BuildContext context,
     AudioTrack track, {
@@ -491,28 +493,29 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
               borderRadius: BorderRadius.circular(8),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: (workCoverUrl ?? track.artworkUrl)?.startsWith('file://') ??
-                        false
-                    ? Image.file(
-                        File((workCoverUrl ?? track.artworkUrl)!
-                            .replaceFirst('file://', '')),
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.album, size: 32);
-                        },
-                      )
-                    : CachedNetworkImage(
-                        imageUrl: (workCoverUrl ?? track.artworkUrl)!,
-                        cacheKey: track.workId != null
-                            ? 'work_cover_${track.workId}'
-                            : null,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.album, size: 32),
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
+                child:
+                    (workCoverUrl ?? track.artworkUrl)?.startsWith('file://') ??
+                            false
+                        ? Image.file(
+                            File((workCoverUrl ?? track.artworkUrl)!
+                                .replaceFirst('file://', '')),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.album, size: 32);
+                            },
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: (workCoverUrl ?? track.artworkUrl)!,
+                            cacheKey: track.workId != null
+                                ? 'work_cover_${track.workId}'
+                                : null,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.album, size: 32),
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
               ),
             )
           : const Icon(
@@ -538,7 +541,8 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
 /// - Forward (enter): scale + fade from bottom-left, Hero flies from mini player artwork
 /// - Back via swipe: Cupertino slide transition (natural iOS feel)
 /// - Back via button: fade out (letting Hero fly back when available)
-class _PlayerPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class _PlayerPageRoute<T> extends PageRoute<T>
+    with CupertinoRouteTransitionMixin<T> {
   _PlayerPageRoute({required this.builder});
 
   final WidgetBuilder builder;
@@ -571,7 +575,11 @@ class _PlayerPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixi
       // Cupertino slide transition for a natural iOS feel.
       if (popGestureInProgress) {
         return CupertinoRouteTransitionMixin.buildPageTransitions<T>(
-          this, context, animation, secondaryAnimation, child,
+          this,
+          context,
+          animation,
+          secondaryAnimation,
+          child,
         );
       }
 

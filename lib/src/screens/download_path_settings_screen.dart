@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../services/download_path_service.dart';
 import '../services/download_service.dart';
+import '../services/log_service.dart';
 import '../providers/settings_provider.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
@@ -54,7 +55,8 @@ class _DownloadPathSettingsScreenState
       if (!mounted) return;
       setState(() => _isLoading = false);
       if (mounted) {
-        _showSnackBar(S.of(context).loadPathFailedWithError('$e'), isError: true);
+        _showSnackBar(S.of(context).loadPathFailedWithError('$e'),
+            isError: true);
       }
     }
   }
@@ -139,7 +141,8 @@ class _DownloadPathSettingsScreenState
       // 延迟显示错误消息
       Future.microtask(() {
         if (mounted) {
-          _showSnackBar(S.of(context).setPathFailedWithError('$e'), isError: true);
+          _showSnackBar(S.of(context).setPathFailedWithError('$e'),
+              isError: true);
         }
       });
     }
@@ -240,7 +243,9 @@ class _DownloadPathSettingsScreenState
 
       // 延迟显示成功消息
       if (mounted) {
-        final message = result.message.isNotEmpty ? result.message : S.of(context).defaultPathRestored;
+        final message = result.message.isNotEmpty
+            ? result.message
+            : S.of(context).defaultPathRestored;
         Future.microtask(() {
           if (mounted) {
             _showSnackBar(message);
@@ -252,7 +257,8 @@ class _DownloadPathSettingsScreenState
       if (mounted) {
         Future.microtask(() {
           if (mounted) {
-            _showSnackBar(S.of(context).resetPathFailedWithError('$e'), isError: true);
+            _showSnackBar(S.of(context).resetPathFailedWithError('$e'),
+                isError: true);
           }
         });
       }
@@ -268,12 +274,14 @@ class _DownloadPathSettingsScreenState
 
     try {
       if (isError) {
-        SnackBarUtil.showError(context, message, duration: const Duration(seconds: 4));
+        SnackBarUtil.showError(context, message,
+            duration: const Duration(seconds: 4));
       } else {
-        SnackBarUtil.showInfo(context, message, duration: const Duration(seconds: 2));
+        SnackBarUtil.showInfo(context, message,
+            duration: const Duration(seconds: 2));
       }
     } catch (e) {
-      print('[DownloadPathSettings] 无法显示 SnackBar: $e');
+      logOutput('[DownloadPathSettings] 无法显示 SnackBar: $e');
     }
   }
 
@@ -283,7 +291,8 @@ class _DownloadPathSettingsScreenState
 
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).downloadPathSettings, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).downloadPathSettings,
+            style: const TextStyle(fontSize: 18)),
       ),
       body: _isMigrating
           ? Center(
@@ -356,7 +365,9 @@ class _DownloadPathSettingsScreenState
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    hasCustomPath ? S.of(context).customPath : S.of(context).defaultPath,
+                                    hasCustomPath
+                                        ? S.of(context).customPath
+                                        : S.of(context).defaultPath,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: Theme.of(context)
@@ -395,7 +406,9 @@ class _DownloadPathSettingsScreenState
                     onPressed:
                         _isLoading || _isMigrating ? null : _selectCustomPath,
                     icon: const Icon(Icons.folder_open),
-                    label: Text(hasCustomPath ? S.of(context).changeCustomPath : S.of(context).setCustomPath),
+                    label: Text(hasCustomPath
+                        ? S.of(context).changeCustomPath
+                        : S.of(context).setCustomPath),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size.fromHeight(48),
                     ),
@@ -417,7 +430,7 @@ class _DownloadPathSettingsScreenState
                     color: Theme.of(context)
                         .colorScheme
                         .errorContainer
-                        .withOpacity(0.3),
+                        .withValues(alpha: 0.3),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(

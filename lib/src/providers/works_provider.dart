@@ -3,10 +3,13 @@ import 'package:equatable/equatable.dart';
 
 import '../models/work.dart';
 import '../services/kikoeru_api_service.dart' hide kikoeruApiServiceProvider;
+import '../services/log_service.dart';
 import 'auth_provider.dart';
 import 'settings_provider.dart';
 import '../models/sort_options.dart';
 import 'subtitle_library_provider.dart';
+
+final _log = LogService.instance;
 
 // Display mode - 展示模式
 enum DisplayMode {
@@ -206,7 +209,7 @@ class WorksNotifier extends StateNotifier<WorksState> {
     final modeState = _getModeState(mode);
 
     if (modeState.isLoading) {
-      print('[WorksProvider] Already loading, skipping');
+      _log.captureOutput('[WorksProvider] Already loading, skipping');
       return;
     }
 
@@ -216,7 +219,7 @@ class WorksNotifier extends StateNotifier<WorksState> {
     final page = targetPage ??
         (isAllMode ? previousPage : (refresh ? 1 : (previousPage + 1)));
 
-    print(
+    _log.captureOutput(
         '[WorksProvider] Loading works - mode: $mode, page: $page, refresh: $refresh, currentPage: $previousPage, targetPage: $targetPage');
 
     _updateModeState(
@@ -233,7 +236,7 @@ class WorksNotifier extends StateNotifier<WorksState> {
 
       // 当字幕筛选开启时，不发送 subtitle 参数给服务器，而是在前端过滤
       // 这样可以同时显示服务器有字幕 和 本地字幕库有字幕的作品
-      final serverSubtitleParam = 0; // 始终请求所有作品，前端过滤
+      const serverSubtitleParam = 0; // 始终请求所有作品，前端过滤
 
       if (mode == DisplayMode.popular) {
         response = await _apiService.getPopularWorks(
@@ -297,7 +300,7 @@ class WorksNotifier extends StateNotifier<WorksState> {
         isLastPage = !hasMore && filteredWorks.isNotEmpty;
       }
 
-      print(
+      _log.captureOutput(
           '[WorksProvider] Loaded ${filteredWorks.length} works (filtered from ${newRawWorks.length}), total: ${filteredWorks.length}, hasMore: $hasMore, currentPage: $currentPage');
 
       _updateModeState(
@@ -314,7 +317,7 @@ class WorksNotifier extends StateNotifier<WorksState> {
         ),
       );
     } catch (e) {
-      print('Failed to load works: $e');
+      _log.captureOutput('Failed to load works: $e');
 
       _updateModeState(
         mode,
@@ -525,7 +528,7 @@ final worksProvider = StateNotifierProvider<WorksNotifier, WorksState>((ref) {
     final prevUser = previous;
     final nextUser = next;
     if (prevUser?.name != nextUser?.name || prevUser?.host != nextUser?.host) {
-      print('[WorksProvider] User changed, refreshing works list');
+      _log.captureOutput('[WorksProvider] User changed, refreshing works list');
       notifier.refresh();
     }
   });

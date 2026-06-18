@@ -6,7 +6,10 @@ import 'dart:convert';
 import 'youdao_translator.dart';
 import 'microsoft_translator.dart';
 import 'llm_translator.dart';
+import 'log_service.dart';
 import '../utils/global_keys.dart';
+
+final _log = LogService.instance;
 
 class TranslationService {
   static final TranslationService _instance = TranslationService._internal();
@@ -135,12 +138,10 @@ class TranslationService {
         String result;
         if (source == 'youdao') {
           result = await _youdaoTranslator.translate(text,
-              sourceLang: sourceLang,
-              targetLang: _youdaoTargetLang(locale));
+              sourceLang: sourceLang, targetLang: _youdaoTargetLang(locale));
         } else if (source == 'microsoft') {
           result = await _microsoftTranslator.translate(text,
-              sourceLang: sourceLang,
-              targetLang: _microsoftTargetLang(locale));
+              sourceLang: sourceLang, targetLang: _microsoftTargetLang(locale));
         } else if (source == 'llm') {
           result = await _llmTranslator.translate(text,
               sourceLang: sourceLang, locale: locale);
@@ -164,7 +165,7 @@ class TranslationService {
 
         return result;
       } catch (e) {
-        print('Translation error with $source: $e');
+        _log.captureOutput('Translation error with $source: $e');
         // 继续尝试下一个
       }
     }
@@ -220,7 +221,7 @@ class TranslationService {
               await translate(texts[index], sourceLang: sourceLang);
           results[index] = translated;
         } catch (e) {
-          print('Translation batch item $index failed: $e');
+          _log.captureOutput('Translation batch item $index failed: $e');
           results[index] = texts[index];
         }
       }
@@ -306,7 +307,7 @@ class TranslationService {
               await translate(chunks[index], sourceLang: sourceLang);
           results[index] = translated;
         } catch (e) {
-          print('Translation chunk $index failed: $e');
+          _log.captureOutput('Translation chunk $index failed: $e');
           results[index] = chunks[index];
         } finally {
           completedCount++;
@@ -338,15 +339,14 @@ class TranslationService {
         }
       }
     } catch (e) {
-      print('Cache read error: $e');
+      _log.captureOutput('Cache read error: $e');
     }
     return null;
   }
 
   /// 缓存翻译结果
-  Future<void> _cacheTranslation(
-      String text, String translation, String? sourceLang,
-      Locale targetLocale) async {
+  Future<void> _cacheTranslation(String text, String translation,
+      String? sourceLang, Locale targetLocale) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final key = _getCacheKey(text, sourceLang, targetLocale);
@@ -356,7 +356,7 @@ class TranslationService {
       });
       await prefs.setString(key, data);
     } catch (e) {
-      print('Cache write error: $e');
+      _log.captureOutput('Cache write error: $e');
     }
   }
 
@@ -380,7 +380,7 @@ class TranslationService {
         }
       }
     } catch (e) {
-      print('Cache clear error: $e');
+      _log.captureOutput('Cache clear error: $e');
     }
   }
 
@@ -390,7 +390,7 @@ class TranslationService {
       final translation = await _googleTranslator.translate(text, from: 'auto');
       return translation.sourceLanguage.code;
     } catch (e) {
-      print('Language detection error: $e');
+      _log.captureOutput('Language detection error: $e');
       return 'unknown';
     }
   }

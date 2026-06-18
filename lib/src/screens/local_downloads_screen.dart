@@ -9,6 +9,7 @@ import '../models/download_task.dart';
 import '../models/sort_options.dart';
 import '../models/work.dart';
 import '../services/download_service.dart';
+import '../services/log_service.dart';
 import '../services/storage_service.dart';
 import '../utils/string_utils.dart';
 import '../utils/snackbar_util.dart';
@@ -19,6 +20,8 @@ import 'offline_work_detail_screen.dart';
 import '../widgets/overscroll_next_page_detector.dart';
 import '../widgets/privacy_blur_cover.dart';
 import '../utils/scroll_optimization.dart';
+
+final _log = LogService.instance;
 
 /// 本地下载屏幕 - 显示已完成的下载内容
 class LocalDownloadsScreen extends ConsumerStatefulWidget {
@@ -49,54 +52,13 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
   void _showSnackBarSafe(SnackBar snackBar) {
     if (!mounted) return;
 
-    try {
-      // 提取消息
-      final content = snackBar.content;
-      String message = '';
-
-      if (content is Text) {
-        message = content.data ?? '';
-      } else if (content is Row) {
-        final children = content.children;
-        for (final child in children) {
-          if (child is Text) {
-            message = child.data ?? '';
-            break;
-          } else if (child is Expanded) {
-            final expandedChild = child.child;
-            if (expandedChild is Text) {
-              message = expandedChild.data ?? '';
-              break;
-            }
-          }
-        }
-      }
-
-      if (message.isEmpty) {
-        final messenger = ScaffoldMessenger.maybeOf(context);
-        if (messenger != null && messenger.mounted) {
-          messenger.showSnackBar(snackBar);
-        }
-        return;
-      }
-
-      // 根据背景色判断类型
-      final backgroundColor = snackBar.backgroundColor;
-      final duration = snackBar.duration;
-
-      if (backgroundColor == Colors.red ||
-          backgroundColor == Theme.of(context).colorScheme.error) {
-        SnackBarUtil.showError(context, message, duration: duration);
-      } else if (backgroundColor == Colors.green) {
-        SnackBarUtil.showSuccess(context, message, duration: duration);
-      } else if (backgroundColor == Colors.orange) {
-        SnackBarUtil.showWarning(context, message, duration: duration);
-      } else {
-        SnackBarUtil.showInfo(context, message, duration: duration);
-      }
-    } catch (e) {
-      print('[LocalDownloads] 无法显示 SnackBar: $e');
-    }
+    SnackBarUtil.showFromSnackBar(
+      context,
+      snackBar,
+      onError: (error, _) {
+        _log.captureOutput('[LocalDownloads] 无法显示 SnackBar: $error');
+      },
+    );
   }
 
   @override
@@ -237,7 +199,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
             ),
           );
         } catch (e) {
-          print('[LocalDownloads] 无法显示加载提示: $e');
+          _log.captureOutput('[LocalDownloads] 无法显示加载提示: $e');
         }
       }
 
@@ -265,7 +227,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
               ),
             );
           } catch (e) {
-            print('[LocalDownloads] 无法显示完成提示: $e');
+            _log.captureOutput('[LocalDownloads] 无法显示完成提示: $e');
           }
         }
       });
@@ -285,7 +247,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
               ),
             );
           } catch (e) {
-            print('[LocalDownloads] 无法显示错误提示: $e');
+            _log.captureOutput('[LocalDownloads] 无法显示错误提示: $e');
           }
         }
       });
@@ -297,22 +259,23 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       Map<int, List<DownloadTask>> groupedTasks) async {
     if (_selectedWorkIds.isEmpty) return;
 
+    final l10n = S.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(S.of(context).deletionConfirmTitle),
-        content: Text(S.of(context).deleteSelectedWorksConfirm(_selectedWorkIds.length)),
+        title: Text(l10n.deletionConfirmTitle),
+        content: Text(l10n.deleteSelectedWorksConfirm(_selectedWorkIds.length)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(S.of(context).cancel),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: Text(S.of(context).delete),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -336,8 +299,8 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
             await DownloadService.instance.deleteTask(task.id);
             successCount++;
           } catch (e) {
-            errorMessage ??= S.of(context).partialDeleteFailed(e.toString());
-            print('[LocalDownloads] 删除任务 ${task.id} 失败: $e');
+            errorMessage ??= l10n.partialDeleteFailed(e.toString());
+            _log.captureOutput('[LocalDownloads] 删除任务 ${task.id} 失败: $e');
           }
         }
       }
@@ -356,7 +319,9 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
           if (mounted) {
             if (errorMessage != null && successCount > 0) {
               _showSnackBarSafe(
-                SnackBar(content: Text(S.of(context).deletedNOfTotal(successCount, totalCount))),
+                SnackBar(
+                    content:
+                        Text(l10n.deletedNOfTotal(successCount, totalCount))),
               );
             } else if (errorMessage != null) {
               _showSnackBarSafe(
@@ -364,7 +329,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
               );
             } else {
               _showSnackBarSafe(
-                SnackBar(content: Text(S.of(context).deleted)),
+                SnackBar(content: Text(l10n.deleted)),
               );
             }
           }
@@ -375,7 +340,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
         Future.microtask(() {
           if (mounted) {
             _showSnackBarSafe(
-              SnackBar(content: Text(S.of(context).deleteFailedWithError(e.toString()))),
+              SnackBar(content: Text(l10n.deleteFailedWithError(e.toString()))),
             );
           }
         });
@@ -474,11 +439,11 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
   }
 
   void _openWorkDetail(int workId, DownloadTask task) async {
-    print(
+    _log.captureOutput(
         '[LocalDownloads] 打开作品详情: workId=$workId, hasMetadata=${task.workMetadata != null}');
 
     if (task.workMetadata == null) {
-      print('[LocalDownloads] 错误：任务没有元数据');
+      _log.captureOutput('[LocalDownloads] 错误：任务没有元数据');
       _showSnackBarSafe(
         SnackBar(
           content: Text(S.of(context).noWorkMetadataForOffline),
@@ -526,7 +491,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
     try {
       return _deepSanitize(metadata) as Map<String, dynamic>;
     } catch (e) {
-      print('[LocalDownloads] 清理元数据时出错: $e');
+      _log.captureOutput('[LocalDownloads] 清理元数据时出错: $e');
       rethrow;
     }
   }
@@ -555,7 +520,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
         // 递归处理嵌套的children等字段
         return _deepSanitize(json);
       } catch (e) {
-        print('[LocalDownloads] 对象序列化失败 ${value.runtimeType}: $e');
+        _log.captureOutput('[LocalDownloads] 对象序列化失败 ${value.runtimeType}: $e');
         return null;
       }
     }
@@ -595,9 +560,9 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
 
         // 获取当前页的作品
         final currentPageWorkIds = sortedWorkIds.sublist(
-              startIndex,
-              endIndex,
-            );
+          startIndex,
+          endIndex,
+        );
         final currentPageTasks = Map<int, List<DownloadTask>>.fromEntries(
           currentPageWorkIds.map((id) => MapEntry(id, groupedTasks[id]!)),
         );
@@ -634,92 +599,96 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                       ),
                     )
                   : groupedTasks.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 64,
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            S.of(context).noResults,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : OverscrollNextPageDetector(
-                      hasNextPage: _currentPage < totalPages,
-                      isLoading: false,
-                      onNextPage: () async {
-                        _nextPage(totalPages);
-                        // 等待一帧后滚动到顶部，确保内容已加载
-                        await Future.delayed(const Duration(milliseconds: 50));
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _scrollToTop();
-                        });
-                      },
-                      child: CustomScrollView(
-                        controller: _scrollController,
-                        cacheExtent: ScrollOptimization.cacheExtent,
-                        physics: ScrollOptimization.physics,
-                        slivers: [
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                            sliver: SliverGrid(
-                              gridDelegate:
-                                  const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 210,
-                                childAspectRatio: 0.72,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: Theme.of(context).colorScheme.outline,
                               ),
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  final workId = currentPageWorkIds[index];
-                                  final workTasks = currentPageTasks[workId]!;
-                                  final firstTask = workTasks.first;
-                                  final isSelected =
-                                      _selectedWorkIds.contains(workId);
+                              const SizedBox(height: 16),
+                              Text(
+                                S.of(context).noResults,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : OverscrollNextPageDetector(
+                          hasNextPage: _currentPage < totalPages,
+                          isLoading: false,
+                          onNextPage: () async {
+                            _nextPage(totalPages);
+                            // 等待一帧后滚动到顶部，确保内容已加载
+                            await Future.delayed(
+                                const Duration(milliseconds: 50));
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              _scrollToTop();
+                            });
+                          },
+                          child: CustomScrollView(
+                            controller: _scrollController,
+                            cacheExtent: ScrollOptimization.cacheExtent,
+                            physics: ScrollOptimization.physics,
+                            slivers: [
+                              SliverPadding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                                sliver: SliverGrid(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 210,
+                                    childAspectRatio: 0.72,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      final workId = currentPageWorkIds[index];
+                                      final workTasks =
+                                          currentPageTasks[workId]!;
+                                      final firstTask = workTasks.first;
+                                      final isSelected =
+                                          _selectedWorkIds.contains(workId);
 
-                                  return _buildWorkCard(
-                                    workId: workId,
-                                    workTasks: workTasks,
-                                    firstTask: firstTask,
-                                    isSelected: isSelected,
-                                  );
-                                },
-                                childCount: currentPageTasks.length,
+                                      return _buildWorkCard(
+                                        workId: workId,
+                                        workTasks: workTasks,
+                                        firstTask: firstTask,
+                                        isSelected: isSelected,
+                                      );
+                                    },
+                                    childCount: currentPageTasks.length,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          // 分页控件
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                            sliver: SliverToBoxAdapter(
-                              child: PaginationBar(
-                                currentPage: _currentPage,
-                                totalCount: totalCount,
-                                pageSize: _pageSize,
-                                hasMore: _currentPage < totalPages,
-                                isLoading: false,
-                                onPreviousPage: _previousPage,
-                                onNextPage: () => _nextPage(totalPages),
-                                onGoToPage: _goToPage,
+                              // 分页控件
+                              SliverPadding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                                sliver: SliverToBoxAdapter(
+                                  child: PaginationBar(
+                                    currentPage: _currentPage,
+                                    totalCount: totalCount,
+                                    pageSize: _pageSize,
+                                    hasMore: _currentPage < totalPages,
+                                    isLoading: false,
+                                    onPreviousPage: _previousPage,
+                                    onNextPage: () => _nextPage(totalPages),
+                                    onGoToPage: _goToPage,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
             ),
           ],
         );
@@ -738,7 +707,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       color: Theme.of(context)
           .colorScheme
           .surfaceContainerHighest
-          .withOpacity(0.5),
+          .withValues(alpha: 0.5),
       child: _isSelectionMode
           ? Row(
               children: [
@@ -788,7 +757,8 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                     constraints:
                         const BoxConstraints(minWidth: 40, minHeight: 40),
                     onPressed: () => _deleteSelectedWorks(groupedTasks),
-                    tooltip: '${S.of(context).delete} (${_selectedWorkIds.length})',
+                    tooltip:
+                        '${S.of(context).delete} (${_selectedWorkIds.length})',
                     color: Theme.of(context).colorScheme.error,
                   ),
                 SizedBox(width: horizontalPadding - 8),
@@ -813,7 +783,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                           backgroundColor: Theme.of(context)
                               .colorScheme
                               .primaryContainer
-                              .withOpacity(0.5),
+                              .withValues(alpha: 0.5),
                         ),
                         onPressed: _toggleSelectionMode,
                       ),
@@ -830,13 +800,15 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                           backgroundColor: Theme.of(context)
                               .colorScheme
                               .primaryContainer
-                              .withOpacity(0.5),
+                              .withValues(alpha: 0.5),
                         ),
                         onPressed: _refreshMetadata,
                       ),
                     ),
                     // 打开文件夹按钮（仅 Windows 和 macOS）
-                    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux)
+                    if (Platform.isWindows ||
+                        Platform.isMacOS ||
+                        Platform.isLinux)
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: TextButton.icon(
@@ -848,7 +820,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                             backgroundColor: Theme.of(context)
                                 .colorScheme
                                 .primaryContainer
-                                .withOpacity(0.5),
+                                .withValues(alpha: 0.5),
                           ),
                           onPressed: _openDownloadFolder,
                         ),
@@ -893,7 +865,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       color: Theme.of(context)
           .colorScheme
           .surfaceContainerHighest
-          .withOpacity(0.3),
+          .withValues(alpha: 0.3),
       child: TextField(
         controller: _searchController,
         autofocus: true,
@@ -957,7 +929,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       clipBehavior: Clip.antiAlias,
       elevation: isSelected ? 8 : 2,
       shadowColor: isSelected
-          ? Theme.of(context).colorScheme.primary.withOpacity(0.4)
+          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)
           : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -1004,7 +976,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.7),
+                                Colors.black.withValues(alpha: 0.7),
                               ],
                             ),
                           ),
@@ -1117,11 +1089,11 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                   decoration: BoxDecoration(
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary
-                        : Colors.white.withOpacity(0.95),
+                        : Colors.white.withValues(alpha: 0.95),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),

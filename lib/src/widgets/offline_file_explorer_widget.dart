@@ -1,26 +1,41 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 
 import '../models/work.dart';
 import '../services/download_path_service.dart';
 import '../services/download_service.dart';
+import '../services/log_service.dart';
 import '../services/translation_service.dart';
-import '../services/subtitle_library_service.dart';
-import '../models/audio_track.dart';
+import '../services/subtitle_match_loader.dart';
+import '../services/audio_playback_plan_builder.dart';
+import '../services/file_preview_resolver.dart';
+import '../services/file_size_resolver.dart';
+import '../services/audio_file_url_resolver.dart';
+import '../services/video_file_opener.dart';
+import '../services/offline_local_file_scanner.dart';
+import '../services/file_explorer_tap_resolver.dart';
+import '../services/file_name_translation_controller.dart';
+import '../services/file_delete_request_builder.dart';
 import '../providers/audio_provider.dart';
 import '../providers/lyric_provider.dart';
 import '../providers/settings_provider.dart';
-import '../utils/file_icon_utils.dart';
+import '../utils/file_tree_utils.dart';
 import '../utils/snackbar_util.dart';
-import 'responsive_dialog.dart';
+import 'file_tree_actions.dart';
+import 'file_tree_view.dart';
+import 'file_explorer_tree_panel.dart';
+import 'file_delete_confirmation_dialog.dart';
 import 'image_gallery_screen.dart';
+import 'manual_subtitle_load_flow.dart';
 import 'text_preview_screen.dart';
 import 'pdf_preview_screen.dart';
+import 'video_open_failure_dialog.dart';
+import 'translation_toggle_button.dart';
 import '../../l10n/app_localizations.dart';
+
+final _log = LogService.instance;
 
 /// 离线文件浏览器 - 显示已下载的文件
 /// 只显示硬盘上实际存在的文件，不显示未下载的文件
@@ -43,17 +58,46 @@ class _OfflineFileExplorerWidgetState
     extends ConsumerState<OfflineFileExplorerWidget> {
   List<dynamic> _localFiles = []; // 仅包含本地存在的文件
   final Set<String> _expandedFolders = {}; // 记录展开的文件夹路径
-  final Map<String, bool> _fileExists = {}; // hash -> exists on disk
   final Set<String> _audioWithLibrarySubtitles = {}; // 存储在字幕库中有匹配字幕的音频文件名
   bool _isLoading = true;
   String? _errorMessage;
   String? _mainFolderPath; // 主文件夹路径
   late final FileListController _fileListController;
+  int _loadGeneration = 0;
 
-  // 翻译相关状态
-  bool _showTranslation = false;
-  final Map<String, String> _translationCache = {}; // 原文 -> 译文
-  final Set<String> _translatingItems = {}; // 正在翻译的项目
+  FilePreviewResolver get _previewResolver => FilePreviewResolver(
+        downloadRootPath: () async {
+          final downloadDir = await DownloadPathService.getDownloadDirectory();
+          return downloadDir.path;
+        },
+      );
+
+  FileSizeResolver get _fileSizeResolver => FileSizeResolver(
+        downloadRootPath: () async {
+          final downloadDir = await DownloadPathService.getDownloadDirectory();
+          return downloadDir.path;
+        },
+      );
+
+  AudioFileUrlResolver get _audioUrlResolver => AudioFileUrlResolver(
+        resolveDownloadedPath: (_, __) async => null,
+        downloadRootPath: () async {
+          final downloadDir = await DownloadPathService.getDownloadDirectory();
+          return downloadDir.path;
+        },
+        resolveCachedAudioPath: (_) async => null,
+      );
+
+  final VideoFileOpener _videoFileOpener = VideoFileOpener();
+  final SubtitleMatchLoader _subtitleMatchLoader = const SubtitleMatchLoader();
+  final FileExplorerTapResolver _tapResolver =
+      const FileExplorerTapResolver(videoBeforeAudio: false);
+  final AudioPlaybackPlanBuilder _audioPlaybackPlanBuilder =
+      const AudioPlaybackPlanBuilder();
+  final FileNameTranslationController _translationController =
+      FileNameTranslationController();
+  final FileDeleteRequestBuilder _deleteRequestBuilder =
+      const FileDeleteRequestBuilder();
 
   @override
   void initState() {
@@ -64,10 +108,16 @@ class _OfflineFileExplorerWidgetState
 
   @override
   void dispose() {
+    _loadGeneration++;
+    _translationController.dispose();
     // 离线页面关闭时清空文件列表，避免影响其他作品
     // 使用 Future.microtask 延迟执行，避免在 dispose 中直接修改 provider
     Future.microtask(() => _fileListController.clear());
     super.dispose();
+  }
+
+  bool _isCurrentLoad(int generation) {
+    return mounted && generation == _loadGeneration;
   }
 
   // 加载本地存在的文件
@@ -80,6 +130,7 @@ class _OfflineFileExplorerWidgetState
       return;
     }
 
+    final generation = ++_loadGeneration;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -87,10 +138,13 @@ class _OfflineFileExplorerWidgetState
 
     try {
       final downloadDir = await DownloadPathService.getDownloadDirectory();
+      if (!_isCurrentLoad(generation)) return;
+
       final workDir =
           Directory(p.join(downloadDir.path, widget.work.id.toString()));
 
       if (!await workDir.exists()) {
+        if (!_isCurrentLoad(generation)) return;
         setState(() {
           _isLoading = false;
           _errorMessage = S.of(context).workFolderNotExist;
@@ -98,13 +152,19 @@ class _OfflineFileExplorerWidgetState
         return;
       }
 
-      // 递归检查并过滤本地存在的文件
-      _localFiles = await _filterLocalFiles(widget.fileTree!, workDir.path, '');
+      final scanResult = await const OfflineLocalFileScanner().scan(
+        fileTree: widget.fileTree!,
+        workDirPath: workDir.path,
+      );
+      if (!_isCurrentLoad(generation)) return;
+
+      _localFiles = scanResult.files;
       // 更新全局文件列表供字幕自动加载使用
       _fileListController.updateFiles(List<dynamic>.from(_localFiles));
 
       // 检查字幕库中的匹配项
-      await _checkLibrarySubtitles();
+      await _checkLibrarySubtitles(generation);
+      if (!_isCurrentLoad(generation)) return;
 
       // 识别主文件夹并自动展开（需要在检查字幕库后执行）
       _identifyAndExpandMainFolder();
@@ -113,6 +173,7 @@ class _OfflineFileExplorerWidgetState
         _isLoading = false;
       });
     } catch (e) {
+      if (!_isCurrentLoad(generation)) return;
       setState(() {
         _isLoading = false;
         _errorMessage = S.of(context).loadFilesFailed(e.toString());
@@ -120,402 +181,46 @@ class _OfflineFileExplorerWidgetState
     }
   }
 
-  // 递归过滤本地存在的文件
-  Future<List<dynamic>> _filterLocalFiles(
-      List<dynamic> items, String workDirPath, String parentPath) async {
-    final List<dynamic> filteredItems = [];
-
-    for (final item in items) {
-      final type = _getProperty(item, 'type', defaultValue: '');
-      final title = _getProperty(item, 'title', defaultValue: 'unknown');
-      final hash = _getProperty(item, 'hash');
-
-      if (type == 'folder') {
-        final children = _getProperty(item, 'children') as List<dynamic>?;
-
-        if (children != null && children.isNotEmpty) {
-          final folderPath = parentPath.isEmpty ? title : '$parentPath/$title';
-          final filteredChildren =
-              await _filterLocalFiles(children, workDirPath, folderPath);
-
-          // 只添加包含文件的文件夹
-          if (filteredChildren.isNotEmpty) {
-            // 创建文件夹的 Map 副本
-            if (item is Map<String, dynamic>) {
-              final folderCopy = Map<String, dynamic>.from(item);
-              folderCopy['children'] = filteredChildren;
-              filteredItems.add(folderCopy);
-            } else {
-              // 如果是 AudioFile 对象，转换为 Map
-              final folderMap = <String, dynamic>{
-                'type': 'folder',
-                'title': title,
-                'children': filteredChildren,
-              };
-              filteredItems.add(folderMap);
-            }
-          }
-        }
-      } else if (hash != null) {
-        // 检查文件是否存在
-        final relativePath = parentPath.isEmpty ? title : '$parentPath/$title';
-        final filePath = '$workDirPath/$relativePath';
-        final file = File(filePath);
-        final downloadingFile = File('$filePath.downloading');
-
-        // 检查文件是否存在且没有正在下载的临时文件
-        // 如果存在 .downloading 文件，说明下载未完成，不显示
-        if (await file.exists() && !await downloadingFile.exists()) {
-          _fileExists[hash] = true;
-
-          // 根据文件扩展名确定正确的类型
-          String fileType = type; // 默认使用现有类型
-
-          // 如果类型是 'file' 或为空，根据扩展名重新判断
-          if (type == 'file' || type == null || type.isEmpty) {
-            fileType = FileIconUtils.inferFileType(title);
-          }
-
-          // 统一创建或修正 Map
-          if (item is Map<String, dynamic>) {
-            // 如果是 Map，可能需要修正类型
-            if (item['type'] != fileType) {
-              final correctedMap = Map<String, dynamic>.from(item);
-              correctedMap['type'] = fileType;
-              filteredItems.add(correctedMap);
-            } else {
-              filteredItems.add(item);
-            }
-          } else {
-            // 如果是 AudioFile 对象，转换为 Map
-            final fileMap = <String, dynamic>{
-              'type': fileType,
-              'title': title,
-              'hash': hash,
-              'duration': _getProperty(item, 'duration'),
-              'size': _getProperty(item, 'size'),
-            };
-            filteredItems.add(fileMap);
-          }
-        }
-      }
-    }
-
-    return filteredItems;
-  }
-
-  // 安全获取对象属性（支持 Map 和 AudioFile 对象）
-  dynamic _getProperty(dynamic item, String key, {dynamic defaultValue}) {
-    if (item == null) return defaultValue;
-
-    if (item is Map) {
-      return item[key] ?? defaultValue;
-    } else {
-      // AudioFile 对象
-      try {
-        switch (key) {
-          case 'type':
-            return (item as dynamic).type ?? defaultValue;
-          case 'title':
-            return (item as dynamic).title ?? defaultValue;
-          case 'name':
-            return (item as dynamic).title ?? defaultValue;
-          case 'hash':
-            return (item as dynamic).hash ?? defaultValue;
-          case 'children':
-            return (item as dynamic).children ?? defaultValue;
-          case 'size':
-            return (item as dynamic).size ?? defaultValue;
-          case 'mediaType':
-            return (item as dynamic).type ?? defaultValue;
-          case 'duration':
-            return (item as dynamic).duration ?? defaultValue;
-          default:
-            return defaultValue;
-        }
-      } catch (e) {
-        return defaultValue;
-      }
-    }
-  }
-
   // 检查字幕库中哪些音频文件有匹配的字幕
-  Future<void> _checkLibrarySubtitles() async {
+  Future<void> _checkLibrarySubtitles(int generation) async {
     try {
-      final libraryDir =
-          await SubtitleLibraryService.getSubtitleLibraryDirectory();
-      if (!await libraryDir.exists()) {
-        return;
-      }
+      final matches = await _subtitleMatchLoader.loadMatches(
+        workId: widget.work.id,
+        fileTree: _localFiles,
+      );
+      if (!_isCurrentLoad(generation)) return;
 
-      _audioWithLibrarySubtitles.clear();
-      final workId = widget.work.id;
-      final parsedFolderPath = '${libraryDir.path}/${SubtitleLibraryService.parsedFolderName}';
+      _audioWithLibrarySubtitles
+        ..clear()
+        ..addAll(matches);
 
-      // 生成可能的文件夹名称列表（支持带前导零的格式）
-      final possibleFolderNames = [
-        'RJ$workId',
-        'RJ0$workId',
-        'BJ$workId',
-        'BJ0$workId',
-        'VJ$workId',
-        'VJ0$workId',
-      ];
-
-      // 收集所有音频文件名
-      final audioFiles = <String>[];
-      void collectAudioFiles(List<dynamic> items) {
-        for (final item in items) {
-          final title = _getProperty(item, 'title', defaultValue: '');
-
-          // 检查是否是音频文件（通过类型或文件名后缀）
-          // 修复：wav等格式可能没有被正确标记为audio类型
-          if (item is Map<String, dynamic> && FileIconUtils.isAudioFile(item)) {
-            if (title.isNotEmpty) {
-              audioFiles.add(title);
-            }
-          }
-          final children = _getProperty(item, 'children') as List<dynamic>?;
-          if (children != null) {
-            collectAudioFiles(children);
-          }
-        }
-      }
-
-      collectAudioFiles(_localFiles);
-
-      // 检查每个可能的文件夹
-      for (final folderName in possibleFolderNames) {
-        final folderPath = '$parsedFolderPath/$folderName';
-        final folder = Directory(folderPath);
-        if (!await folder.exists()) continue;
-
-        // 遍历字幕库文件夹，查找匹配的字幕
-        await for (final entity in folder.list(recursive: true)) {
-          if (entity is File) {
-            final fileName = entity.path.split(Platform.pathSeparator).last;
-
-            // 检查是否有音频文件匹配这个字幕
-            for (final audioFile in audioFiles) {
-              if (SubtitleLibraryService.isSubtitleForAudio(
-                  fileName, audioFile)) {
-                _audioWithLibrarySubtitles.add(audioFile);
-                // 不要 break，因为一个字幕文件可能对应多个音频文件（如 mp3 和 wav 版本）
-              }
-            }
-          }
-        }
-      }
-
-      print(
+      _log.captureOutput(
           '[OfflineFileExplorer] 字幕库匹配: ${_audioWithLibrarySubtitles.length} 个音频文件有字幕');
     } catch (e) {
-      print('[OfflineFileExplorer] 检查字幕库失败: $e');
+      _log.captureOutput('[OfflineFileExplorer] 检查字幕库失败: $e');
     }
   }
 
   // 识别主文件夹：音频数量最多的目录，如果有多个则选择文本文件最多的
   void _identifyAndExpandMainFolder() {
-    if (_localFiles.isEmpty) return;
+    final formatPreference = ref.read(audioFormatPreferenceProvider);
+    final mainFolder = FileTreeUtils.identifyMainFolder(
+      _localFiles,
+      formatPreference.priority,
+      audioWithLibrarySubtitles: _audioWithLibrarySubtitles,
+    );
 
-    // 如果根目录本身包含音频文件，则不需要展开
-    final rootHasAudio = _localFiles.any((item) =>
-        item is Map<String, dynamic> && FileIconUtils.isAudioFile(item));
-    if (rootHasAudio) {
-      _mainFolderPath = '';
-      return;
-    }
-
-    // 收集所有文件夹及其统计信息
-    final Map<String, Map<String, dynamic>> folderStats = {};
-
-    void analyzeFolders(List<dynamic> items, String parentPath) {
-      for (final item in items) {
-        if (_getProperty(item, 'type', defaultValue: '') == 'folder') {
-          final children = _getProperty(item, 'children') as List<dynamic>?;
-          if (children != null && children.isNotEmpty) {
-            final itemPath = _getItemPath(parentPath, item);
-
-            // 统计该文件夹的音频和文本文件数量
-            final stats = _countFilesInFolder(children);
-            folderStats[itemPath] = {
-              'audioCount': stats['audioCount'],
-              'textCount': stats['textCount'],
-              'item': item,
-            };
-
-            // 递归分析子文件夹
-            analyzeFolders(children, itemPath);
-          }
-        }
-      }
-    }
-
-    analyzeFolders(_localFiles, '');
-
-    if (folderStats.isEmpty) {
+    if (mainFolder == null) {
       _mainFolderPath = null;
       return;
     }
 
-    // 找出音频数量最多的文件夹
-    int maxAudioCount = 0;
-    for (final stats in folderStats.values) {
-      if (stats['audioCount'] > maxAudioCount) {
-        maxAudioCount = stats['audioCount'];
-      }
+    _mainFolderPath = mainFolder.path;
+    _expandedFolders.addAll(mainFolder.expandedPaths);
+    if (mainFolder.path.isNotEmpty) {
+      _log.captureOutput(
+          '[OfflineFileExplorer] 识别到主文件夹 $_mainFolderPath (音频:${mainFolder.audioCount}, 文本:${mainFolder.textCount})');
     }
-
-    // 在音频数量最多的文件夹中，先选择文本文件最多的
-    String? mainFolder;
-    int maxTextCount = -1;
-    List<String> candidateFolders = [];
-
-    for (final entry in folderStats.entries) {
-      if (entry.value['audioCount'] == maxAudioCount) {
-        final textCount = entry.value['textCount'] as int;
-        if (textCount > maxTextCount) {
-          maxTextCount = textCount;
-          candidateFolders = [entry.key];
-        } else if (textCount == maxTextCount) {
-          candidateFolders.add(entry.key);
-        }
-      }
-    }
-
-    // 如果有多个文件夹的音频和文本数量都相同，按照音频格式偏好选择
-    if (candidateFolders.length > 1) {
-      final formatPreference = ref.read(audioFormatPreferenceProvider);
-      mainFolder = _selectByAudioFormatPreference(
-          candidateFolders, formatPreference.priority);
-    } else if (candidateFolders.isNotEmpty) {
-      mainFolder = candidateFolders.first;
-    }
-
-    if (mainFolder != null) {
-      _mainFolderPath = mainFolder;
-      // 展开主文件夹路径上的所有父文件夹
-      _expandPathToFolder(mainFolder);
-      print(
-          '[OfflineFileExplorer] 识别到主文件夹 $_mainFolderPath (音频:$maxAudioCount, 文本:$maxTextCount)');
-    }
-  }
-
-  // 统计文件夹中的音频和文本文件数量（仅统计当前层级，不递归子文件夹）
-  Map<String, int> _countFilesInFolder(List<dynamic> items) {
-    int audioCount = 0;
-    int textCount = 0;
-
-    for (final child in items) {
-      if (child is Map<String, dynamic> && FileIconUtils.isAudioFile(child)) {
-        audioCount++;
-
-        // 检查该音频是否在字幕库中有匹配的字幕
-        final audioTitle = _getProperty(child, 'title', defaultValue: '');
-        if (_audioWithLibrarySubtitles.contains(audioTitle)) {
-          textCount++; // 字幕库匹配也算作文本文件
-        }
-      } else if (FileIconUtils.isTextFile(child)) {
-        textCount++;
-      }
-    }
-
-    return {'audioCount': audioCount, 'textCount': textCount};
-  }
-
-  // 根据音频格式偏好选择文件夹
-  // 返回包含最高优先级音频格式的文件夹
-  String _selectByAudioFormatPreference(
-      List<String> folderPaths, List<AudioFormat> priorityOrder) {
-    // 为每个候选文件夹找到其包含的最高优先级格式
-    Map<String, int> folderPriorities = {};
-
-    for (final folderPath in folderPaths) {
-      // 找到该文件夹下的所有音频文件
-      final folderChildren = _findFolderChildren(folderPath);
-      int highestPriority = priorityOrder.length; // 初始化为最低优先级（越大越低优先级）
-
-      for (final child in folderChildren) {
-        if (child is Map<String, dynamic> && FileIconUtils.isAudioFile(child)) {
-          final fileName =
-              _getProperty(child, 'title', defaultValue: '').toLowerCase();
-          // 检查文件扩展名
-          for (int i = 0; i < priorityOrder.length; i++) {
-            final format = priorityOrder[i];
-            if (fileName.endsWith('.${format.extension}')) {
-              if (i < highestPriority) {
-                highestPriority = i;
-              }
-              break; // 找到格式后跳出循环
-            }
-          }
-        }
-      }
-
-      folderPriorities[folderPath] = highestPriority;
-    }
-
-    // 选择优先级最高（数值最小）的文件夹
-    String selectedFolder = folderPaths.first;
-    int bestPriority = folderPriorities[selectedFolder]!;
-
-    for (final folderPath in folderPaths) {
-      final priority = folderPriorities[folderPath]!;
-      if (priority < bestPriority) {
-        bestPriority = priority;
-        selectedFolder = folderPath;
-      }
-    }
-
-    return selectedFolder;
-  }
-
-  // 查找指定路径的文件夹中的子项
-  List<dynamic> _findFolderChildren(String targetPath) {
-    final segments = targetPath.split('/');
-    List<dynamic> currentItems = _localFiles;
-
-    for (final segment in segments) {
-      bool found = false;
-      for (final item in currentItems) {
-        final title = _getProperty(item, 'title', defaultValue: '');
-        if (title == segment &&
-            _getProperty(item, 'type', defaultValue: '') == 'folder') {
-          currentItems = _getProperty(item, 'children') as List<dynamic>? ?? [];
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        return []; // 路径不存在
-      }
-    }
-
-    return currentItems;
-  }
-
-  // 展开到指定文件夹的路径
-  void _expandPathToFolder(String targetPath) {
-    final segments = targetPath.split('/');
-    String currentPath = '';
-
-    for (int i = 0; i < segments.length; i++) {
-      if (i == 0) {
-        currentPath = segments[i];
-      } else {
-        currentPath = '$currentPath/${segments[i]}';
-      }
-
-      if (!_expandedFolders.contains(currentPath)) {
-        _expandedFolders.add(currentPath);
-      }
-    }
-  }
-
-  // 生成文件/文件夹的唯一路径
-  String _getItemPath(String parentPath, dynamic item) {
-    final title = _getProperty(item, 'title', defaultValue: 'unknown');
-    return parentPath.isEmpty ? title : '$parentPath/$title';
   }
 
   // 切换文件夹展开/折叠状态
@@ -529,606 +234,259 @@ class _OfflineFileExplorerWidgetState
     });
   }
 
-  // 格式化文件大小
-  String _formatFileSize(int? bytes) {
-    if (bytes == null || bytes <= 0) return '';
-
-    const units = ['B', 'KB', 'MB', 'GB'];
-    int unitIndex = 0;
-    double size = bytes.toDouble();
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-
-    if (unitIndex == 0) {
-      return '$bytes B';
-    } else {
-      return '${size.toStringAsFixed(2)} ${units[unitIndex]}';
-    }
-  }
-
-  // 获取文件大小（从元数据或本地文件）
-  Future<int?> _getFileSize(dynamic item, String parentPath) async {
-    // 先尝试从元数据获取
-    final metaSize = _getProperty(item, 'size');
-    if (metaSize != null && metaSize is int && metaSize > 0) {
-      return metaSize;
-    }
-
-    // 如果元数据没有，从本地文件读取
-    final title = _getProperty(item, 'title', defaultValue: '');
-
-    try {
-      final downloadDir = await DownloadPathService.getDownloadDirectory();
-      final workDir = p.join(downloadDir.path, widget.work.id.toString());
-      final filePath = parentPath.isEmpty
-          ? p.join(workDir, title)
-          : p.join(workDir, parentPath, title);
-      final file = File(filePath);
-
-      if (await file.exists()) {
-        return await file.length();
-      }
-    } catch (e) {
-      // 忽略错误
-    }
-
-    return null;
-  }
-
   // 播放音频文件（从本地）
   Future<void> _playAudioFile(dynamic audioFile, String parentPath) async {
-    final hash = _getProperty(audioFile, 'hash');
-    final title = _getProperty(audioFile, 'title', defaultValue: S.of(context).unknown);
+    final l10n = S.of(context);
+    final targetResult = await _audioUrlResolver.resolveOfflinePlaybackTarget(
+      file: audioFile,
+      workId: widget.work.id,
+      parentPath: parentPath,
+      unknownTitle: l10n.unknown,
+    );
 
-    if (hash == null) {
-      SnackBarUtil.showError(context, S.of(context).cannotPlayAudioMissingId);
-      return;
+    if (!mounted) return;
+
+    switch (targetResult.status) {
+      case OfflineAudioPlaybackTargetStatus.missingId:
+        SnackBarUtil.showError(context, l10n.cannotPlayAudioMissingId);
+        return;
+      case OfflineAudioPlaybackTargetStatus.missingFile:
+        SnackBarUtil.showError(context, l10n.audioFileNotExist);
+        return;
+      case OfflineAudioPlaybackTargetStatus.ready:
+        break;
     }
 
-    // 获取本地文件路径
-    final downloadDir = await DownloadPathService.getDownloadDirectory();
-    final workDir = p.join(downloadDir.path, widget.work.id.toString());
-    final localPath = parentPath.isEmpty
-        ? p.join(workDir, title)
-        : p.join(workDir, parentPath, title);
-    final localFile = File(localPath);
+    final target = targetResult.requireTarget;
+    final plan = await _audioPlaybackPlanBuilder.build(
+      fileTree: _localFiles,
+      parentPath: parentPath,
+      selectedFile: audioFile,
+      resolveUrl: (file) => _audioUrlResolver.resolveOffline(
+        file: file,
+        workDir: target.workDir,
+        parentPath: parentPath,
+      ),
+      work: widget.work,
+      unknownTitle: l10n.unknown,
+      artworkUrl: target.artworkUrl,
+      requireHash: true,
+    );
 
-    if (!await localFile.exists()) {
-      SnackBarUtil.showError(context, S.of(context).audioFileNotExist);
-      return;
-    }
+    if (!mounted) return;
 
-    // 获取作品封面URL（用于播放器显示）
-    String? coverUrl;
-    try {
-      final coverFile = File(p.join(workDir, 'cover.jpg'));
-      if (await coverFile.exists()) {
-        coverUrl = 'file://${coverFile.path}';
-      }
-    } catch (e) {
-      // 封面不存在，忽略
-    }
-
-    // 获取同一目录下的所有本地音频文件
-    final audioFiles = _getAudioFilesFromSameDirectory(parentPath);
-
-    final currentIndex =
-        audioFiles.indexWhere((file) => _getProperty(file, 'hash') == hash);
-
-    if (currentIndex == -1) {
-      SnackBarUtil.showError(context, S.of(context).cannotFindAudioFile(title));
-      return;
-    }
-
-    // 构建播放队列（仅使用本地文件）
-    final List<AudioTrack> audioTracks = [];
-    for (final file in audioFiles) {
-      final fileHash = _getProperty(file, 'hash');
-      final fileTitle = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
-
-      if (fileHash == null) continue;
-
-      // 获取本地文件路径（使用 path 包确保路径分隔符正确）
-      final filePath = parentPath.isEmpty
-          ? p.join(workDir, fileTitle)
-          : p.join(workDir, parentPath, fileTitle);
-      final file2 = File(filePath);
-
-      if (await file2.exists()) {
-        // 使用 file:// 协议的本地路径
-        final audioUrl = 'file://$filePath';
-
-        // 获取声优信息
-        final vaNames = widget.work.vas?.map((va) => va.name).toList() ?? [];
-        final artistInfo = vaNames.isNotEmpty ? vaNames.join(', ') : null;
-
-        audioTracks.add(AudioTrack(
-          id: fileHash,
-          url: audioUrl,
-          title: fileTitle,
-          artist: artistInfo,
-          album: widget.work.title,
-          artworkUrl: coverUrl,
-          duration: _getProperty(file, 'duration') != null
-              ? Duration(
-                  milliseconds: (_getProperty(file, 'duration') * 1000).round())
-              : null,
-          workId: widget.work.id,
-          hash: fileHash,
-        ));
-      }
-    }
-
-    if (audioTracks.isEmpty) {
-      SnackBarUtil.showError(context, S.of(context).noPlayableAudioFiles);
-      return;
-    }
-
-    // 播放音频队列，从当前选择的文件开始
-    final adjustedIndex = audioTracks.indexWhere((track) => track.hash == hash);
-    final startIndex = adjustedIndex != -1 ? adjustedIndex : 0;
-
-    ref.read(audioPlayerControllerProvider.notifier).playTracks(
-          audioTracks,
-          startIndex: startIndex,
-          work: widget.work,
+    switch (plan.status) {
+      case AudioPlaybackPlanStatus.selectedFileMissing:
+        SnackBarUtil.showError(
+          context,
+          l10n.cannotFindAudioFile(plan.selectedTitle),
         );
-  }
-
-  // 获取同一目录下的所有音频文件（不递归子文件夹）
-  List<dynamic> _getAudioFilesFromSameDirectory(String targetPath) {
-    final List<dynamic> audioFiles = [];
-
-    // 如果是根目录
-    if (targetPath.isEmpty) {
-      for (final item in _localFiles) {
-        if (item is Map<String, dynamic> && FileIconUtils.isAudioFile(item)) {
-          audioFiles.add(item);
-        }
-      }
-      return audioFiles;
+        return;
+      case AudioPlaybackPlanStatus.emptyQueue:
+        SnackBarUtil.showError(context, l10n.noPlayableAudioFiles);
+        return;
+      case AudioPlaybackPlanStatus.ready:
+        final queue = plan.queue!;
+        ref.read(audioPlayerControllerProvider.notifier).playTracks(
+              queue.tracks,
+              startIndex: queue.startIndex,
+              work: widget.work,
+            );
     }
-
-    // 查找目标路径对应的文件夹
-    List<dynamic>? findFolderByPath(List<dynamic> items, String currentPath) {
-      for (final item in items) {
-        if (_getProperty(item, 'type', defaultValue: '') == 'folder') {
-          final itemPath = _getItemPath(currentPath, item);
-
-          if (itemPath == targetPath) {
-            final children = _getProperty(item, 'children') as List<dynamic>?;
-            return children;
-          }
-
-          final children = _getProperty(item, 'children') as List<dynamic>?;
-          if (children != null) {
-            final result = findFolderByPath(children, itemPath);
-            if (result != null) return result;
-          }
-        }
-      }
-      return null;
-    }
-
-    final folderContents = findFolderByPath(_localFiles, '');
-
-    if (folderContents != null) {
-      for (final item in folderContents) {
-        if (item is Map<String, dynamic> && FileIconUtils.isAudioFile(item)) {
-          audioFiles.add(item);
-        }
-      }
-    }
-
-    return audioFiles;
   }
 
   // 辅助方法：判断文件名是否为音频格式
   // 手动加载字幕
   Future<void> _loadLyricManually(dynamic file) async {
-    final title = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
+    final l10n = S.of(context);
+    final title = FileTreeUtils.titleOf(file, defaultValue: l10n.unknown);
+    final currentTrack = ref.read(currentTrackProvider).value;
 
-    final currentTrackAsync = ref.read(currentTrackProvider);
-    final currentTrack = currentTrackAsync.value;
-
-    if (currentTrack == null) {
-      SnackBarUtil.showError(context, S.of(context).noAudioCannotLoadSubtitle);
-      return;
-    }
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => ResponsiveAlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              Icons.subtitles,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
-            ),
-            const SizedBox(width: 12),
-            Text(S.of(context).loadSubtitle),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                S.of(context).loadSubtitleConfirm,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.closed_caption,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          S.of(context).subtitleFile,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.music_note,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          S.of(context).currentAudio,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      currentTrack.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondaryContainer
-                      .withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        S.of(context).subtitleAutoRestoreNote,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSecondaryContainer,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(S.of(context).cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(S.of(context).confirmLoad),
-          ),
-        ],
-      ),
+    await runManualSubtitleLoadFlow(
+      context,
+      file: file,
+      workId: widget.work.id,
+      subtitleTitle: title,
+      currentAudioTitle: currentTrack?.title,
+      loadSubtitle: (file, {required workId}) {
+        return ref.read(lyricControllerProvider.notifier).loadLyricManually(
+              file,
+              workId: workId,
+            );
+      },
+      isMounted: () => mounted,
     );
-
-    if (confirmed != true || !mounted) return;
-
-    try {
-      await ref.read(lyricControllerProvider.notifier).loadLyricManually(
-            file,
-            workId: widget.work.id,
-          );
-      SnackBarUtil.showSuccess(context, S.of(context).subtitleLoadSuccess(title));
-    } catch (e) {
-      SnackBarUtil.showError(context, S.of(context).subtitleLoadFailed(e.toString()));
-    }
   }
 
   // 预览图片文件（从本地）
   Future<void> _previewImageFile(dynamic file) async {
-    final downloadDir = await DownloadPathService.getDownloadDirectory();
-    final workPath = p.join(downloadDir.path, widget.work.id.toString());
+    final l10n = S.of(context);
 
-    final imageFiles = _getImageFilesFromCurrentDirectory();
-    final currentIndex = imageFiles.indexWhere(
-        (f) => _getProperty(f, 'hash') == _getProperty(file, 'hash'));
-
-    if (currentIndex == -1) {
-      SnackBarUtil.showError(context, S.of(context).cannotFindImageFile);
-      return;
-    }
-
-    final List<Map<String, String>> imageItems = [];
-    for (final f in imageFiles) {
-      final hash = _getProperty(f, 'hash', defaultValue: '');
-      final title = _getProperty(f, 'title', defaultValue: S.of(context).unknown);
-
-      final filePath = await _findFileFullPath(f, _localFiles, '');
-      if (filePath != null) {
-        final localPath = p.join(workPath, filePath);
-        final localFile = File(localPath);
-        if (await localFile.exists()) {
-          imageItems
-              .add({'url': 'file://$localPath', 'title': title, 'hash': hash});
-        }
-      }
-    }
-
-    if (imageItems.isEmpty) {
-      SnackBarUtil.showError(context, S.of(context).noPreviewableImages);
-      return;
-    }
-
-    final adjustedIndex = imageItems
-        .indexWhere((item) => item['hash'] == _getProperty(file, 'hash'));
+    final result = await _previewResolver.buildOfflineImageGalleryTarget(
+      selectedFile: file,
+      imageFiles: _getImageFilesFromCurrentDirectory(),
+      fileTree: _localFiles,
+      workId: widget.work.id,
+      unknownTitle: l10n.unknown,
+    );
 
     if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ImageGalleryScreen(
-          images: imageItems,
-          initialIndex: adjustedIndex != -1 ? adjustedIndex : 0,
-          workId: widget.work.id,
-        ),
-      ),
-    );
+
+    switch (result.status) {
+      case PreviewImageGalleryStatus.ready:
+        final target = result.requireTarget;
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ImageGalleryScreen(
+              images: target.toGalleryMaps(),
+              initialIndex: target.initialIndex,
+              workId: widget.work.id,
+            ),
+          ),
+        );
+        return;
+      case PreviewImageGalleryStatus.missingSelectedImage:
+        SnackBarUtil.showError(context, l10n.cannotFindImageFile);
+        return;
+      case PreviewImageGalleryStatus.empty:
+        SnackBarUtil.showError(context, l10n.noPreviewableImages);
+        return;
+      case PreviewImageGalleryStatus.missingOnlineInfo:
+        return;
+    }
   }
 
   List<dynamic> _getImageFilesFromCurrentDirectory() {
-    final List<dynamic> imageFiles = [];
-
-    void extractImageFiles(List<dynamic> items) {
-      for (final item in items) {
-        if (FileIconUtils.isImageFile(item)) {
-          imageFiles.add(item);
-        } else if (_getProperty(item, 'type', defaultValue: '') == 'folder') {
-          final children = _getProperty(item, 'children') as List<dynamic>?;
-          if (children != null) {
-            extractImageFiles(children);
-          }
-        }
-      }
-    }
-
-    if (_localFiles.isNotEmpty) {
-      extractImageFiles(_localFiles);
-    }
-
-    return imageFiles;
-  }
-
-  Future<String?> _findFileFullPath(
-      dynamic targetFile, List<dynamic> items, String parentPath) async {
-    for (final item in items) {
-      final type = _getProperty(item, 'type', defaultValue: '');
-      final title = _getProperty(item, 'title', defaultValue: 'unknown');
-
-      if (type == 'folder') {
-        final children = _getProperty(item, 'children') as List<dynamic>?;
-        if (children != null) {
-          final folderPath = parentPath.isEmpty ? title : '$parentPath/$title';
-          final result =
-              await _findFileFullPath(targetFile, children, folderPath);
-          if (result != null) return result;
-        }
-      } else {
-        if (_getProperty(item, 'hash') == _getProperty(targetFile, 'hash')) {
-          return parentPath.isEmpty ? title : '$parentPath/$title';
-        }
-      }
-    }
-    return null;
+    return FileTreeUtils.imageFilesRecursive(_localFiles);
   }
 
   Future<void> _previewTextFile(dynamic file) async {
-    final hash = _getProperty(file, 'hash');
-    final title = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
-
-    if (hash == null) {
-      SnackBarUtil.showError(context, S.of(context).cannotPreviewTextMissingId);
-      return;
-    }
-
-    final filePath = await _findFileFullPath(file, _localFiles, '');
-    if (filePath == null) {
-      SnackBarUtil.showError(context, S.of(context).cannotFindFilePath);
-      return;
-    }
-
-    final downloadDir = await DownloadPathService.getDownloadDirectory();
-    final localPath =
-        p.join(downloadDir.path, widget.work.id.toString(), filePath);
-    final localFile = File(localPath);
-
-    if (!await localFile.exists()) {
-      SnackBarUtil.showError(context, S.of(context).fileNotExist(title));
-      return;
-    }
-
-    if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => TextPreviewScreen(
-          textUrl: 'file://$localPath',
-          title: title,
-          workId: widget.work.id,
-          hash: hash,
-        ),
-      ),
-    );
+    await _previewDocumentFile(file, isPdf: false);
   }
 
   Future<void> _previewPdfFile(dynamic file) async {
-    final hash = _getProperty(file, 'hash');
-    final title = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
+    await _previewDocumentFile(file, isPdf: true);
+  }
 
-    if (hash == null) {
-      SnackBarUtil.showError(context, S.of(context).cannotPreviewPdfMissingId);
-      return;
-    }
-
-    final filePath = await _findFileFullPath(file, _localFiles, '');
-    if (filePath == null) {
-      SnackBarUtil.showError(context, S.of(context).cannotFindFilePath);
-      return;
-    }
-
-    final downloadDir = await DownloadPathService.getDownloadDirectory();
-    final localPath =
-        p.join(downloadDir.path, widget.work.id.toString(), filePath);
-    final localFile = File(localPath);
-
-    if (!await localFile.exists()) {
-      SnackBarUtil.showError(context, S.of(context).fileNotExist(title));
-      return;
-    }
+  Future<void> _previewDocumentFile(
+    dynamic file, {
+    required bool isPdf,
+  }) async {
+    final l10n = S.of(context);
+    final result = await _previewResolver.resolveOfflineDocumentTarget(
+      file: file,
+      fileTree: _localFiles,
+      workId: widget.work.id,
+      unknownTitle: l10n.unknown,
+    );
 
     if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PdfPreviewScreen(
-          pdfUrl: 'file://$localPath',
-          title: title,
-          workId: widget.work.id,
-          hash: hash,
-        ),
-      ),
-    );
+
+    switch (result.status) {
+      case PreviewDocumentTargetStatus.ready:
+        final target = result.requireTarget;
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) {
+              if (isPdf) {
+                return PdfPreviewScreen(
+                  pdfUrl: target.url,
+                  title: target.title,
+                  workId: widget.work.id,
+                  hash: target.hash,
+                );
+              }
+
+              return TextPreviewScreen(
+                textUrl: target.url,
+                title: target.title,
+                workId: widget.work.id,
+                hash: target.hash,
+              );
+            },
+          ),
+        );
+        return;
+      case PreviewDocumentTargetStatus.missingId:
+        SnackBarUtil.showError(
+          context,
+          isPdf
+              ? l10n.cannotPreviewPdfMissingId
+              : l10n.cannotPreviewTextMissingId,
+        );
+        return;
+      case PreviewDocumentTargetStatus.missingPath:
+        SnackBarUtil.showError(context, l10n.cannotFindFilePath);
+        return;
+      case PreviewDocumentTargetStatus.missingFile:
+        SnackBarUtil.showError(context, l10n.fileNotExist(result.title));
+        return;
+      case PreviewDocumentTargetStatus.missingOnlineInfo:
+      case PreviewDocumentTargetStatus.unavailable:
+        return;
+    }
   }
 
   Future<void> _playVideoWithSystemPlayer(dynamic videoFile) async {
-    final hash = _getProperty(videoFile, 'hash');
+    final l10n = S.of(context);
 
-    if (hash == null) {
-      SnackBarUtil.showError(context, S.of(context).cannotPlayVideoMissingId);
-      return;
+    final targetResult = await _previewResolver.resolveOfflineVideoTarget(
+      file: videoFile,
+      fileTree: _localFiles,
+      workId: widget.work.id,
+    );
+
+    if (!mounted) return;
+
+    switch (targetResult.status) {
+      case PreviewVideoTargetStatus.ready:
+        final target = targetResult.requireTarget;
+        final result = await _videoFileOpener.open(target.source);
+        if (!mounted) return;
+
+        _handleLocalVideoOpenResult(result, fallbackPath: target.localPath);
+        return;
+      case PreviewVideoTargetStatus.missingId:
+        SnackBarUtil.showError(context, l10n.cannotPlayVideoMissingId);
+        return;
+      case PreviewVideoTargetStatus.missingPath:
+        SnackBarUtil.showError(context, l10n.cannotFindFilePath);
+        return;
+      case PreviewVideoTargetStatus.missingFile:
+        SnackBarUtil.showError(context, l10n.videoFileNotExist);
+        return;
+      case PreviewVideoTargetStatus.missingParams:
+        return;
     }
+  }
 
-    final filePath = await _findFileFullPath(videoFile, _localFiles, '');
-    if (filePath == null) {
-      SnackBarUtil.showError(context, S.of(context).cannotFindFilePath);
-      return;
-    }
+  void _handleLocalVideoOpenResult(
+    VideoOpenResult result, {
+    required String? fallbackPath,
+  }) {
+    final l10n = S.of(context);
 
-    final downloadDir = await DownloadPathService.getDownloadDirectory();
-    final localPath =
-        p.join(downloadDir.path, widget.work.id.toString(), filePath);
-    final localFile = File(localPath);
-
-    if (!await localFile.exists()) {
-      SnackBarUtil.showError(context, S.of(context).videoFileNotExist);
-      return;
-    }
-
-    try {
-      // 使用 OpenFilex 打开本地视频文件（支持 iOS/Android 沙盒路径）
-      final result = await OpenFilex.open(localPath);
-
-      if (result.type != ResultType.done) {
-        // 打开失败，显示错误信息
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => ResponsiveAlertDialog(
-              title: Text(S.of(context).cannotOpenVideo),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(S.of(context).errorInfo(result.message)),
-                    const SizedBox(height: 12),
-                    Text(S.of(context).noVideoPlayerFound),
-                    const SizedBox(height: 8),
-                    Text(S.of(context).installVideoPlayerApp),
-                    const SizedBox(height: 12),
-                    Text(S.of(context).filePathLabel),
-                    SelectableText(localPath,
-                        style: const TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(S.of(context).close),
-                ),
-              ],
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      SnackBarUtil.showError(context, S.of(context).openVideoFileError(e.toString()));
+    switch (result.type) {
+      case VideoOpenResultType.success:
+        return;
+      case VideoOpenResultType.localOpenFailed:
+        showDialog(
+          context: context,
+          builder: (context) => VideoOpenFailureDialog.local(
+            errorMessage: result.message ?? '',
+            filePath: result.path ?? fallbackPath ?? '',
+          ),
+        );
+        return;
+      case VideoOpenResultType.localOpenError:
+        SnackBarUtil.showError(
+          context,
+          l10n.openVideoFileError(result.message ?? ''),
+        );
+        return;
+      case VideoOpenResultType.remoteCannotLaunch:
+      case VideoOpenResultType.remoteOpenError:
+        return;
     }
   }
 
@@ -1138,345 +496,91 @@ class _OfflineFileExplorerWidgetState
   }
 
   Widget _buildFileList() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadLocalFiles,
-              child: Text(S.of(context).retry),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_localFiles.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.folder_open, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              S.of(context).noDownloadedFiles,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 标题栏
-          Container(
-            padding: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).dividerColor,
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    S.of(context).offlineFiles,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                  ),
-                ),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _showTranslation = !_showTranslation;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: _showTranslation
-                              ? Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.3)
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.g_translate,
-                            size: 16,
-                            color: _showTranslation
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(0.7),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _showTranslation ? S.of(context).translationOriginal : S.of(context).translationTranslated,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: _showTranslation
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .onSurface
-                                      .withOpacity(0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // 文件树列表
-          ..._buildFileTree(_localFiles, ''),
-        ],
+    return FileExplorerTreePanel(
+      isLoading: _isLoading,
+      errorMessage: _errorMessage,
+      empty: _localFiles.isEmpty,
+      emptyMessage: S.of(context).noDownloadedFiles,
+      onRetry: _loadLocalFiles,
+      title: S.of(context).offlineFiles,
+      trailing: TranslationToggleButton(
+        isTranslated: _translationController.showTranslation,
+        originalLabel: S.of(context).translationOriginal,
+        translatedLabel: S.of(context).translationTranslated,
+        onPressed: () {
+          setState(() {
+            _translationController.toggleShowTranslation();
+          });
+        },
       ),
+      items: _localFiles,
+      expandedFolders: _expandedFolders,
+      onToggleFolder: _toggleFolder,
+      onFileTap: _handleFileTap,
+      displayNameFor: _getDisplayName,
+      metadataBuilder: _buildFileMetadata,
+      trailingBuilder: _buildFileActions,
+      audioWithLibrarySubtitles: _audioWithLibrarySubtitles,
     );
   }
 
-  // 递归构建文件树
-  List<Widget> _buildFileTree(List<dynamic> items, String parentPath,
-      {int level = 0}) {
-    final List<Widget> widgets = [];
+  Widget? _buildFileMetadata(BuildContext context, FileTreeEntry entry) {
+    if (entry.isFolder) return null;
 
-    for (final item in items) {
-      final type = _getProperty(item, 'type', defaultValue: '');
-      final originalTitle = _getProperty(item, 'title', defaultValue: S.of(context).unknown);
-      final title = _getDisplayName(originalTitle); // 使用翻译后的名称
-      final isFolder = type == 'folder';
-      final children = _getProperty(item, 'children') as List<dynamic>?;
-      final itemPath = _getItemPath(parentPath, item);
-      final isExpanded = _expandedFolders.contains(itemPath);
-      final isTranslating = _translatingItems.contains(originalTitle);
+    return FutureBuilder<int?>(
+      future: _fileSizeResolver.resolveOffline(
+        item: entry.item,
+        workId: widget.work.id,
+        parentPath: entry.parentPath,
+      ),
+      builder: (context, snapshot) {
+        final fileSize =
+            snapshot.hasData ? FileSizeResolver.formatBytes(snapshot.data) : '';
+        if (fileSize.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
-      // 如果启用翻译且该项未翻译，自动翻译
-      if (_showTranslation &&
-          !_translationCache.containsKey(originalTitle) &&
-          !isTranslating) {
-        _translateItem(originalTitle);
-      }
-
-      // 文件/文件夹项
-      widgets.add(
-        InkWell(
-          onTap: () {
-            if (isFolder) {
-              _toggleFolder(itemPath);
-            } else {
-              _handleFileTap(item, title, parentPath);
-            }
-          },
-          onLongPress: () {
-            Clipboard.setData(ClipboardData(text: title));
-            SnackBarUtil.showSuccess(context, S.of(context).copiedName(title));
-          },
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 8.0 + (level * 20.0),
-              right: 8.0,
-              top: 8.0,
-              bottom: 8.0,
-            ),
-            child: Row(
-              children: [
-                // 展开/折叠图标（仅文件夹）
-                if (isFolder)
-                  Icon(
-                    isExpanded
-                        ? Icons.keyboard_arrow_down
-                        : Icons.keyboard_arrow_right,
-                    size: 20,
-                  )
-                else
-                  const SizedBox(width: 20),
-                const SizedBox(width: 8),
-                // 文件图标（带字幕库匹配标记）
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Stack(
-                    children: [
-                      Icon(
-                        FileIconUtils.getFileIconFromMap(item),
-                        color: FileIconUtils.getFileIconColorFromMap(item),
-                        size: 24,
-                      ),
-                      // 字幕库匹配标记（音频文件）
-                      if (item is Map<String, dynamic> &&
-                          FileIconUtils.isAudioFile(item) &&
-                          _audioWithLibrarySubtitles.contains(originalTitle))
-                        Positioned(
-                          left: 0,
-                          top: 0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.subtitles,
-                              color: Colors.blue[600],
-                              size: 13,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // 文件名 + 时长 + 文件大小
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      // 显示文件大小
-                      if (!isFolder)
-                        FutureBuilder<int?>(
-                          future: _getFileSize(item, parentPath),
-                          builder: (context, snapshot) {
-                            // 获取文件大小
-                            final fileSize = snapshot.hasData
-                                ? _formatFileSize(snapshot.data)
-                                : '';
-
-                            if (fileSize.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
-
-                            return Text(
-                              fileSize,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[600],
-                              ),
-                            );
-                          },
-                        ),
-                    ],
-                  ),
-                ),
-                // 操作按钮
-                if (FileIconUtils.isAudioFile(item) ||
-                    FileIconUtils.isVideoFile(item) ||
-                    FileIconUtils.isImageFile(item) ||
-                    FileIconUtils.isTextFile(item) ||
-                    FileIconUtils.isPdfFile(item) ||
-                    !isFolder)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 字幕加载按钮（仅字幕文件显示）
-                      if (FileIconUtils.isTextFile(item) &&
-                          FileIconUtils.isLyricFile(originalTitle))
-                        IconButton(
-                          onPressed: () => _loadLyricManually(item),
-                          icon: const Icon(Icons.subtitles),
-                          color: Colors.orange,
-                          tooltip: S.of(context).loadAsSubtitle,
-                          iconSize: 20,
-                        ),
-                      // 删除按钮
-                      IconButton(
-                        onPressed: () => _deleteFile(item, parentPath),
-                        icon: const Icon(Icons.delete_outline),
-                        color: Colors.red.shade400,
-                        tooltip: S.of(context).delete,
-                        iconSize: 20,
-                      ),
-                    ],
-                  )
-                else if (isFolder && children != null)
-                  Text(
-                    S.of(context).nItems(children.length),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-              ],
-            ),
+        return Text(
+          fileSize,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey[600],
           ),
-        ),
-      );
+        );
+      },
+    );
+  }
 
-      // 如果是展开的文件夹，递归显示子项
-      if (isFolder && isExpanded && children != null && children.isNotEmpty) {
-        widgets.addAll(_buildFileTree(children, itemPath, level: level + 1));
-      }
-    }
-
-    return widgets;
+  Widget? _buildFileActions(BuildContext context, FileTreeEntry entry) {
+    return FileTreeActions(
+      entry: entry,
+      showPlaybackActions: false,
+      showPreviewActions: false,
+      showDeleteAction: true,
+      onLoadSubtitle: (item, _) => _loadLyricManually(item),
+      onDelete: (item, parentPath) => _deleteFile(item, parentPath),
+    );
   }
 
   // 获取显示的名称（根据翻译状态）
   String _getDisplayName(String originalName) {
-    if (_showTranslation && _translationCache.containsKey(originalName)) {
-      return _translationCache[originalName]!;
-    }
-    return originalName;
+    return _translationController.displayName(
+      originalName,
+      onMissingTranslation: _queueTranslation,
+    );
   }
 
   // 按需翻译单个项目
-  Future<void> _translateItem(String originalName) async {
-    if (_translationCache.containsKey(originalName) ||
-        _translatingItems.contains(originalName)) {
-      return;
-    }
+  void _queueTranslation(String originalName) {
+    final generation = _translationController.beginLazyTranslation(
+      originalName,
+    );
+    if (generation == null) return;
 
-    setState(() {
-      _translatingItems.add(originalName);
-    });
+    Future.microtask(() => _translateItem(originalName, generation));
+  }
 
+  Future<void> _translateItem(String originalName, int generation) async {
     try {
       final translationService = TranslationService();
       final translated = await translationService.translate(
@@ -1484,77 +588,65 @@ class _OfflineFileExplorerWidgetState
         sourceLang: 'ja',
       );
 
-      setState(() {
-        _translationCache[originalName] = translated;
-        _translatingItems.remove(originalName);
-      });
+      final completed = _translationController.completeLazyTranslation(
+        generation,
+        originalName,
+        translated,
+      );
+      if (!completed) return;
+      if (!mounted) return;
+      setState(() {});
     } catch (e) {
-      print('[OfflineFileExplorer] 翻译失败: $e');
-      setState(() {
-        _translatingItems.remove(originalName);
-      });
+      _log.captureOutput('[OfflineFileExplorer] 翻译失败: $e');
+      final failed = _translationController.failLazyTranslation(
+        generation,
+        originalName,
+      );
+      if (!failed) return;
+      if (!mounted) return;
+      setState(() {});
     }
   }
 
   // 处理文件点击
   void _handleFileTap(dynamic file, String title, String parentPath) {
-    if (FileIconUtils.isAudioFile(file)) {
-      _playAudioFile(file, parentPath);
-    } else if (FileIconUtils.isVideoFile(file)) {
-      _playVideoWithSystemPlayer(file);
-    } else if (FileIconUtils.isImageFile(file)) {
-      _previewImageFile(file);
-    } else if (FileIconUtils.isPdfFile(file)) {
-      _previewPdfFile(file);
-    } else if (FileIconUtils.isTextFile(file)) {
-      _previewTextFile(file);
-    } else {
-      SnackBarUtil.showInfo(context, S.of(context).unsupportedFileType(title));
+    switch (_tapResolver.resolve(file)) {
+      case FileExplorerTapAction.audio:
+        _playAudioFile(file, parentPath);
+        return;
+      case FileExplorerTapAction.video:
+        _playVideoWithSystemPlayer(file);
+        return;
+      case FileExplorerTapAction.image:
+        _previewImageFile(file);
+        return;
+      case FileExplorerTapAction.pdf:
+        _previewPdfFile(file);
+        return;
+      case FileExplorerTapAction.text:
+        _previewTextFile(file);
+        return;
+      case FileExplorerTapAction.unsupported:
+        SnackBarUtil.showInfo(
+            context, S.of(context).unsupportedFileType(title));
     }
   }
 
   // 删除单个文件
   Future<void> _deleteFile(dynamic file, String parentPath) async {
-    final title = _getProperty(file, 'title', defaultValue: S.of(context).unknown);
-    final relativePath = parentPath.isEmpty ? title : '$parentPath/$title';
-
-    // 显示确认对话框
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => ResponsiveAlertDialog(
-        title: Text(S.of(context).deletionConfirmTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(S.of(context).deleteFilePrompt),
-            const SizedBox(height: 12),
-            Text(
-              relativePath,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(S.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            child: Text(S.of(context).delete),
-          ),
-        ],
-      ),
+    final l10n = S.of(context);
+    final request = _deleteRequestBuilder.build(
+      file: file,
+      parentPath: parentPath,
+      unknownTitle: l10n.unknown,
     );
 
-    if (confirmed != true || !mounted) return;
+    final confirmed = await showFileDeleteConfirmationDialog(
+      context,
+      relativePath: request.relativePath,
+    );
+
+    if (!confirmed || !mounted) return;
 
     try {
       // 显示加载指示器
@@ -1569,7 +661,10 @@ class _OfflineFileExplorerWidgetState
       }
 
       // 删除文件
-      await DownloadService.instance.deleteFile(widget.work.id, relativePath);
+      await DownloadService.instance.deleteFile(
+        widget.work.id,
+        request.relativePath,
+      );
 
       // 关闭加载指示器
       if (mounted) {
@@ -1581,7 +676,7 @@ class _OfflineFileExplorerWidgetState
 
       // 显示成功消息
       if (mounted) {
-        SnackBarUtil.showSuccess(context, S.of(context).deletedItem(title));
+        SnackBarUtil.showSuccess(context, l10n.deletedItem(request.title));
       }
     } catch (e) {
       // 关闭加载指示器
@@ -1591,7 +686,10 @@ class _OfflineFileExplorerWidgetState
 
       // 显示错误消息
       if (mounted) {
-        SnackBarUtil.showError(context, S.of(context).deleteFailedWithError(e.toString()));
+        SnackBarUtil.showError(
+          context,
+          l10n.deleteFailedWithError(e.toString()),
+        );
       }
     }
   }

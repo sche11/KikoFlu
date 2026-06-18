@@ -8,7 +8,10 @@ import '../models/account.dart';
 import '../services/kikoeru_api_service.dart';
 import '../services/storage_service.dart';
 import '../services/account_database.dart';
+import '../services/log_service.dart';
 import '../utils/server_utils.dart';
+
+final _log = LogService.instance;
 
 // Kikoeru API Service Provider
 final kikoeruApiServiceProvider = Provider<KikoeruApiService>((ref) {
@@ -66,15 +69,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _loadCurrentUser() async {
     try {
-      print('[Auth] Loading current user...');
+      _log.captureOutput('[Auth] Loading current user...');
 
       // First try to load from storage (faster)
       final token = StorageService.getString('auth_token');
       final host = StorageService.getString('server_host');
       final userJson = StorageService.getMap('current_user');
 
-      print('[Auth] Stored token: ${token != null ? "exists" : "null"}');
-      print('[Auth] Stored host: $host');
+      _log.captureOutput(
+          '[Auth] Stored token: ${token != null ? "exists" : "null"}');
+      _log.captureOutput('[Auth] Stored host: $host');
 
       if (token != null && host != null) {
         _apiService.init(token, host);
@@ -82,7 +86,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         User? user;
         if (userJson != null) {
           user = User.fromJson(userJson);
-          print('[Auth] Loaded user from storage: ${user.name}');
+          _log.captureOutput('[Auth] Loaded user from storage: ${user.name}');
         }
 
         state = state.copyWith(
@@ -94,25 +98,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
         // Validate token by fetching user info
         try {
-          print('[Auth] Validating token...');
+          _log.captureOutput('[Auth] Validating token...');
           await _refreshUserInfo();
-          print('[Auth] Token is valid, user logged in successfully');
+          _log.captureOutput(
+              '[Auth] Token is valid, user logged in successfully');
           return; // Token is valid, we're done
         } catch (e) {
-          print('[Auth] Token validation failed: $e');
+          _log.captureOutput('[Auth] Token validation failed: $e');
           // Token is invalid, try to re-login with saved account
         }
       }
 
       // If no valid token, try to load from database and re-login
-      print('[Auth] Checking database for active account...');
+      _log.captureOutput('[Auth] Checking database for active account...');
       final activeAccount = await AccountDatabase.instance.getActiveAccount();
 
       if (activeAccount != null) {
         // Silently re-login with saved credentials
-        print(
+        _log.captureOutput(
             '[Auth] Found active account in database: ${activeAccount.username}');
-        print('[Auth] Re-logging in with saved account...');
+        _log.captureOutput('[Auth] Re-logging in with saved account...');
 
         _apiService.init('', activeAccount.host);
 
@@ -125,13 +130,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
         );
 
         if (success) {
-          print('[Auth] Re-login successful');
+          _log.captureOutput('[Auth] Re-login successful');
           return;
         } else {
-          print('[Auth] Re-login failed due to network or server issue');
+          _log.captureOutput(
+              '[Auth] Re-login failed due to network or server issue');
           // 网络问题导致登录失败，但我们有缓存的账户信息
           // 允许用户以离线模式进入应用（可以使用本地下载内容）
-          print('[Auth] Entering offline mode with cached account');
+          _log.captureOutput(
+              '[Auth] Entering offline mode with cached account');
 
           // 使用缓存的账户信息设置基本状态
           _apiService.init('', activeAccount.host);
@@ -152,24 +159,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
             error: '网络连接失败，以离线模式启动',
           );
 
-          print('[Auth] Offline mode activated');
+          _log.captureOutput('[Auth] Offline mode activated');
           return;
         }
       } else {
-        print('[Auth] No active account found in database');
+        _log.captureOutput('[Auth] No active account found in database');
       }
 
       // If all fails, logout
-      print('[Auth] No valid authentication found, logging out');
+      _log.captureOutput('[Auth] No valid authentication found, logging out');
       await logout();
     } catch (e) {
-      print('[Auth] Failed to load saved auth: $e');
+      _log.captureOutput('[Auth] Failed to load saved auth: $e');
 
       // 在异常情况下，也尝试检查是否有缓存账户
       try {
         final activeAccount = await AccountDatabase.instance.getActiveAccount();
         if (activeAccount != null) {
-          print(
+          _log.captureOutput(
               '[Auth] Exception occurred but found cached account, entering offline mode');
 
           _apiService.init('', activeAccount.host);
@@ -193,7 +200,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           return;
         }
       } catch (dbError) {
-        print('[Auth] Failed to check database: $dbError');
+        _log.captureOutput('[Auth] Failed to check database: $dbError');
       }
 
       await logout();
@@ -218,7 +225,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
 
     try {
-      print(
+      _log.captureOutput(
           '[Auth] Login attempt - username: $username, host: $host, silent: $silent');
 
       // 删除主机地址末尾的斜杠，以免请求资源时出现地址错误
@@ -237,7 +244,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         throw Exception('No token received from server');
       }
 
-      print('[Auth] Login successful, received token');
+      _log.captureOutput('[Auth] Login successful, received token');
 
       // Normalize host URL to include protocol
       String normalizedHost;
@@ -254,7 +261,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }
       }
 
-      print('[Auth] Normalized host: $normalizedHost');
+      _log.captureOutput('[Auth] Normalized host: $normalizedHost');
 
       // Update API service with real token and normalized host
       _apiService.init(token, normalizedHost);
@@ -331,9 +338,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
             ),
           );
         }
-        print('[Auth] Account saved to database');
+        _log.captureOutput('[Auth] Account saved to database');
       } catch (e) {
-        print('[Auth] Failed to save account to database: $e');
+        _log.captureOutput('[Auth] Failed to save account to database: $e');
       }
 
       state = state.copyWith(
@@ -344,10 +351,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoggedIn: true,
       );
 
-      print('[Auth] Login completed, state updated');
+      _log.captureOutput('[Auth] Login completed, state updated');
       return true;
     } catch (e) {
-      print('[Auth] Login error: $e');
+      _log.captureOutput('[Auth] Login error: $e');
 
       if (!silent) {
         state = state.copyWith(
@@ -444,9 +451,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
             lastUsedAt: DateTime.now(),
           ),
         );
-        print('[Auth] Registered account saved to database');
+        _log.captureOutput('[Auth] Registered account saved to database');
       } catch (e) {
-        print('[Auth] Failed to save registered account to database: $e');
+        _log.captureOutput(
+            '[Auth] Failed to save registered account to database: $e');
       }
 
       state = state.copyWith(
@@ -503,7 +511,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = state.copyWith(currentUser: user);
     } catch (e) {
-      print('Failed to refresh user info: $e');
+      _log.captureOutput('Failed to refresh user info: $e');
       // Rethrow the exception so caller can handle it
       rethrow;
     }
@@ -547,7 +555,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await StorageService.remove('current_user');
       await StorageService.remove('server_cookie');
     } catch (e) {
-      print('Failed to clear storage: $e');
+      _log.captureOutput('Failed to clear storage: $e');
     }
 
     state = const AuthState();
@@ -559,7 +567,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final serverCookie = user.serverCookie;
 
     if (token != null && host != null) {
-      print('[Auth] Switching user - username: ${user.name}, host: $host');
+      _log.captureOutput(
+          '[Auth] Switching user - username: ${user.name}, host: $host');
 
       if (serverCookie != null && serverCookie.isNotEmpty) {
         await StorageService.setString('server_cookie', serverCookie);
@@ -579,7 +588,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoggedIn: true,
       );
 
-      print('[Auth] User switched successfully');
+      _log.captureOutput('[Auth] User switched successfully');
     } else {
       throw Exception('Invalid user data: missing token or host');
     }
@@ -625,7 +634,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// 重新尝试连接（用于从离线模式恢复）
   Future<void> retryConnection() async {
-    print('[Auth] Retrying connection...');
+    _log.captureOutput('[Auth] Retrying connection...');
     await _loadCurrentUser();
   }
 

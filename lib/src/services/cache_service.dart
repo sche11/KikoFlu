@@ -5,10 +5,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'storage_service.dart';
 import 'download_service.dart';
+import 'log_service.dart';
 import '../models/download_task.dart';
 import '../utils/encoding_utils.dart';
 
 class CacheService {
+  static final _log = LogService.instance;
   // 缓存时长（过期后自动删除）
   static const Duration workDetailCacheDuration =
       Duration(hours: 24); // 作品详情缓存24小时（SharedPreferences）
@@ -132,7 +134,7 @@ class CacheService {
     try {
       return jsonDecode(cachedData) as Map<String, dynamic>;
     } catch (e) {
-      print('[Cache] 解码作品详情缓存失败: $e');
+      _log.captureOutput('[Cache] 解码作品详情缓存失败: $e');
       // 数据损坏，删除缓存
       await prefs.remove(cacheKey);
       await prefs.remove(cacheTimeKey);
@@ -148,7 +150,7 @@ class CacheService {
 
     await prefs.remove(cacheKey);
     await prefs.remove(cacheTimeKey);
-    print('[Cache] 已清除作品详情缓存: $workId');
+    _log.captureOutput('[Cache] 已清除作品详情缓存: $workId');
   }
 
   // 缓存作品文件列表
@@ -198,11 +200,11 @@ class CacheService {
       if (await file.exists()) {
         final lastModified = await file.lastModified();
         if (DateTime.now().difference(lastModified) < audioCacheDuration) {
-          print('[Cache] 音频缓存命中: $hash');
+          _log.captureOutput('[Cache] 音频缓存命中: $hash');
           return file.path; // 未过期，直接返回
         }
         // 过期，删除旧文件
-        print('[Cache] 音频缓存过期，重新下载: $hash');
+        _log.captureOutput('[Cache] 音频缓存过期，重新下载: $hash');
         await file.delete();
         await _removeAudioCacheMeta(hash);
       }
@@ -212,7 +214,7 @@ class CacheService {
       final tempFile = await prepareAudioCacheTempFile(hash);
 
       // 下载文件（先至临时文件）
-      print('[Cache] 下载音频文件: $hash');
+      _log.captureOutput('[Cache] 下载音频文件: $hash');
 
       // 配置服务器Cookie（如果存在）
       dio.options.headers.addAll(StorageService.serverCookieHeaders);
@@ -225,7 +227,7 @@ class CacheService {
       await checkAndCleanCache();
       return (await _audioFinalFile(hash)).path;
     } catch (e) {
-      print('[Cache] 缓存音频文件失败: $e');
+      _log.captureOutput('[Cache] 缓存音频文件失败: $e');
       return null;
     }
   }
@@ -236,7 +238,7 @@ class CacheService {
       // 1. 先检查下载文件（优先级最高，因为是用户主动下载的）
       final downloadedFile = await _getDownloadedAudioFile(hash);
       if (downloadedFile != null) {
-        print('[Cache] 使用已下载的音频文件: $hash');
+        _log.captureOutput('[Cache] 使用已下载的音频文件: $hash');
         return downloadedFile;
       }
 
@@ -266,13 +268,13 @@ class CacheService {
         if (cacheTime != null) {
           final cacheDateTime = DateTime.fromMillisecondsSinceEpoch(cacheTime);
           if (DateTime.now().difference(cacheDateTime) < audioCacheDuration) {
-            print('[Cache] 使用缓存的音频文件: $hash');
+            _log.captureOutput('[Cache] 使用缓存的音频文件: $hash');
             return file.path; // 未过期
           }
         }
 
         // 过期，删除
-        print('[Cache] 音频缓存过期: $hash');
+        _log.captureOutput('[Cache] 音频缓存过期: $hash');
         await file.delete();
         await prefs.remove(metaKey);
         if (await tempFile.exists()) {
@@ -282,7 +284,7 @@ class CacheService {
 
       return null;
     } catch (e) {
-      print('[Cache] 获取缓存音频文件失败: $e');
+      _log.captureOutput('[Cache] 获取缓存音频文件失败: $e');
       return null;
     }
   }
@@ -299,7 +301,7 @@ class CacheService {
       // 1. 先检查下载文件
       final downloadedFile = await _getDownloadedFile(workId, hash, null);
       if (downloadedFile != null) {
-        print('[Cache] 使用已下载的文件: $hash');
+        _log.captureOutput('[Cache] 使用已下载的文件: $hash');
         return downloadedFile;
       }
 
@@ -337,7 +339,7 @@ class CacheService {
 
       return filePath;
     } catch (e) {
-      print('[Cache] 缓存文件失败: $e');
+      _log.captureOutput('[Cache] 缓存文件失败: $e');
       return null;
     }
   }
@@ -375,7 +377,7 @@ class CacheService {
 
       return null;
     } catch (e) {
-      print('[Cache] 获取缓存文件失败: $e');
+      _log.captureOutput('[Cache] 获取缓存文件失败: $e');
       return null;
     }
   }
@@ -403,7 +405,7 @@ class CacheService {
       // 检查并自动清理缓存
       await checkAndCleanCache();
     } catch (e) {
-      print('[Cache] 缓存文本失败: $e');
+      _log.captureOutput('[Cache] 缓存文本失败: $e');
     }
   }
 
@@ -419,7 +421,7 @@ class CacheService {
       if (downloadedFile != null) {
         final file = File(downloadedFile);
         if (await file.exists()) {
-          print('[Cache] 从已下载的文件读取文本内容: $hash');
+          _log.captureOutput('[Cache] 从已下载的文件读取文本内容: $hash');
           // 使用智能编码检测读取文件
           return await EncodingUtils.readFileAsString(file);
         }
@@ -453,7 +455,7 @@ class CacheService {
 
       return null;
     } catch (e) {
-      print('[Cache] 获取缓存文本失败: $e');
+      _log.captureOutput('[Cache] 获取缓存文本失败: $e');
       return null;
     }
   }
@@ -486,9 +488,9 @@ class CacheService {
         }
       }
 
-      print('[Cache] 所有缓存已清除');
+      _log.captureOutput('[Cache] 所有缓存已清除');
     } catch (e) {
-      print('[Cache] 清除缓存失败: $e');
+      _log.captureOutput('[Cache] 清除缓存失败: $e');
       rethrow;
     }
   }
@@ -500,7 +502,7 @@ class CacheService {
       final customAudioCacheDir = await _getAudioCacheDirectory();
       if (await customAudioCacheDir.exists()) {
         await customAudioCacheDir.delete(recursive: true);
-        print('[Cache] 自定义音频缓存已清除');
+        _log.captureOutput('[Cache] 自定义音频缓存已清除');
       }
 
       // 2. 清除 SharedPreferences 中的音频缓存元数据
@@ -518,10 +520,10 @@ class CacheService {
           Directory('${appCacheDir.path}/just_audio_cache');
       if (await justAudioCacheDir.exists()) {
         await justAudioCacheDir.delete(recursive: true);
-        print('[Cache] just_audio 缓存已清除');
+        _log.captureOutput('[Cache] just_audio 缓存已清除');
       }
     } catch (e) {
-      print('[Cache] 清除音频缓存失败: $e');
+      _log.captureOutput('[Cache] 清除音频缓存失败: $e');
     }
   }
 
@@ -533,17 +535,17 @@ class CacheService {
 
       if (await imageCacheDir.exists()) {
         await imageCacheDir.delete(recursive: true);
-        print('[Cache] 图片缓存已清除');
+        _log.captureOutput('[Cache] 图片缓存已清除');
       }
     } catch (e) {
-      print('[Cache] 清除图片缓存失败: $e');
+      _log.captureOutput('[Cache] 清除图片缓存失败: $e');
     }
   }
 
   // 获取缓存大小
   static Future<int> getCacheSize() async {
     try {
-      print('[Cache] 获取缓存大小');
+      _log.captureOutput('[Cache] 获取缓存大小');
       int totalSize = 0;
 
       // 1. 获取 Kikoeru 自定义缓存大小（PDF、文本等）
@@ -570,7 +572,7 @@ class CacheService {
 
       return totalSize;
     } catch (e) {
-      print('[Cache] 获取缓存大小失败: $e');
+      _log.captureOutput('[Cache] 获取缓存大小失败: $e');
       return 0;
     }
   }
@@ -604,7 +606,7 @@ class CacheService {
 
       return totalSize;
     } catch (e) {
-      print('[Cache] 获取音频缓存大小失败: $e');
+      _log.captureOutput('[Cache] 获取音频缓存大小失败: $e');
       return 0;
     }
   }
@@ -630,7 +632,7 @@ class CacheService {
 
       return totalSize;
     } catch (e) {
-      print('[Cache] 获取图片缓存大小失败: $e');
+      _log.captureOutput('[Cache] 获取图片缓存大小失败: $e');
       return 0;
     }
   }
@@ -663,7 +665,7 @@ class CacheService {
 
       return estimatedSize;
     } catch (e) {
-      print('[Cache] 获取 SharedPreferences 缓存大小失败: $e');
+      _log.captureOutput('[Cache] 获取 SharedPreferences 缓存大小失败: $e');
       return 0;
     }
   }
@@ -737,12 +739,12 @@ class CacheService {
       final limitBytes = limitMB * 1024 * 1024;
 
       if (currentSize > limitBytes) {
-        print(
+        _log.captureOutput(
             '[Cache] 缓存大小 ${_formatBytes(currentSize)} 超过上限 ${limitMB}MB，开始清理...');
         await _cleanOldCacheFiles(limitBytes);
       }
     } catch (e) {
-      print('[Cache] 自动清理缓存失败: $e');
+      _log.captureOutput('[Cache] 自动清理缓存失败: $e');
     }
   }
 
@@ -814,10 +816,10 @@ class CacheService {
       // 4. 图片缓存由 cached_network_image 自己管理过期时间，不需要手动清理
 
       if (deletedCount > 0) {
-        print('[Cache] 已清理 $deletedCount 个过期缓存项');
+        _log.captureOutput('[Cache] 已清理 $deletedCount 个过期缓存项');
       }
     } catch (e) {
-      print('[Cache] 清理过期缓存文件失败: $e');
+      _log.captureOutput('[Cache] 清理过期缓存文件失败: $e');
     }
   }
 
@@ -865,7 +867,7 @@ class CacheService {
 
       return deletedCount;
     } catch (e) {
-      print('[Cache] 清理过期 SharedPreferences 失败: $e');
+      _log.captureOutput('[Cache] 清理过期 SharedPreferences 失败: $e');
       return 0;
     }
   }
@@ -957,10 +959,10 @@ class CacheService {
         }
       }
 
-      print(
+      _log.captureOutput(
           '[Cache] 已删除 $deletedCount 个旧缓存文件，当前大小: ${_formatBytes(currentSize)}');
     } catch (e) {
-      print('[Cache] 清理旧缓存文件失败: $e');
+      _log.captureOutput('[Cache] 清理旧缓存文件失败: $e');
     }
   }
 
@@ -981,7 +983,7 @@ class CacheService {
         await prefs.remove('text_cache_meta_${workId}_$safeHash');
       }
     } catch (e) {
-      print('[Cache] 删除元数据失败: $e');
+      _log.captureOutput('[Cache] 删除元数据失败: $e');
     }
   }
 
@@ -1009,7 +1011,7 @@ class CacheService {
 
       return null;
     } catch (e) {
-      print('[Cache] 获取下载文件失败: $e');
+      _log.captureOutput('[Cache] 获取下载文件失败: $e');
       return null;
     }
   }
@@ -1057,20 +1059,20 @@ class CacheService {
                     entity.path.split(Platform.pathSeparator).last;
                 // 精确匹配文件名
                 if (entityFileName == fileName) {
-                  print('[Cache] 找到手动复制的文件: ${entity.path}');
+                  _log.captureOutput('[Cache] 找到手动复制的文件: ${entity.path}');
                   return entity.path;
                 }
               }
             }
           }
         } catch (e) {
-          print('[Cache] 检查手动复制文件失败: $e');
+          _log.captureOutput('[Cache] 检查手动复制文件失败: $e');
         }
       }
 
       return null;
     } catch (e) {
-      print('[Cache] 获取下载文件失败: $e');
+      _log.captureOutput('[Cache] 获取下载文件失败: $e');
       return null;
     }
   }

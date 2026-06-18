@@ -145,7 +145,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
 
                                 // 隐私设置
                                 DropdownButtonFormField<PlaylistPrivacy>(
-                                  value: selectedPrivacy,
+                                  initialValue: selectedPrivacy,
                                   decoration: InputDecoration(
                                     labelText: S.of(context).privacySetting,
                                     border: const OutlineInputBorder(),
