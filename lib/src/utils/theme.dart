@@ -4,15 +4,7 @@ import '../providers/theme_provider.dart';
 
 class AppTheme {
   // iOS 使用 Cupertino 转场以支持侧滑返回
-  static const _pageTransitionsTheme = PageTransitionsTheme(
-    builders: {
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-      TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
-    },
-  );
+  static const _pageTransitionsTheme = PageTransitionsTheme();
 
   // 平台字体配置
   static TextTheme? _getTextTheme() {
