@@ -36,6 +36,7 @@ import 'src/providers/locale_provider.dart';
 import 'src/providers/theme_provider.dart';
 import 'src/providers/update_provider.dart';
 import 'src/utils/global_keys.dart';
+import 'src/utils/system_ui_style.dart';
 import 'src/widgets/screen_awake_observer.dart';
 
 void _setEnv(String key, String value) {
@@ -285,12 +286,7 @@ void main(List<String> args) async {
   await DownloadService.instance.initialize();
 
   // Set system UI overlay style
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-    ),
-  );
+  SystemChrome.setSystemUIOverlayStyle(transparentSystemBarsStyle);
 
   // 允许横竖屏旋�?
   SystemChrome.setPreferredOrientations([

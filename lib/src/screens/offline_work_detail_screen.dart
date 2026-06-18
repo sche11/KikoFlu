@@ -14,6 +14,7 @@ import '../models/work.dart';
 import '../providers/auth_provider.dart';
 import '../services/translation_service.dart';
 import '../services/download_service.dart';
+import '../utils/system_ui_style.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../widgets/offline_file_explorer_widget.dart';
@@ -280,12 +281,7 @@ class _OfflineWorkDetailScreenState
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final systemOverlayStyle = SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness:
-          brightness == Brightness.light ? Brightness.dark : Brightness.light,
-      systemNavigationBarColor: Colors.transparent,
-    );
+    final systemOverlayStyle = transparentSystemBarsForBrightness(brightness);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: systemOverlayStyle,

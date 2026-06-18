@@ -8,6 +8,7 @@ import '../providers/audio_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/locale_provider.dart';
 import '../providers/lyric_provider.dart';
+import '../utils/system_ui_style.dart';
 import '../widgets/player/player_cover_widget.dart';
 import '../widgets/player/player_controls_widget.dart';
 import '../widgets/player/lyric_display_widget.dart';
@@ -197,12 +198,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
 
     // 根据主题亮度设置状态栏图标颜色
     final brightness = Theme.of(context).brightness;
-    final systemOverlayStyle = SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness:
-          brightness == Brightness.light ? Brightness.dark : Brightness.light,
-      systemNavigationBarColor: Colors.transparent,
-    );
+    final systemOverlayStyle = transparentSystemBarsForBrightness(brightness);
 
     // 全屏锁定模式：隐藏所有UI，只显示歌词
     if (_isLyricLocked) {

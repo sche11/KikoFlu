@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/audio_provider.dart';
 import '../providers/update_provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/main_bottom_navigation_bar.dart';
 import '../widgets/mini_player.dart';
 import 'works_screen.dart';
 import 'search_screen.dart';
@@ -41,7 +40,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ];
   }
 
-  List<NavigationDestination> _buildDestinations(BuildContext context, bool showUpdateBadge) {
+  List<NavigationDestination> _buildDestinations(
+      BuildContext context, bool showUpdateBadge) {
     final s = S.of(context);
     return [
       NavigationDestination(
@@ -352,55 +352,21 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // MiniPlayer
-          Consumer(
-            builder: (context, ref, child) {
-              final currentTrack = ref.watch(currentTrackProvider);
-              return currentTrack.when(
-                data: (track) => track != null
-                    ? const MiniPlayer()
-                    : const SizedBox.shrink(),
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              );
-            },
-          ),
-          // NavigationBar
-          Builder(
-            builder: (context) {
-              final mediaQuery = MediaQuery.of(context);
-              final bottomPadding = mediaQuery.padding.bottom;
-              final isIOS = Platform.isIOS;
-
-              Widget navBar = NavigationBar(
-                height: 58,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                selectedIndex: _currentIndex,
-                onDestinationSelected: _handleDestinationSelected,
-                destinations: destinations,
-              );
-
-              if (isIOS) {
-                navBar = MediaQuery.removePadding(
-                  context: context,
-                  removeBottom: true,
-                  child: navBar,
-                );
-              }
-
-              final navBottomPadding =
-                  isIOS ? (bottomPadding > 0 ? 6.0 : 0.0) : bottomPadding;
-
-              return Padding(
-                padding: EdgeInsets.only(bottom: navBottomPadding),
-                child: navBar,
-              );
-            },
-          ),
-        ],
+      bottomNavigationBar: MainBottomNavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: _handleDestinationSelected,
+        destinations: destinations,
+        miniPlayer: Consumer(
+          builder: (context, ref, child) {
+            final currentTrack = ref.watch(currentTrackProvider);
+            return currentTrack.when(
+              data: (track) =>
+                  track != null ? const MiniPlayer() : const SizedBox.shrink(),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            );
+          },
+        ),
       ),
     );
   }

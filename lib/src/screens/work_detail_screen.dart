@@ -12,6 +12,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../services/storage_service.dart';
 import '../services/work_track_file_builder.dart';
+import '../utils/system_ui_style.dart';
 import '../widgets/file_explorer_widget.dart';
 import '../widgets/file_selection_dialog.dart';
 import '../widgets/global_audio_player_wrapper.dart';
@@ -434,13 +435,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
   Widget build(BuildContext context) {
     // 根据主题亮度设置状态栏图标颜色
     final brightness = Theme.of(context).brightness;
-    final systemOverlayStyle = SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: brightness == Brightness.light
-          ? Brightness.dark // 浅色模式用深色图标
-          : Brightness.light, // 深色模式用浅色图标
-      systemNavigationBarColor: Colors.transparent,
-    );
+    final systemOverlayStyle = transparentSystemBarsForBrightness(brightness);
 
     return GlobalAudioPlayerWrapper(
       child: Scaffold(
