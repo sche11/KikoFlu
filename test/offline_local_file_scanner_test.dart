@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kikoeru_flutter/src/services/offline_local_file_scanner.dart';
+import 'package:path/path.dart' as p;
 
 Map<String, dynamic> fileItem(
   String title, {
@@ -147,6 +150,91 @@ void main() {
           ],
         },
       ]);
+    });
+
+    test('merges completed files discovered on disk but missing from metadata',
+        () async {
+      final workDir = await Directory.systemTemp.createTemp(
+        'offline_local_file_scanner_',
+      );
+      addTearDown(() async {
+        if (await workDir.exists()) {
+          await workDir.delete(recursive: true);
+        }
+      });
+
+      await File(p.join(workDir.path, 'Disc 1', 'track01.mp3'))
+          .create(recursive: true);
+      await File(p.join(workDir.path, 'Disc 1', 'bonus.wav'))
+          .writeAsString('audio');
+      await File(p.join(workDir.path, 'Disc 1', 'bonus.srt'))
+          .writeAsString('1\n00:00:01,000 --> 00:00:02,000\nhello');
+
+      final result = await const OfflineLocalFileScanner().scan(
+        fileTree: [
+          folderItem('Disc 1', [
+            fileItem('track01.mp3', hash: 'track'),
+          ]),
+        ],
+        workDirPath: workDir.path,
+      );
+
+      final folder = result.files.single as Map<String, dynamic>;
+      final children = folder['children'] as List<dynamic>;
+      final titles = children
+          .map((item) => (item as Map<String, dynamic>)['title'])
+          .toSet();
+
+      expect(titles, {'track01.mp3', 'bonus.wav', 'bonus.srt'});
+
+      final bonusAudio = children
+          .cast<Map<String, dynamic>>()
+          .singleWhere((item) => item['title'] == 'bonus.wav');
+      expect(bonusAudio['type'], 'audio');
+      expect(bonusAudio['hash'], 'local:Disc 1/bonus.wav');
+      expect(
+          bonusAudio['localPath'], p.join(workDir.path, 'Disc 1', 'bonus.wav'));
+
+      final bonusSubtitle = children
+          .cast<Map<String, dynamic>>()
+          .singleWhere((item) => item['title'] == 'bonus.srt');
+      expect(bonusSubtitle['type'], 'text');
+      expect(bonusSubtitle['hash'], 'local:Disc 1/bonus.srt');
+      expect(
+        bonusSubtitle['localPath'],
+        p.join(workDir.path, 'Disc 1', 'bonus.srt'),
+      );
+    });
+
+    test('skips app metadata, hidden files, and partial downloads', () async {
+      final workDir = await Directory.systemTemp.createTemp(
+        'offline_local_file_scanner_',
+      );
+      addTearDown(() async {
+        if (await workDir.exists()) {
+          await workDir.delete(recursive: true);
+        }
+      });
+
+      await File(p.join(workDir.path, 'work_metadata.json'))
+          .writeAsString('{}');
+      await File(p.join(workDir.path, 'cover.jpg')).writeAsString('cover');
+      await File(p.join(workDir.path, '.DS_Store')).writeAsString('hidden');
+      await File(p.join(workDir.path, 'track.mp3.downloading'))
+          .writeAsString('partial');
+      await File(p.join(workDir.path, 'partial.mp3')).writeAsString('partial');
+      await File(p.join(workDir.path, 'partial.mp3.downloading'))
+          .writeAsString('partial marker');
+      await File(p.join(workDir.path, 'extra.mp3')).writeAsString('audio');
+
+      final result = await const OfflineLocalFileScanner().scan(
+        fileTree: const [],
+        workDirPath: workDir.path,
+      );
+
+      expect(result.files, hasLength(1));
+      expect(
+          (result.files.single as Map<String, dynamic>)['title'], 'extra.mp3');
     });
   });
 }

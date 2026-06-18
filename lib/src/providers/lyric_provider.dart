@@ -182,6 +182,12 @@ class LyricController extends StateNotifier<LyricState> {
       _log.captureOutput(
           '[Lyric] 找到匹配字幕: title="${lyricFile['title']}", type="${lyricFile['type']}", hash=${lyricFile['hash']}');
 
+      final localPath = _localPathOf(lyricFile);
+      if (localPath != null) {
+        await loadLyricFromLocalFile(localPath);
+        return;
+      }
+
       // 获取认证信息
       final authState = ref.read(authProvider);
       final host = authState.host ?? '';
@@ -708,6 +714,12 @@ class LyricController extends StateNotifier<LyricState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
+      final localPath = _localPathOf(lyricFile);
+      if (localPath != null) {
+        await loadLyricFromLocalFile(localPath);
+        return;
+      }
+
       // 获取认证信息
       final authState = ref.read(authProvider);
       final host = authState.host ?? '';
@@ -812,6 +824,15 @@ class LyricController extends StateNotifier<LyricState> {
       );
       rethrow;
     }
+  }
+
+  String? _localPathOf(dynamic file) {
+    if (file is! Map) return null;
+    final localPath = file['localPath'];
+    if (localPath is String && localPath.isNotEmpty) {
+      return localPath;
+    }
+    return null;
   }
 }
 
