@@ -40,20 +40,11 @@ class TranslationService {
   ) {
     final appLocale = _getEffectiveLocaleFromPreferences(prefs);
     final preferences = TranslationLanguagePreferences(
-      sourceLanguage: TranslationSourceLanguage.fromValue(
-        prefs.getString(
-          TranslationLanguagePreferencesNotifier.keySourceLanguage,
-        ),
-      ),
       targetLanguage: TranslationTargetLanguage.fromValue(
         prefs.getString(
           TranslationLanguagePreferencesNotifier.keyTargetLanguage,
         ),
       ),
-      customSourceLanguage: prefs.getString(
-            TranslationLanguagePreferencesNotifier.keyCustomSourceLanguage,
-          ) ??
-          '',
       customTargetLanguage: prefs.getString(
             TranslationLanguagePreferencesNotifier.keyCustomTargetLanguage,
           ) ??
@@ -466,36 +457,20 @@ class _TranslationLanguageConfig {
   final bool allowCustomLanguage;
   final Locale targetLocale;
 
-  TranslationSourceLanguage get sourceLanguage {
-    if (!allowCustomLanguage &&
-        preferences.sourceLanguage == TranslationSourceLanguage.custom) {
-      return TranslationSourceLanguage.automatic;
-    }
-    return preferences.sourceLanguage;
-  }
-
   String googleSourceLang(String? sourceLang) {
-    return _selectedSource(sourceLang, sourceLanguage.googleCode) ?? 'auto';
+    return sourceLang ?? 'auto';
   }
 
   String? youdaoSourceLang(String? sourceLang) {
-    return _selectedSource(sourceLang, sourceLanguage.youdaoCode);
+    return sourceLang;
   }
 
   String? microsoftSourceLang(String? sourceLang) {
-    return _selectedSource(sourceLang, sourceLanguage.microsoftCode);
+    return sourceLang;
   }
 
   String cacheSourceLang(String? sourceLang) {
-    if (allowCustomLanguage &&
-        preferences.sourceLanguage == TranslationSourceLanguage.custom &&
-        preferences.customSourceLanguage.isNotEmpty) {
-      return 'custom:${preferences.customSourceLanguage}';
-    }
-    if (sourceLanguage != TranslationSourceLanguage.automatic) {
-      return sourceLanguage.cacheCode;
-    }
-    return sourceLang ?? sourceLanguage.cacheCode;
+    return sourceLang ?? 'auto';
   }
 
   String cacheTargetLang() {
@@ -510,14 +485,6 @@ class _TranslationLanguageConfig {
   }
 
   String? llmSourceLanguageName(String? sourceLang) {
-    if (allowCustomLanguage &&
-        preferences.sourceLanguage == TranslationSourceLanguage.custom &&
-        preferences.customSourceLanguage.isNotEmpty) {
-      return preferences.customSourceLanguage;
-    }
-    if (sourceLanguage != TranslationSourceLanguage.automatic) {
-      return sourceLanguage.llmLanguageName;
-    }
     if (sourceLang != null && sourceLang != 'auto') {
       return _llmLanguageNameForCode(sourceLang);
     }
@@ -531,13 +498,6 @@ class _TranslationLanguageConfig {
       return preferences.customTargetLanguage;
     }
     return null;
-  }
-
-  String? _selectedSource(String? sourceLang, String? preferredSourceCode) {
-    if (sourceLanguage != TranslationSourceLanguage.automatic) {
-      return preferredSourceCode;
-    }
-    return sourceLang;
   }
 
   String _llmLanguageNameForCode(String code) {

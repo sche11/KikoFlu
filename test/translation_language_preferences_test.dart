@@ -19,30 +19,24 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('translation language preferences default to auto and app language',
-      () async {
+  test('translation language preferences default to app language', () async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
     var preferences = container.read(translationLanguagePreferencesProvider);
-    expect(preferences.sourceLanguage, TranslationSourceLanguage.automatic);
     expect(preferences.targetLanguage, TranslationTargetLanguage.followApp);
 
     await _pumpAsyncPreferenceLoad();
 
     preferences = container.read(translationLanguagePreferencesProvider);
-    expect(preferences.sourceLanguage, TranslationSourceLanguage.automatic);
     expect(preferences.targetLanguage, TranslationTargetLanguage.followApp);
   });
 
-  test('translation language preferences load and persist custom values',
+  test('translation language preferences load and persist target values',
       () async {
     SharedPreferences.setMockInitialValues({
-      TranslationLanguagePreferencesNotifier.keySourceLanguage:
-          TranslationSourceLanguage.japanese.value,
       TranslationLanguagePreferencesNotifier.keyTargetLanguage:
           TranslationTargetLanguage.english.value,
-      TranslationLanguagePreferencesNotifier.keyCustomSourceLanguage: 'Korean',
       TranslationLanguagePreferencesNotifier.keyCustomTargetLanguage:
           'Portuguese (Brazil)',
     });
@@ -50,43 +44,27 @@ void main() {
     addTearDown(container.dispose);
 
     expect(
-      container.read(translationLanguagePreferencesProvider).sourceLanguage,
-      TranslationSourceLanguage.automatic,
-    );
+        container.read(translationLanguagePreferencesProvider).targetLanguage,
+        TranslationTargetLanguage.followApp);
     await _pumpAsyncPreferenceLoad();
 
     var preferences = container.read(translationLanguagePreferencesProvider);
-    expect(preferences.sourceLanguage, TranslationSourceLanguage.japanese);
     expect(preferences.targetLanguage, TranslationTargetLanguage.english);
-    expect(preferences.customSourceLanguage, 'Korean');
     expect(preferences.customTargetLanguage, 'Portuguese (Brazil)');
 
     final notifier =
         container.read(translationLanguagePreferencesProvider.notifier);
-    await notifier.updateSourceLanguage(TranslationSourceLanguage.custom);
     await notifier.updateTargetLanguage(TranslationTargetLanguage.custom);
-    await notifier.updateCustomSourceLanguage('  Spanish  ');
     await notifier.updateCustomTargetLanguage('  Korean  ');
 
     preferences = container.read(translationLanguagePreferencesProvider);
     final prefs = await SharedPreferences.getInstance();
 
-    expect(preferences.sourceLanguage, TranslationSourceLanguage.custom);
     expect(preferences.targetLanguage, TranslationTargetLanguage.custom);
-    expect(preferences.customSourceLanguage, 'Spanish');
     expect(preferences.customTargetLanguage, 'Korean');
-    expect(
-      prefs.getString(TranslationLanguagePreferencesNotifier.keySourceLanguage),
-      TranslationSourceLanguage.custom.value,
-    );
     expect(
       prefs.getString(TranslationLanguagePreferencesNotifier.keyTargetLanguage),
       TranslationTargetLanguage.custom.value,
-    );
-    expect(
-      prefs.getString(
-          TranslationLanguagePreferencesNotifier.keyCustomSourceLanguage),
-      'Spanish',
     );
     expect(
       prefs.getString(
@@ -95,14 +73,14 @@ void main() {
     );
   });
 
-  test('LLM default prompt uses custom source and target languages', () async {
+  test('LLM default prompt uses custom target language and auto source',
+      () async {
     SharedPreferences.setMockInitialValues({
       'translation_source': TranslationSource.llm.value,
-      TranslationLanguagePreferencesNotifier.keySourceLanguage:
-          TranslationSourceLanguage.custom.value,
+      'translation_source_language': 'custom',
       TranslationLanguagePreferencesNotifier.keyTargetLanguage:
           TranslationTargetLanguage.custom.value,
-      TranslationLanguagePreferencesNotifier.keyCustomSourceLanguage: 'Korean',
+      'translation_custom_source_language': 'Korean',
       TranslationLanguagePreferencesNotifier.keyCustomTargetLanguage:
           'Portuguese (Brazil)',
     });
@@ -110,7 +88,7 @@ void main() {
     final prompt =
         await TranslationService().getDefaultLLMPromptForCurrentLocale();
 
-    expect(prompt, contains('from Korean'));
+    expect(prompt, isNot(contains('from Korean')));
     expect(prompt, contains('into Portuguese (Brazil)'));
   });
 
@@ -135,11 +113,10 @@ void main() {
     SharedPreferences.setMockInitialValues({
       'translation_source': TranslationSource.google.value,
       'locale_language': 'en',
-      TranslationLanguagePreferencesNotifier.keySourceLanguage:
-          TranslationSourceLanguage.custom.value,
+      'translation_source_language': 'custom',
       TranslationLanguagePreferencesNotifier.keyTargetLanguage:
           TranslationTargetLanguage.custom.value,
-      TranslationLanguagePreferencesNotifier.keyCustomSourceLanguage: 'Korean',
+      'translation_custom_source_language': 'Korean',
       TranslationLanguagePreferencesNotifier.keyCustomTargetLanguage:
           'Portuguese (Brazil)',
     });

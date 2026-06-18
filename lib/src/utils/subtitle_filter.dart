@@ -2,8 +2,7 @@ import '../models/work.dart';
 
 enum SubtitleFilterMode {
   all(0),
-  withSubtitles(1),
-  withoutSubtitles(2);
+  withSubtitles(1);
 
   const SubtitleFilterMode(this.value);
 
@@ -19,8 +18,7 @@ enum SubtitleFilterMode {
   SubtitleFilterMode get next {
     return switch (this) {
       SubtitleFilterMode.all => SubtitleFilterMode.withSubtitles,
-      SubtitleFilterMode.withSubtitles => SubtitleFilterMode.withoutSubtitles,
-      SubtitleFilterMode.withoutSubtitles => SubtitleFilterMode.all,
+      SubtitleFilterMode.withSubtitles => SubtitleFilterMode.all,
     };
   }
 
@@ -43,7 +41,6 @@ bool workMatchesSubtitleFilter(
   return switch (mode) {
     SubtitleFilterMode.all => true,
     SubtitleFilterMode.withSubtitles => hasSubtitle,
-    SubtitleFilterMode.withoutSubtitles => !hasSubtitle,
   };
 }
 

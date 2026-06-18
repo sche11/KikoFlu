@@ -594,9 +594,6 @@ class SEn extends S {
   String get showOnlySubtitled => 'Show only subtitled works';
 
   @override
-  String get showOnlyWithoutSubtitles => 'Show only works without subtitles';
-
-  @override
   String selectedCount(int count) {
     return '$count selected';
   }
@@ -861,19 +858,10 @@ class SEn extends S {
       'Select translation service provider:';
 
   @override
-  String get translationSourceLanguage => 'Source Language';
-
-  @override
   String get translationTargetLanguage => 'Target Language';
 
   @override
-  String get selectTranslationSourceLanguage => 'Select source language:';
-
-  @override
   String get selectTranslationTargetLanguage => 'Select target language:';
-
-  @override
-  String get translationLanguageAuto => 'Auto Detect';
 
   @override
   String get translationLanguageFollowApp => 'Follow App Language';
@@ -897,9 +885,6 @@ class SEn extends S {
   String get translationLanguageCustom => 'Custom';
 
   @override
-  String get translationCustomSourceLanguage => 'Custom Source Language';
-
-  @override
   String get translationCustomTargetLanguage => 'Custom Target Language';
 
   @override
@@ -909,6 +894,9 @@ class SEn extends S {
   String translationCustomLanguageLabel(String value) {
     return 'Custom: $value';
   }
+
+  @override
+  String get translationCustomTargetRequiresLlm => 'Requires LLM translation';
 
   @override
   String get needsConfiguration => 'Needs configuration';

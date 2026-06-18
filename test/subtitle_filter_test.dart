@@ -21,11 +21,13 @@ const _noSubtitleWork = Work(
 );
 
 void main() {
-  test('subtitle filter cycles through all states', () {
+  test('subtitle filter cycles through available states', () {
     expect(SubtitleFilterMode.all.next, SubtitleFilterMode.withSubtitles);
-    expect(SubtitleFilterMode.withSubtitles.next,
-        SubtitleFilterMode.withoutSubtitles);
-    expect(SubtitleFilterMode.withoutSubtitles.next, SubtitleFilterMode.all);
+    expect(SubtitleFilterMode.withSubtitles.next, SubtitleFilterMode.all);
+  });
+
+  test('legacy without-subtitles value falls back to all works', () {
+    expect(SubtitleFilterMode.fromValue(2), SubtitleFilterMode.all);
   });
 
   test('detects online and local library subtitles', () {
@@ -61,12 +63,9 @@ void main() {
       [1, 2],
     );
     expect(
-      filterWorksBySubtitleMode(
-        works,
-        localSubtitleIds,
-        SubtitleFilterMode.withoutSubtitles.value,
-      ).map((work) => work.id),
-      [3],
-    );
+        filterWorksBySubtitleMode(works, localSubtitleIds, 2).map(
+          (work) => work.id,
+        ),
+        [1, 2, 3]);
   });
 }

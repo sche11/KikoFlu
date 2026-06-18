@@ -219,96 +219,17 @@ class PreferencesScreen extends ConsumerWidget {
     );
   }
 
-  void _showTranslationSourceLanguageDialog(
-      BuildContext pageContext, WidgetRef ref) {
-    final translationSource = ref.read(translationSourceProvider);
-    final preferences = ref.read(translationLanguagePreferencesProvider);
-    final currentLanguage = preferences.sourceLanguage;
-    final options = TranslationSourceLanguage.values.where((language) {
-      return translationSource == TranslationSource.llm ||
-          language != TranslationSourceLanguage.custom;
-    }).toList();
-
-    showDialog(
-      context: pageContext,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(
-          S.of(dialogContext).translationSourceLanguage,
-          style: const TextStyle(fontSize: 18),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              S.of(dialogContext).selectTranslationSourceLanguage,
-              style: const TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            RadioOptionGroup<TranslationSourceLanguage>(
-              groupValue: options.contains(currentLanguage)
-                  ? currentLanguage
-                  : TranslationSourceLanguage.automatic,
-              options: [
-                for (final language in options)
-                  RadioOption(
-                    value: language,
-                    title: Text(_languageOptionLabel(
-                      dialogContext,
-                      language.localizedName(dialogContext),
-                      language == TranslationSourceLanguage.custom
-                          ? preferences.customSourceLanguage
-                          : null,
-                    )),
-                  ),
-              ],
-              onChanged: (value) async {
-                if (value == TranslationSourceLanguage.custom) {
-                  final customLanguage = await _showCustomLanguageDialog(
-                    pageContext,
-                    title: S.of(pageContext).translationCustomSourceLanguage,
-                    initialValue: preferences.customSourceLanguage,
-                  );
-                  if (customLanguage == null) return;
-                  await ref
-                      .read(translationLanguagePreferencesProvider.notifier)
-                      .updateCustomSourceLanguage(customLanguage);
-                }
-
-                await ref
-                    .read(translationLanguagePreferencesProvider.notifier)
-                    .updateSourceLanguage(value);
-                if (!dialogContext.mounted) return;
-                Navigator.pop(dialogContext);
-                SnackBarUtil.showSuccess(
-                  pageContext,
-                  S
-                      .of(pageContext)
-                      .setToValue(value.localizedName(pageContext)),
-                );
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(S.of(dialogContext).close),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showTranslationTargetLanguageDialog(
       BuildContext pageContext, WidgetRef ref) {
     final translationSource = ref.read(translationSourceProvider);
     final preferences = ref.read(translationLanguagePreferencesProvider);
+    final customLanguageEnabled = translationSource == TranslationSource.llm;
     final currentLanguage = preferences.targetLanguage;
-    final options = TranslationTargetLanguage.values.where((language) {
-      return translationSource == TranslationSource.llm ||
-          language != TranslationTargetLanguage.custom;
-    }).toList();
+    final groupValue = currentLanguage == TranslationTargetLanguage.custom &&
+            !customLanguageEnabled
+        ? TranslationTargetLanguage.followApp
+        : currentLanguage;
+    const options = TranslationTargetLanguage.values;
 
     showDialog(
       context: pageContext,
@@ -327,13 +248,13 @@ class PreferencesScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             RadioOptionGroup<TranslationTargetLanguage>(
-              groupValue: options.contains(currentLanguage)
-                  ? currentLanguage
-                  : TranslationTargetLanguage.followApp,
+              groupValue: groupValue,
               options: [
                 for (final language in options)
                   RadioOption(
                     value: language,
+                    enabled: customLanguageEnabled ||
+                        language != TranslationTargetLanguage.custom,
                     title: Text(_languageOptionLabel(
                       dialogContext,
                       language.localizedName(dialogContext),
@@ -341,9 +262,26 @@ class PreferencesScreen extends ConsumerWidget {
                           ? preferences.customTargetLanguage
                           : null,
                     )),
+                    subtitle: language == TranslationTargetLanguage.custom &&
+                            !customLanguageEnabled
+                        ? Text(
+                            S
+                                .of(dialogContext)
+                                .translationCustomTargetRequiresLlm,
+                            style: TextStyle(
+                              color: Theme.of(dialogContext)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          )
+                        : null,
                   ),
               ],
               onChanged: (value) async {
+                if (value == TranslationTargetLanguage.custom &&
+                    !customLanguageEnabled) {
+                  return;
+                }
                 if (value == TranslationTargetLanguage.custom) {
                   final customLanguage = await _showCustomLanguageDialog(
                     pageContext,
@@ -438,23 +376,15 @@ class PreferencesScreen extends ConsumerWidget {
     return S.of(context).translationCustomLanguageLabel(trimmedValue);
   }
 
-  String _sourceLanguageLabel(
-    BuildContext context,
-    TranslationLanguagePreferences preferences,
-  ) {
-    if (preferences.sourceLanguage == TranslationSourceLanguage.custom &&
-        preferences.customSourceLanguage.isNotEmpty) {
-      return S
-          .of(context)
-          .translationCustomLanguageLabel(preferences.customSourceLanguage);
-    }
-    return preferences.sourceLanguage.localizedName(context);
-  }
-
   String _targetLanguageLabel(
     BuildContext context,
     TranslationLanguagePreferences preferences,
+    bool customLanguageEnabled,
   ) {
+    if (preferences.targetLanguage == TranslationTargetLanguage.custom &&
+        !customLanguageEnabled) {
+      return TranslationTargetLanguage.followApp.localizedName(context);
+    }
     if (preferences.targetLanguage == TranslationTargetLanguage.custom &&
         preferences.customTargetLanguage.isNotEmpty) {
       return S
@@ -536,25 +466,15 @@ class PreferencesScreen extends ConsumerWidget {
                 ),
                 Divider(color: Theme.of(context).colorScheme.outlineVariant),
                 ListTile(
-                  leading: Icon(Icons.input,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).translationSourceLanguage),
-                  subtitle: Text(S.of(context).currentSettingLabel(
-                      _sourceLanguageLabel(
-                          context, translationLanguagePreferences))),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    _showTranslationSourceLanguageDialog(context, ref);
-                  },
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
                   leading: Icon(Icons.language,
                       color: Theme.of(context).colorScheme.primary),
                   title: Text(S.of(context).translationTargetLanguage),
-                  subtitle: Text(S.of(context).currentSettingLabel(
-                      _targetLanguageLabel(
-                          context, translationLanguagePreferences))),
+                  subtitle: Text(
+                      S.of(context).currentSettingLabel(_targetLanguageLabel(
+                            context,
+                            translationLanguagePreferences,
+                            translationSource == TranslationSource.llm,
+                          ))),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     _showTranslationTargetLanguageDialog(context, ref);

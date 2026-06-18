@@ -596,9 +596,6 @@ class SRu extends S {
   String get showOnlySubtitled => 'Только с субтитрами';
 
   @override
-  String get showOnlyWithoutSubtitles => 'Только без субтитров';
-
-  @override
   String selectedCount(int count) {
     return 'Выбрано: $count';
   }
@@ -863,19 +860,10 @@ class SRu extends S {
   String get selectTranslationProvider => 'Выберите службу перевода:';
 
   @override
-  String get translationSourceLanguage => 'Исходный язык';
-
-  @override
   String get translationTargetLanguage => 'Целевой язык';
 
   @override
-  String get selectTranslationSourceLanguage => 'Выберите исходный язык:';
-
-  @override
   String get selectTranslationTargetLanguage => 'Выберите целевой язык:';
-
-  @override
-  String get translationLanguageAuto => 'Автоопределение';
 
   @override
   String get translationLanguageFollowApp => 'Язык приложения';
@@ -899,9 +887,6 @@ class SRu extends S {
   String get translationLanguageCustom => 'Свой';
 
   @override
-  String get translationCustomSourceLanguage => 'Свой исходный язык';
-
-  @override
   String get translationCustomTargetLanguage => 'Свой целевой язык';
 
   @override
@@ -911,6 +896,9 @@ class SRu extends S {
   String translationCustomLanguageLabel(String value) {
     return 'Свой: $value';
   }
+
+  @override
+  String get translationCustomTargetRequiresLlm => 'Требуется LLM перевод';
 
   @override
   String get needsConfiguration => 'Требуется настройка';

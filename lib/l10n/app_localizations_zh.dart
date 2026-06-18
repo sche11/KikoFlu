@@ -580,9 +580,6 @@ class SZh extends S {
   String get showOnlySubtitled => '仅显示带字幕作品';
 
   @override
-  String get showOnlyWithoutSubtitles => '仅显示无字幕作品';
-
-  @override
   String selectedCount(int count) {
     return '已选择 $count 项';
   }
@@ -842,19 +839,10 @@ class SZh extends S {
   String get selectTranslationProvider => '选择翻译服务提供商：';
 
   @override
-  String get translationSourceLanguage => '源语言';
-
-  @override
   String get translationTargetLanguage => '目标语言';
 
   @override
-  String get selectTranslationSourceLanguage => '选择源语言：';
-
-  @override
   String get selectTranslationTargetLanguage => '选择目标语言：';
-
-  @override
-  String get translationLanguageAuto => '自动检测';
 
   @override
   String get translationLanguageFollowApp => '跟随 App 语言';
@@ -878,9 +866,6 @@ class SZh extends S {
   String get translationLanguageCustom => '自定义';
 
   @override
-  String get translationCustomSourceLanguage => '自定义源语言';
-
-  @override
   String get translationCustomTargetLanguage => '自定义目标语言';
 
   @override
@@ -890,6 +875,9 @@ class SZh extends S {
   String translationCustomLanguageLabel(String value) {
     return '自定义: $value';
   }
+
+  @override
+  String get translationCustomTargetRequiresLlm => '需要使用 LLM 翻译才能使用';
 
   @override
   String get needsConfiguration => '需要配置';
@@ -4034,9 +4022,6 @@ class SZhHant extends SZh {
   String get showOnlySubtitled => '僅顯示帶字幕作品';
 
   @override
-  String get showOnlyWithoutSubtitles => '僅顯示無字幕作品';
-
-  @override
   String selectedCount(int count) {
     return '已選擇 $count 項';
   }
@@ -4296,19 +4281,10 @@ class SZhHant extends SZh {
   String get selectTranslationProvider => '選擇翻譯服務提供商：';
 
   @override
-  String get translationSourceLanguage => '源語言';
-
-  @override
   String get translationTargetLanguage => '目標語言';
 
   @override
-  String get selectTranslationSourceLanguage => '選擇源語言：';
-
-  @override
   String get selectTranslationTargetLanguage => '選擇目標語言：';
-
-  @override
-  String get translationLanguageAuto => '自動偵測';
 
   @override
   String get translationLanguageFollowApp => '跟隨 App 語言';
@@ -4332,9 +4308,6 @@ class SZhHant extends SZh {
   String get translationLanguageCustom => '自訂';
 
   @override
-  String get translationCustomSourceLanguage => '自訂源語言';
-
-  @override
   String get translationCustomTargetLanguage => '自訂目標語言';
 
   @override
@@ -4344,6 +4317,9 @@ class SZhHant extends SZh {
   String translationCustomLanguageLabel(String value) {
     return '自訂: $value';
   }
+
+  @override
+  String get translationCustomTargetRequiresLlm => '需要使用 LLM 翻譯才能使用';
 
   @override
   String get needsConfiguration => '需要設定';

@@ -581,9 +581,6 @@ class SJa extends S {
   String get showOnlySubtitled => '字幕付き作品のみ表示';
 
   @override
-  String get showOnlyWithoutSubtitles => '字幕なし作品のみ表示';
-
-  @override
   String selectedCount(int count) {
     return '$count件選択中';
   }
@@ -843,19 +840,10 @@ class SJa extends S {
   String get selectTranslationProvider => '翻訳サービスプロバイダーを選択：';
 
   @override
-  String get translationSourceLanguage => 'ソース言語';
-
-  @override
   String get translationTargetLanguage => 'ターゲット言語';
 
   @override
-  String get selectTranslationSourceLanguage => 'ソース言語を選択：';
-
-  @override
   String get selectTranslationTargetLanguage => 'ターゲット言語を選択：';
-
-  @override
-  String get translationLanguageAuto => '自動検出';
 
   @override
   String get translationLanguageFollowApp => 'アプリ言語に従う';
@@ -879,9 +867,6 @@ class SJa extends S {
   String get translationLanguageCustom => 'カスタム';
 
   @override
-  String get translationCustomSourceLanguage => 'カスタムソース言語';
-
-  @override
   String get translationCustomTargetLanguage => 'カスタムターゲット言語';
 
   @override
@@ -891,6 +876,9 @@ class SJa extends S {
   String translationCustomLanguageLabel(String value) {
     return 'カスタム: $value';
   }
+
+  @override
+  String get translationCustomTargetRequiresLlm => 'LLM翻訳が必要です';
 
   @override
   String get needsConfiguration => '設定が必要';

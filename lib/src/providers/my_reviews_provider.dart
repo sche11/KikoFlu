@@ -44,7 +44,7 @@ class MyReviewsState extends Equatable {
   final MyReviewLayoutType layoutType;
   final SortOrder sortType;
   final SortDirection sortOrder;
-  final int subtitleFilter; // 0: 全部, 1: 有字幕, 2: 无字幕
+  final int subtitleFilter; // 0: 全部, 1: 有字幕
 
   int get effectivePageSize =>
       SubtitleFilterMode.fromValue(subtitleFilter).isActive

@@ -310,7 +310,6 @@ class SearchResultNotifier extends StateNotifier<SearchResultState> {
       // 关闭字幕筛选：分页大小减半，页码翻倍减1（保持大致位置）
       newPage = (currentPage * 2) - 1;
     } else {
-      // 有字幕/无字幕之间切换，分页大小不变
       newPage = currentPage;
     }
     newPage = newPage.clamp(1, 9999);

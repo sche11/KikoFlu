@@ -116,8 +116,7 @@ extension SubtitleFilterModeL10n on SubtitleFilterMode {
     final s = S.of(context);
     return switch (this) {
       SubtitleFilterMode.all => s.showOnlySubtitled,
-      SubtitleFilterMode.withSubtitles => s.showOnlyWithoutSubtitles,
-      SubtitleFilterMode.withoutSubtitles => s.showAllWorks,
+      SubtitleFilterMode.withSubtitles => s.showAllWorks,
     };
   }
 }
@@ -148,21 +147,6 @@ extension TranslationSourceL10n on TranslationSource {
       TranslationSource.youdao => s.translationSourceYoudao,
       TranslationSource.microsoft => s.translationSourceMicrosoft,
       TranslationSource.llm => s.translationSourceLlm,
-    };
-  }
-}
-
-extension TranslationSourceLanguageL10n on TranslationSourceLanguage {
-  String localizedName(BuildContext context) {
-    final s = S.of(context);
-    return switch (this) {
-      TranslationSourceLanguage.automatic => s.translationLanguageAuto,
-      TranslationSourceLanguage.zhHans => s.translationLanguageZhHans,
-      TranslationSourceLanguage.zhHant => s.translationLanguageZhHant,
-      TranslationSourceLanguage.english => s.translationLanguageEnglish,
-      TranslationSourceLanguage.japanese => s.translationLanguageJapanese,
-      TranslationSourceLanguage.russian => s.translationLanguageRussian,
-      TranslationSourceLanguage.custom => s.translationLanguageCustom,
     };
   }
 }

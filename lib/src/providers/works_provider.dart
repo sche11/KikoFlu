@@ -94,7 +94,7 @@ class WorksState extends Equatable {
   final SortOrder sortOption;
   final SortDirection sortDirection;
   final DisplayMode displayMode;
-  final int subtitleFilter; // 0: 全部, 1: 有字幕, 2: 无字幕
+  final int subtitleFilter; // 0: 全部, 1: 有字幕
   final int basePageSize; // 用户设置的基础分页大小
   final Map<DisplayMode, WorksModeSnapshot> modeStates;
 
@@ -430,7 +430,7 @@ class WorksNotifier extends StateNotifier<WorksState> {
   bool get isSubtitleFilterActive =>
       SubtitleFilterMode.fromValue(state.subtitleFilter).isActive;
 
-  // Cycle subtitle filter: all -> with subtitles -> without subtitles -> all
+  // Cycle subtitle filter: all -> with subtitles -> all
   void toggleSubtitleFilter() {
     final currentPage = state.currentPage;
     final oldFilterMode = SubtitleFilterMode.fromValue(state.subtitleFilter);
@@ -450,7 +450,6 @@ class WorksNotifier extends StateNotifier<WorksState> {
       // 关闭字幕筛选：分页大小减半，页码翻倍减1（保持大致位置）
       newPage = (currentPage * 2) - 1;
     } else {
-      // 有字幕/无字幕之间切换，分页大小不变
       newPage = currentPage;
     }
     newPage = newPage.clamp(1, 9999);
