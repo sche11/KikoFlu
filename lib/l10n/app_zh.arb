@@ -711,6 +711,7 @@
 
   "titleLabel": "标题",
   "rjNumberLabel": "RJ号",
+  "workIdLabel": "作品编号",
   "tapToViewRatingDetail": "点击查看评分详情",
   "priceInYen": "{price} 日元",
   "soldCount": "售出：{count}",

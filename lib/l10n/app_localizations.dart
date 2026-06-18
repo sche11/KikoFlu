@@ -3894,6 +3894,12 @@ abstract class S {
   /// **'RJ Number'**
   String get rjNumberLabel;
 
+  /// No description provided for @workIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work ID'**
+  String get workIdLabel;
+
   /// No description provided for @tapToViewRatingDetail.
   ///
   /// In en, this message translates to:

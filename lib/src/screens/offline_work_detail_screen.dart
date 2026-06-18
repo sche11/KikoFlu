@@ -299,12 +299,12 @@ class _OfflineWorkDetailScreenState
             ],
             title: GestureDetector(
               onLongPress: () => _copyToClipboard(
-                  formatRJCode(widget.work.id), S.of(context).rjNumberLabel),
+                  widget.work.displayId, S.of(context).workIdLabel),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    formatRJCode(widget.work.id),
+                    widget.work.displayId,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,

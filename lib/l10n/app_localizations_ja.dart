@@ -2063,6 +2063,9 @@ class SJa extends S {
   String get rjNumberLabel => 'RJ番号';
 
   @override
+  String get workIdLabel => '作品番号';
+
+  @override
   String get tapToViewRatingDetail => 'タップして評価詳細を表示';
 
   @override

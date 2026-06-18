@@ -2055,6 +2055,9 @@ class SZh extends S {
   String get rjNumberLabel => 'RJ号';
 
   @override
+  String get workIdLabel => '作品编号';
+
+  @override
   String get tapToViewRatingDetail => '点击查看评分详情';
 
   @override
@@ -5504,6 +5507,9 @@ class SZhHant extends SZh {
 
   @override
   String get rjNumberLabel => 'RJ號';
+
+  @override
+  String get workIdLabel => '作品編號';
 
   @override
   String get tapToViewRatingDetail => '點擊查看評分詳情';

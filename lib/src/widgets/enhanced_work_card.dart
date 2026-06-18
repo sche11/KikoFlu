@@ -149,7 +149,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
               child: Stack(
                 children: [
                   _buildCoverImage(context, host, token),
-                  // RJ号标签 (左上角)
+                  // 作品编号标签 (左上角)
                   Positioned(
                     top: 4,
                     left: 4,
@@ -416,7 +416,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                           borderRadius: BorderRadius.circular(8),
                           child: _buildCoverImage(context, host, token),
                         ),
-                        // RJ号标签
+                        // 作品编号标签
                         Positioned(
                           top: 2,
                           left: 2,
@@ -428,7 +428,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                               borderRadius: BorderRadius.circular(3),
                             ),
                             child: Text(
-                              formatRJCode(widget.work.id),
+                              widget.work.displayId,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: rjFontSize,
@@ -678,7 +678,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        formatRJCode(widget.work.id),
+        widget.work.displayId,
         style: TextStyle(
           color: Colors.white,
           fontSize: fontSize,

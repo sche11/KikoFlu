@@ -14,7 +14,6 @@ import '../widgets/scrollable_appbar.dart';
 import '../utils/snackbar_util.dart';
 import '../screens/work_detail_screen.dart';
 import '../widgets/overscroll_next_page_detector.dart';
-import '../utils/string_utils.dart';
 import '../widgets/privacy_blur_cover.dart';
 import '../utils/scroll_optimization.dart';
 import '../../l10n/app_localizations.dart';
@@ -635,14 +634,14 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   ),
                   const SizedBox(height: 4),
 
-                  // RJ号、社团名和用户评分
+                  // 作品编号、社团名和用户评分
                   Wrap(
                     spacing: 8,
                     runSpacing: 4,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        formatRJCode(work.id),
+                        work.displayId,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.primary,
                           fontWeight: FontWeight.w500,

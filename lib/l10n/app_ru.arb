@@ -720,6 +720,7 @@
 
   "titleLabel": "Название",
   "rjNumberLabel": "RJ номер",
+  "workIdLabel": "ID работы",
   "tapToViewRatingDetail": "Нажмите для просмотра деталей рейтинга",
   "priceInYen": "{price} иен",
   "soldCount": "Продано: {count}",

@@ -2118,6 +2118,9 @@ class SRu extends S {
   String get rjNumberLabel => 'RJ номер';
 
   @override
+  String get workIdLabel => 'ID работы';
+
+  @override
   String get tapToViewRatingDetail => 'Нажмите для просмотра деталей рейтинга';
 
   @override

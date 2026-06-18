@@ -720,6 +720,7 @@
 
   "titleLabel": "標題",
   "rjNumberLabel": "RJ號",
+  "workIdLabel": "作品編號",
   "tapToViewRatingDetail": "點擊查看評分詳情",
   "priceInYen": "{price} 日元",
   "soldCount": "售出：{count}",

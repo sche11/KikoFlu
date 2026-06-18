@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
+import '../utils/string_utils.dart';
 
 part 'work.g.dart';
 
@@ -53,6 +54,9 @@ class Work extends Equatable {
   @JsonKey(name: 'source_url')
   final String? sourceUrl; // 作品原始链接
 
+  @JsonKey(name: 'source_id')
+  final String? sourceId; // 作品真实编号，如 RJ/BJ/VJ
+
   @JsonKey(name: 'other_language_editions_in_db')
   final List<OtherLanguageEdition>? otherLanguageEditions; // 其他语言版本
 
@@ -79,6 +83,7 @@ class Work extends Equatable {
     this.description,
     this.children,
     this.sourceUrl,
+    this.sourceId,
     this.otherLanguageEditions,
   });
 
@@ -137,6 +142,14 @@ class Work extends Equatable {
 
   String get circleTitle => name ?? '';
 
+  String get displayId {
+    final normalizedSourceId = sourceId?.trim();
+    if (normalizedSourceId != null && normalizedSourceId.isNotEmpty) {
+      return normalizedSourceId;
+    }
+    return formatRJCode(id);
+  }
+
   /// 创建 Work 的副本，可选择性地覆盖某些字段
   Work copyWith({
     int? id,
@@ -161,6 +174,7 @@ class Work extends Equatable {
     String? description,
     List<AudioFile>? children,
     String? sourceUrl,
+    String? sourceId,
     List<OtherLanguageEdition>? otherLanguageEditions,
   }) {
     return Work(
@@ -186,6 +200,7 @@ class Work extends Equatable {
       description: description ?? this.description,
       children: children ?? this.children,
       sourceUrl: sourceUrl ?? this.sourceUrl,
+      sourceId: sourceId ?? this.sourceId,
       otherLanguageEditions:
           otherLanguageEditions ?? this.otherLanguageEditions,
     );
@@ -215,6 +230,7 @@ class Work extends Equatable {
         description,
         children,
         sourceUrl,
+        sourceId,
         otherLanguageEditions,
       ];
 }

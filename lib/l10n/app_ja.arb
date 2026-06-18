@@ -720,6 +720,7 @@
 
   "titleLabel": "タイトル",
   "rjNumberLabel": "RJ番号",
+  "workIdLabel": "作品番号",
   "tapToViewRatingDetail": "タップして評価詳細を表示",
   "priceInYen": "{price} 円",
   "soldCount": "販売数：{count}",

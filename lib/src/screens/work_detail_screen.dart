@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../utils/string_utils.dart';
 import '../utils/snackbar_util.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -442,12 +441,12 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
         floatingActionButton: const DownloadFab(),
         appBar: ScrollableAppBar(
           systemOverlayStyle: systemOverlayStyle,
-          // RJ号作为标题,支持长按复制
+          // 作品编号作为标题,支持长按复制
           title: GestureDetector(
             onLongPress: () => _copyToClipboard(
-                formatRJCode(widget.work.id), S.of(context).rjNumberLabel),
+                widget.work.displayId, S.of(context).workIdLabel),
             child: Text(
-              formatRJCode(widget.work.id),
+              widget.work.displayId,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,

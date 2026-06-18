@@ -918,6 +918,7 @@
 
   "titleLabel": "Title",
   "rjNumberLabel": "RJ Number",
+  "workIdLabel": "Work ID",
   "tapToViewRatingDetail": "Tap to view rating details",
   "priceInYen": "{price} Yen",
   "@priceInYen": { "placeholders": { "price": { "type": "int" } } },

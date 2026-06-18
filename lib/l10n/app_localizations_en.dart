@@ -2112,6 +2112,9 @@ class SEn extends S {
   String get rjNumberLabel => 'RJ Number';
 
   @override
+  String get workIdLabel => 'Work ID';
+
+  @override
   String get tapToViewRatingDetail => 'Tap to view rating details';
 
   @override
