@@ -7,6 +7,8 @@ import '../services/kikoeru_api_service.dart' hide kikoeruApiServiceProvider;
 import '../services/log_service.dart';
 import 'auth_provider.dart';
 import 'settings_provider.dart';
+import 'subtitle_library_provider.dart';
+import '../utils/subtitle_filter.dart';
 
 /// 用户 Review/收藏状态的过滤枚举
 enum MyReviewFilter {
@@ -31,6 +33,7 @@ enum MyReviewLayoutType {
 
 class MyReviewsState extends Equatable {
   final List<Work> works;
+  final List<Work> rawWorks;
   final bool isLoading;
   final String? error;
   final int currentPage;
@@ -41,9 +44,16 @@ class MyReviewsState extends Equatable {
   final MyReviewLayoutType layoutType;
   final SortOrder sortType;
   final SortDirection sortOrder;
+  final int subtitleFilter; // 0: 全部, 1: 有字幕, 2: 无字幕
+
+  int get effectivePageSize =>
+      SubtitleFilterMode.fromValue(subtitleFilter).isActive
+          ? pageSize * 2
+          : pageSize;
 
   const MyReviewsState({
     this.works = const [],
+    this.rawWorks = const [],
     this.isLoading = false,
     this.error,
     this.currentPage = 1,
@@ -54,10 +64,12 @@ class MyReviewsState extends Equatable {
     this.layoutType = MyReviewLayoutType.bigGrid,
     this.sortType = SortOrder.updatedAt,
     this.sortOrder = SortDirection.desc,
+    this.subtitleFilter = 0,
   });
 
   MyReviewsState copyWith({
     List<Work>? works,
+    List<Work>? rawWorks,
     bool? isLoading,
     String? error,
     int? currentPage,
@@ -68,9 +80,11 @@ class MyReviewsState extends Equatable {
     MyReviewLayoutType? layoutType,
     SortOrder? sortType,
     SortDirection? sortOrder,
+    int? subtitleFilter,
   }) {
     return MyReviewsState(
       works: works ?? this.works,
+      rawWorks: rawWorks ?? this.rawWorks,
       isLoading: isLoading ?? this.isLoading,
       error: error,
       currentPage: currentPage ?? this.currentPage,
@@ -81,12 +95,14 @@ class MyReviewsState extends Equatable {
       layoutType: layoutType ?? this.layoutType,
       sortType: sortType ?? this.sortType,
       sortOrder: sortOrder ?? this.sortOrder,
+      subtitleFilter: subtitleFilter ?? this.subtitleFilter,
     );
   }
 
   @override
   List<Object?> get props => [
         works,
+        rawWorks,
         isLoading,
         error,
         currentPage,
@@ -97,12 +113,14 @@ class MyReviewsState extends Equatable {
         layoutType,
         sortType,
         sortOrder,
+        subtitleFilter,
       ];
 }
 
 class MyReviewsNotifier extends StateNotifier<MyReviewsState> {
   final KikoeruApiService _apiService;
-  MyReviewsNotifier(this._apiService, {int initialPageSize = 20})
+  final Ref _ref;
+  MyReviewsNotifier(this._apiService, this._ref, {int initialPageSize = 20})
       : super(MyReviewsState(pageSize: initialPageSize));
 
   void updatePageSize(int newSize) {
@@ -120,7 +138,7 @@ class MyReviewsNotifier extends StateNotifier<MyReviewsState> {
     try {
       final result = await _apiService.getMyReviews(
         page: page,
-        pageSize: state.pageSize,
+        pageSize: state.effectivePageSize,
         filter: state.filter.value,
         order: state.sortType.value,
         sort: state.sortOrder.value,
@@ -153,11 +171,12 @@ class MyReviewsNotifier extends StateNotifier<MyReviewsState> {
 
       // 计算是否有更多页
       final totalPages =
-          totalCount > 0 ? (totalCount / state.pageSize).ceil() : 1;
+          totalCount > 0 ? (totalCount / state.effectivePageSize).ceil() : 1;
       final hasMore = page < totalPages;
 
       state = state.copyWith(
-        works: works,
+        works: _filterWorks(works),
+        rawWorks: works,
         totalCount: totalCount,
         hasMore: hasMore,
         isLoading: false,
@@ -195,6 +214,33 @@ class MyReviewsNotifier extends StateNotifier<MyReviewsState> {
     load(targetPage: 1);
   }
 
+  bool get isSubtitleFilterActive =>
+      SubtitleFilterMode.fromValue(state.subtitleFilter).isActive;
+
+  void toggleSubtitleFilter() {
+    final currentPage = state.currentPage;
+    final oldFilterMode = SubtitleFilterMode.fromValue(state.subtitleFilter);
+    final newFilterMode = oldFilterMode.next;
+
+    int newPage;
+    if (oldFilterMode == SubtitleFilterMode.all && newFilterMode.isActive) {
+      newPage = ((currentPage + 1) / 2).ceil();
+    } else if (oldFilterMode.isActive &&
+        newFilterMode == SubtitleFilterMode.all) {
+      newPage = (currentPage * 2) - 1;
+    } else {
+      newPage = currentPage;
+    }
+    newPage = newPage.clamp(1, 9999);
+
+    state = state.copyWith(
+      subtitleFilter: newFilterMode.value,
+      currentPage: newPage,
+      totalCount: 0,
+    );
+    load(targetPage: newPage);
+  }
+
   void changeSort(SortOrder sortType, SortDirection sortOrder) {
     if (state.sortType == sortType && state.sortOrder == sortOrder) return;
     state = state.copyWith(
@@ -217,13 +263,24 @@ class MyReviewsNotifier extends StateNotifier<MyReviewsState> {
   }
 
   void refresh() => load();
+
+  void reapplyFilters() {
+    state = state.copyWith(works: _filterWorks(state.rawWorks));
+  }
+
+  List<Work> _filterWorks(List<Work> works) {
+    final localSubtitleIds = _ref.read(subtitleLibraryProvider);
+    final subtitleFilter = state.subtitleFilter;
+    return filterWorksBySubtitleMode(works, localSubtitleIds, subtitleFilter);
+  }
 }
 
 final myReviewsProvider =
     StateNotifierProvider<MyReviewsNotifier, MyReviewsState>((ref) {
   final apiService = ref.watch(kikoeruApiServiceProvider);
   final pageSize = ref.read(pageSizeProvider);
-  final notifier = MyReviewsNotifier(apiService, initialPageSize: pageSize);
+  final notifier =
+      MyReviewsNotifier(apiService, ref, initialPageSize: pageSize);
 
   ref.listen(pageSizeProvider, (previous, next) {
     if (previous != next) {
@@ -238,6 +295,12 @@ final myReviewsProvider =
     if (prevUser?.name != nextUser?.name || prevUser?.host != nextUser?.host) {
       logOutput('[MyReviewsProvider] User changed, refreshing my reviews');
       notifier.refresh();
+    }
+  });
+
+  ref.listen(subtitleLibraryProvider, (previous, next) {
+    if (previous != next && notifier.isSubtitleFilterActive) {
+      notifier.reapplyFilters();
     }
   });
 

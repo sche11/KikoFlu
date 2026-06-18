@@ -210,6 +210,7 @@
   "recommendedNoSort": "В режиме «Рекомендуемое» сортировка недоступна",
   "showAllWorks": "Показать все работы",
   "showOnlySubtitled": "Только с субтитрами",
+  "showOnlyWithoutSubtitles": "Только без субтитров",
 
   "selectedCount": "Выбрано: {count}",
   "selectAll": "Выбрать все",

@@ -15,6 +15,8 @@ import '../widgets/pagination_bar.dart';
 import '../widgets/global_audio_player_wrapper.dart';
 import '../widgets/download_fab.dart';
 import '../widgets/overscroll_next_page_detector.dart';
+import '../utils/l10n_extensions.dart';
+import '../utils/subtitle_filter.dart';
 
 class SearchResultScreen extends StatelessWidget {
   final String keyword;
@@ -149,6 +151,16 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
     }
   }
 
+  Icon _getSubtitleFilterIcon(int subtitleFilter) {
+    final mode = SubtitleFilterMode.fromValue(subtitleFilter);
+    return Icon(
+      mode == SubtitleFilterMode.withSubtitles
+          ? Icons.closed_caption
+          : Icons.closed_caption_disabled,
+      color: mode.isActive ? Theme.of(context).colorScheme.primary : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(searchResultProvider);
@@ -176,23 +188,16 @@ class _SearchResultContentState extends ConsumerState<_SearchResultContent> {
               tooltip: _getLayoutTooltip(searchState.layoutType),
             ),
             IconButton(
-              icon: Icon(
-                searchState.subtitleFilter == 1
-                    ? Icons.closed_caption
-                    : Icons.closed_caption_disabled,
-                color: searchState.subtitleFilter == 1
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
-              ),
+              icon: _getSubtitleFilterIcon(searchState.subtitleFilter),
               iconSize: 22,
               padding: const EdgeInsets.all(8),
               constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               onPressed: () => ref
                   .read(searchResultProvider.notifier)
                   .toggleSubtitleFilter(),
-              tooltip: searchState.subtitleFilter == 1
-                  ? S.of(context).showAllWorks
-                  : S.of(context).showOnlySubtitled,
+              tooltip: SubtitleFilterMode.fromValue(
+                searchState.subtitleFilter,
+              ).localizedTooltip(context),
             ),
             Padding(
               padding: EdgeInsets.only(

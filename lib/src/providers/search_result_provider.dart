@@ -8,6 +8,7 @@ import '../models/sort_options.dart';
 import 'auth_provider.dart';
 import 'settings_provider.dart';
 import 'subtitle_library_provider.dart';
+import '../utils/subtitle_filter.dart';
 
 // Layout types for search results
 enum SearchLayoutType {
@@ -48,7 +49,9 @@ class SearchResultState extends Equatable {
   final Map<String, dynamic>? searchParams;
 
   // 实际使用的分页大小（字幕筛选时翻倍）
-  int get pageSize => subtitleFilter == 1 ? basePageSize * 2 : basePageSize;
+  int get pageSize => SubtitleFilterMode.fromValue(subtitleFilter).isActive
+      ? basePageSize * 2
+      : basePageSize;
 
   const SearchResultState({
     this.works = const [],
@@ -242,16 +245,13 @@ class SearchResultNotifier extends StateNotifier<SearchResultState> {
     final localSubtitleIds = _ref.read(subtitleLibraryProvider);
     final subtitleFilter = state.subtitleFilter;
 
-    return works.where((work) {
-      // 字幕筛选：如果开启，只保留服务器有字幕 或 本地字幕库有字幕的作品
-      if (subtitleFilter == 1) {
-        final hasServerSubtitle = work.hasSubtitle == true;
-        final hasLocalSubtitle = localSubtitleIds.contains(work.id);
-        if (!hasServerSubtitle && !hasLocalSubtitle) {
-          return false;
-        }
-      }
+    final subtitleFilteredWorks = filterWorksBySubtitleMode(
+      works,
+      localSubtitleIds,
+      subtitleFilter,
+    );
 
+    return subtitleFilteredWorks.where((work) {
       // Check tags
       if (work.tags != null) {
         for (final tag in work.tags!) {
@@ -289,23 +289,29 @@ class SearchResultNotifier extends StateNotifier<SearchResultState> {
     state = state.copyWith(layoutType: nextLayout);
   }
 
-  bool get isSubtitleFilterActive => state.subtitleFilter == 1;
+  bool get isSubtitleFilterActive =>
+      SubtitleFilterMode.fromValue(state.subtitleFilter).isActive;
 
   void toggleSubtitleFilter() {
     final currentPage = state.currentPage;
-    final oldFilter = state.subtitleFilter;
-    final newFilter = oldFilter == 0 ? 1 : 0;
+    final oldFilterMode = SubtitleFilterMode.fromValue(state.subtitleFilter);
+    final newFilterMode = oldFilterMode.next;
+    final newFilter = newFilterMode.value;
 
     // 计算新的页码
     // 开启筛选时：分页大小翻倍，所以页码需要调整
     // 关闭筛选时：反向计算
     int newPage;
-    if (newFilter == 1) {
-      // 开启字幕筛选：页码减半（向上取整）
+    if (oldFilterMode == SubtitleFilterMode.all && newFilterMode.isActive) {
+      // 开启字幕筛选：分页大小翻倍，页码减半（向上取整）
       newPage = ((currentPage + 1) / 2).ceil();
-    } else {
-      // 关闭字幕筛选：页码翻倍减1（保持大致位置）
+    } else if (oldFilterMode.isActive &&
+        newFilterMode == SubtitleFilterMode.all) {
+      // 关闭字幕筛选：分页大小减半，页码翻倍减1（保持大致位置）
       newPage = (currentPage * 2) - 1;
+    } else {
+      // 有字幕/无字幕之间切换，分页大小不变
+      newPage = currentPage;
     }
     newPage = newPage.clamp(1, 9999);
 

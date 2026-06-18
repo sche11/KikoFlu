@@ -580,6 +580,9 @@ class SZh extends S {
   String get showOnlySubtitled => '仅显示带字幕作品';
 
   @override
+  String get showOnlyWithoutSubtitles => '仅显示无字幕作品';
+
+  @override
   String selectedCount(int count) {
     return '已选择 $count 项';
   }
@@ -4026,6 +4029,9 @@ class SZhHant extends SZh {
 
   @override
   String get showOnlySubtitled => '僅顯示帶字幕作品';
+
+  @override
+  String get showOnlyWithoutSubtitles => '僅顯示無字幕作品';
 
   @override
   String selectedCount(int count) {

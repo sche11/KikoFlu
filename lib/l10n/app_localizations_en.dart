@@ -594,6 +594,9 @@ class SEn extends S {
   String get showOnlySubtitled => 'Show only subtitled works';
 
   @override
+  String get showOnlyWithoutSubtitles => 'Show only works without subtitles';
+
+  @override
   String selectedCount(int count) {
     return '$count selected';
   }

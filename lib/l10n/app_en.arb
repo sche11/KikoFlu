@@ -256,6 +256,7 @@
   "recommendedNoSort": "Recommended mode does not support sorting",
   "showAllWorks": "Show all works",
   "showOnlySubtitled": "Show only subtitled works",
+  "showOnlyWithoutSubtitles": "Show only works without subtitles",
 
   "selectedCount": "{count} selected",
   "@selectedCount": {

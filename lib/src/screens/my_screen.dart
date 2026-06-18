@@ -20,6 +20,7 @@ import 'playlists_screen.dart';
 import 'history_screen.dart';
 import '../widgets/sort_dialog.dart';
 import '../models/sort_options.dart';
+import '../utils/subtitle_filter.dart';
 export '../providers/my_reviews_provider.dart' show MyReviewLayoutType;
 
 import '../widgets/overscroll_next_page_detector.dart';
@@ -162,6 +163,16 @@ class _MyScreenState extends ConsumerState<MyScreen>
       case MyReviewLayoutType.list:
         return S.of(context).switchToLargeGrid;
     }
+  }
+
+  Icon _getSubtitleFilterIcon(int subtitleFilter) {
+    final mode = SubtitleFilterMode.fromValue(subtitleFilter);
+    return Icon(
+      mode == SubtitleFilterMode.withSubtitles
+          ? Icons.closed_caption
+          : Icons.closed_caption_disabled,
+      color: mode.isActive ? Theme.of(context).colorScheme.primary : null,
+    );
   }
 
   IconData _getFilterIcon(MyReviewFilter filter) {
@@ -381,6 +392,19 @@ class _MyScreenState extends ConsumerState<MyScreen>
                       tooltip: S.of(context).sort,
                     ),
                     IconButton(
+                      icon: _getSubtitleFilterIcon(state.subtitleFilter),
+                      iconSize: 22,
+                      padding: const EdgeInsets.all(8),
+                      constraints:
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
+                      onPressed: () => ref
+                          .read(myReviewsProvider.notifier)
+                          .toggleSubtitleFilter(),
+                      tooltip: SubtitleFilterMode.fromValue(
+                        state.subtitleFilter,
+                      ).localizedTooltip(context),
+                    ),
+                    IconButton(
                       icon: _getLayoutIcon(state.layoutType),
                       iconSize: 22,
                       padding: const EdgeInsets.all(8),
@@ -528,7 +552,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
                 child: PaginationBar(
                   currentPage: state.currentPage,
                   totalCount: state.totalCount,
-                  pageSize: state.pageSize,
+                  pageSize: state.effectivePageSize,
                   hasMore: state.hasMore,
                   isLoading: state.isLoading,
                   onPreviousPage: () {

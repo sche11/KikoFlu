@@ -581,6 +581,9 @@ class SJa extends S {
   String get showOnlySubtitled => '字幕付き作品のみ表示';
 
   @override
+  String get showOnlyWithoutSubtitles => '字幕なし作品のみ表示';
+
+  @override
   String selectedCount(int count) {
     return '$count件選択中';
   }

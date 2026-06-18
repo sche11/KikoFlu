@@ -210,6 +210,7 @@
   "recommendedNoSort": "推荐模式不支持排序",
   "showAllWorks": "显示全部作品",
   "showOnlySubtitled": "仅显示带字幕作品",
+  "showOnlyWithoutSubtitles": "仅显示无字幕作品",
 
   "selectedCount": "已选择 {count} 项",
   "selectAll": "全选",

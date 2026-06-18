@@ -17,6 +17,8 @@ import '../../l10n/app_localizations.dart';
 import '../widgets/download_fab.dart';
 import '../models/sort_options.dart';
 import '../utils/scroll_optimization.dart';
+import '../utils/subtitle_filter.dart';
+import '../utils/l10n_extensions.dart';
 
 class WorksScreen extends ConsumerStatefulWidget {
   const WorksScreen({super.key});
@@ -158,6 +160,16 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     }
   }
 
+  Icon _getSubtitleFilterIcon(int subtitleFilter) {
+    final mode = SubtitleFilterMode.fromValue(subtitleFilter);
+    return Icon(
+      mode == SubtitleFilterMode.withSubtitles
+          ? Icons.closed_caption
+          : Icons.closed_caption_disabled,
+      color: mode.isActive ? Theme.of(context).colorScheme.primary : null,
+    );
+  }
+
   void _changeDisplayMode(DisplayMode mode) {
     final currentMode = ref.read(worksProvider).displayMode;
     if (currentMode == mode) return;
@@ -273,22 +285,15 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
               ),
               // 第三列：字幕筛选按钮
               IconButton(
-                icon: Icon(
-                  worksState.subtitleFilter == 1
-                      ? Icons.closed_caption
-                      : Icons.closed_caption_disabled,
-                  color: worksState.subtitleFilter == 1
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
-                ),
+                icon: _getSubtitleFilterIcon(worksState.subtitleFilter),
                 iconSize: 22,
                 padding: const EdgeInsets.all(6),
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 onPressed: () =>
                     ref.read(worksProvider.notifier).toggleSubtitleFilter(),
-                tooltip: worksState.subtitleFilter == 1
-                    ? S.of(context).showAllWorks
-                    : S.of(context).showOnlySubtitled,
+                tooltip: SubtitleFilterMode.fromValue(
+                  worksState.subtitleFilter,
+                ).localizedTooltip(context),
               ),
               // 第四列：排序按钮
               Padding(

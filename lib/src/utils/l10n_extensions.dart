@@ -8,6 +8,7 @@ import '../providers/works_provider.dart';
 import '../providers/my_reviews_provider.dart';
 import '../providers/player_buttons_provider.dart';
 import '../providers/floating_lyric_style_provider.dart';
+import 'subtitle_filter.dart';
 
 // ============================================================
 // SearchType
@@ -102,6 +103,21 @@ extension DisplayModeL10n on DisplayMode {
       DisplayMode.all => s.displayModeAll,
       DisplayMode.popular => s.displayModePopular,
       DisplayMode.recommended => s.displayModeRecommended,
+    };
+  }
+}
+
+// ============================================================
+// SubtitleFilterMode
+// ============================================================
+
+extension SubtitleFilterModeL10n on SubtitleFilterMode {
+  String localizedTooltip(BuildContext context) {
+    final s = S.of(context);
+    return switch (this) {
+      SubtitleFilterMode.all => s.showOnlySubtitled,
+      SubtitleFilterMode.withSubtitles => s.showOnlyWithoutSubtitles,
+      SubtitleFilterMode.withoutSubtitles => s.showAllWorks,
     };
   }
 }

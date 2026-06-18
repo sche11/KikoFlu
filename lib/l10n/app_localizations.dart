@@ -1206,6 +1206,12 @@ abstract class S {
   /// **'Show only subtitled works'**
   String get showOnlySubtitled;
 
+  /// No description provided for @showOnlyWithoutSubtitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Show only works without subtitles'**
+  String get showOnlyWithoutSubtitles;
+
   /// No description provided for @selectedCount.
   ///
   /// In en, this message translates to:

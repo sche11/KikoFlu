@@ -596,6 +596,9 @@ class SRu extends S {
   String get showOnlySubtitled => 'Только с субтитрами';
 
   @override
+  String get showOnlyWithoutSubtitles => 'Только без субтитров';
+
+  @override
   String selectedCount(int count) {
     return 'Выбрано: $count';
   }

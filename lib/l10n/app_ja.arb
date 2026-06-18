@@ -210,6 +210,7 @@
   "recommendedNoSort": "おすすめモードでは並べ替えできません",
   "showAllWorks": "すべての作品を表示",
   "showOnlySubtitled": "字幕付き作品のみ表示",
+  "showOnlyWithoutSubtitles": "字幕なし作品のみ表示",
 
   "selectedCount": "{count}件選択中",
   "selectAll": "すべて選択",
