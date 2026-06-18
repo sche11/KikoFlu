@@ -423,6 +423,8 @@
   "llmSettingsSubtitle": "Configure API URL, Key, and model",
   "audioFormatPreference": "Audio Format Preference",
   "audioFormatSubtitle": "Set audio format priority order",
+  "keepScreenAwake": "Keep Screen Awake",
+  "keepScreenAwakeDesc": "Keep the screen on while an audio track is active for easier subtitle reading.",
   "blockingSettings": "Blocking Settings",
   "blockingSettingsSubtitle": "Manage blocked tags, voice actors, and circles",
   "audioPassthrough": "Audio Passthrough (Beta)",

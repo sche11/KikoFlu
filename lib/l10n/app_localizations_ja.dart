@@ -870,6 +870,13 @@ class SJa extends S {
   String get audioFormatSubtitle => 'オーディオフォーマットの優先順位を設定';
 
   @override
+  String get keepScreenAwake => '画面を常にオン';
+
+  @override
+  String get keepScreenAwakeDesc =>
+      '有効にすると、音声トラックがある間は字幕を見やすくするため画面をオンのままにします。';
+
+  @override
   String get blockingSettings => 'ブロック設定';
 
   @override

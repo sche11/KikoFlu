@@ -12,6 +12,22 @@ import AVKit
   ) -> Bool {
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     floatingLyricManager = FloatingLyricManager(controller: controller)
+
+    let screenAwakeChannel = FlutterMethodChannel(
+      name: "com.meteor.kikoeruflutter/screen_awake",
+      binaryMessenger: controller.binaryMessenger
+    )
+    screenAwakeChannel.setMethodCallHandler { call, result in
+      switch call.method {
+      case "setKeepScreenOn":
+        let args = call.arguments as? [String: Any]
+        let enabled = args?["enabled"] as? Bool ?? false
+        UIApplication.shared.isIdleTimerDisabled = enabled
+        result(true)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

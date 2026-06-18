@@ -1728,6 +1728,18 @@ abstract class S {
   /// **'Set audio format priority order'**
   String get audioFormatSubtitle;
 
+  /// No description provided for @keepScreenAwake.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Screen Awake'**
+  String get keepScreenAwake;
+
+  /// No description provided for @keepScreenAwakeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the screen on while an audio track is active for easier subtitle reading.'**
+  String get keepScreenAwakeDesc;
+
   /// No description provided for @blockingSettings.
   ///
   /// In en, this message translates to:

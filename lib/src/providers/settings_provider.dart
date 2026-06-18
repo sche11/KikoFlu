@@ -442,6 +442,41 @@ final pageSizeProvider = StateNotifierProvider<PageSizeNotifier, int>((ref) {
   return PageSizeNotifier();
 });
 
+/// 屏幕常亮设置
+class KeepScreenAwakeNotifier extends StateNotifier<bool> {
+  static const String preferenceKey = 'keep_screen_awake_enabled';
+
+  KeepScreenAwakeNotifier() : super(false) {
+    _loadPreference();
+  }
+
+  Future<void> _loadPreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      state = prefs.getBool(preferenceKey) ?? false;
+    } catch (e) {
+      if (!mounted) return;
+      state = false;
+    }
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    state = enabled;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(preferenceKey, enabled);
+    } catch (e) {
+      // ignore
+    }
+  }
+}
+
+final keepScreenAwakeProvider =
+    StateNotifierProvider<KeepScreenAwakeNotifier, bool>((ref) {
+  return KeepScreenAwakeNotifier();
+});
+
 /// 默认排序设置状态
 class DefaultSortState {
   final SortOrder order;

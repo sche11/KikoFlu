@@ -1,12 +1,13 @@
 package com.meteor.kikoeruflutter
 
-import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import com.ryanheise.audioservice.AudioServiceActivity
+import android.view.WindowManager
 
 class MainActivity : AudioServiceActivity() {
     private var floatingLyricPlugin: FloatingLyricPlugin? = null
+    private val screenAwakeChannelName = "com.meteor.kikoeruflutter/screen_awake"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -19,6 +20,26 @@ class MainActivity : AudioServiceActivity() {
         )
         floatingLyricPlugin?.attachChannel(channel)
         channel.setMethodCallHandler(floatingLyricPlugin)
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            screenAwakeChannelName
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "setKeepScreenOn" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    runOnUiThread {
+                        if (enabled) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        }
+                    }
+                    result.success(true)
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
 
     override fun onDestroy() {

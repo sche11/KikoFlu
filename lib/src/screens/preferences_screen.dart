@@ -320,6 +320,22 @@ class PreferencesScreen extends ConsumerWidget {
                   },
                 ),
                 Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                SwitchListTile(
+                  secondary: Icon(Icons.screen_lock_portrait,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(S.of(context).keepScreenAwake),
+                  subtitle: Text(
+                    S.of(context).keepScreenAwakeDesc,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  value: ref.watch(keepScreenAwakeProvider),
+                  onChanged: (value) {
+                    ref
+                        .read(keepScreenAwakeProvider.notifier)
+                        .setEnabled(value);
+                  },
+                ),
+                Divider(color: Theme.of(context).colorScheme.outlineVariant),
                 ListTile(
                   leading: Icon(Icons.block,
                       color: Theme.of(context).colorScheme.primary),

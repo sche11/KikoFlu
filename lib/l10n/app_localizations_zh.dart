@@ -869,6 +869,12 @@ class SZh extends S {
   String get audioFormatSubtitle => '设置音频格式的优先级顺序';
 
   @override
+  String get keepScreenAwake => '屏幕常亮';
+
+  @override
+  String get keepScreenAwakeDesc => '开启后，有音频轨道时保持屏幕常亮，便于查看字幕。';
+
+  @override
   String get blockingSettings => '屏蔽设置';
 
   @override
@@ -4232,6 +4238,12 @@ class SZhHant extends SZh {
 
   @override
   String get audioFormatSubtitle => '設定音訊格式的優先順序';
+
+  @override
+  String get keepScreenAwake => '螢幕常亮';
+
+  @override
+  String get keepScreenAwakeDesc => '開啟後，有音訊軌道時保持螢幕常亮，方便查看字幕。';
 
   @override
   String get blockingSettings => '封鎖設定';

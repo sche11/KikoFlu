@@ -306,6 +306,8 @@
   "llmSettingsSubtitle": "API URL, ключ и модель",
   "audioFormatPreference": "Аудиоформат",
   "audioFormatSubtitle": "Приоритет аудиоформатов",
+  "keepScreenAwake": "Не выключать экран",
+  "keepScreenAwakeDesc": "Если включено, экран не будет гаснуть при наличии аудиодорожки, чтобы было удобнее читать субтитры.",
   "blockingSettings": "Блокировки",
   "blockingSettingsSubtitle": "Заблокированные теги, сэйю и кружки",
   "audioPassthrough": "Аудио-проход (Beta)",

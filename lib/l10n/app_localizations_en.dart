@@ -888,6 +888,13 @@ class SEn extends S {
   String get audioFormatSubtitle => 'Set audio format priority order';
 
   @override
+  String get keepScreenAwake => 'Keep Screen Awake';
+
+  @override
+  String get keepScreenAwakeDesc =>
+      'Keep the screen on while an audio track is active for easier subtitle reading.';
+
+  @override
   String get blockingSettings => 'Blocking Settings';
 
   @override

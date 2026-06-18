@@ -891,6 +891,13 @@ class SRu extends S {
   String get audioFormatSubtitle => 'Приоритет аудиоформатов';
 
   @override
+  String get keepScreenAwake => 'Не выключать экран';
+
+  @override
+  String get keepScreenAwakeDesc =>
+      'Если включено, экран не будет гаснуть при наличии аудиодорожки, чтобы было удобнее читать субтитры.';
+
+  @override
   String get blockingSettings => 'Блокировки';
 
   @override

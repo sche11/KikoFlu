@@ -306,6 +306,8 @@
   "llmSettingsSubtitle": "API URL、キー、モデルを設定",
   "audioFormatPreference": "オーディオフォーマット設定",
   "audioFormatSubtitle": "オーディオフォーマットの優先順位を設定",
+  "keepScreenAwake": "画面を常にオン",
+  "keepScreenAwakeDesc": "有効にすると、音声トラックがある間は字幕を見やすくするため画面をオンのままにします。",
   "blockingSettings": "ブロック設定",
   "blockingSettingsSubtitle": "ブロック中のタグ、声優、サークルを管理",
   "audioPassthrough": "オーディオパススルー(Beta)",

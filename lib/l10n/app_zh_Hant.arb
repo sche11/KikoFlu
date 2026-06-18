@@ -306,6 +306,8 @@
   "llmSettingsSubtitle": "設定 API 位址、Key 和模型",
   "audioFormatPreference": "音訊格式偏好",
   "audioFormatSubtitle": "設定音訊格式的優先順序",
+  "keepScreenAwake": "螢幕常亮",
+  "keepScreenAwakeDesc": "開啟後，有音訊軌道時保持螢幕常亮，方便查看字幕。",
   "blockingSettings": "封鎖設定",
   "blockingSettingsSubtitle": "管理封鎖的標籤、聲優和社團",
   "audioPassthrough": "音訊直通(Beta)",

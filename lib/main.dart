@@ -36,6 +36,7 @@ import 'src/providers/locale_provider.dart';
 import 'src/providers/theme_provider.dart';
 import 'src/providers/update_provider.dart';
 import 'src/utils/global_keys.dart';
+import 'src/widgets/screen_awake_observer.dart';
 
 void _setEnv(String key, String value) {
   if (Platform.isWindows) {
@@ -441,7 +442,7 @@ class _KikoeruAppState extends ConsumerState<KikoeruApp>
           darkTheme:
               AppTheme.darkTheme(darkScheme, themeSettings.colorSchemeType),
           themeMode: mode,
-          home: _buildHomeScreen(),
+          home: ScreenAwakeObserver(child: _buildHomeScreen()),
         );
       },
     );
