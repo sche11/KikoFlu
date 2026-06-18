@@ -1668,6 +1668,102 @@ abstract class S {
   /// **'Select translation service provider:'**
   String get selectTranslationProvider;
 
+  /// No description provided for @translationSourceLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Source Language'**
+  String get translationSourceLanguage;
+
+  /// No description provided for @translationTargetLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Language'**
+  String get translationTargetLanguage;
+
+  /// No description provided for @selectTranslationSourceLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select source language:'**
+  String get selectTranslationSourceLanguage;
+
+  /// No description provided for @selectTranslationTargetLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select target language:'**
+  String get selectTranslationTargetLanguage;
+
+  /// No description provided for @translationLanguageAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Detect'**
+  String get translationLanguageAuto;
+
+  /// No description provided for @translationLanguageFollowApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow App Language'**
+  String get translationLanguageFollowApp;
+
+  /// No description provided for @translationLanguageZhHans.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplified Chinese'**
+  String get translationLanguageZhHans;
+
+  /// No description provided for @translationLanguageZhHant.
+  ///
+  /// In en, this message translates to:
+  /// **'Traditional Chinese'**
+  String get translationLanguageZhHant;
+
+  /// No description provided for @translationLanguageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get translationLanguageEnglish;
+
+  /// No description provided for @translationLanguageJapanese.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese'**
+  String get translationLanguageJapanese;
+
+  /// No description provided for @translationLanguageRussian.
+  ///
+  /// In en, this message translates to:
+  /// **'Russian'**
+  String get translationLanguageRussian;
+
+  /// No description provided for @translationLanguageCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get translationLanguageCustom;
+
+  /// No description provided for @translationCustomSourceLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Source Language'**
+  String get translationCustomSourceLanguage;
+
+  /// No description provided for @translationCustomTargetLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Target Language'**
+  String get translationCustomTargetLanguage;
+
+  /// No description provided for @translationCustomLanguageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Language name, e.g. Korean'**
+  String get translationCustomLanguageHint;
+
+  /// No description provided for @translationCustomLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom: {value}'**
+  String translationCustomLanguageLabel(String value);
+
   /// No description provided for @needsConfiguration.
   ///
   /// In en, this message translates to:

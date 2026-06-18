@@ -7,6 +7,7 @@ import 'youdao_translator.dart';
 import 'microsoft_translator.dart';
 import 'llm_translator.dart';
 import 'log_service.dart';
+import '../providers/settings_provider.dart';
 import '../utils/global_keys.dart';
 
 final _log = LogService.instance;
@@ -22,9 +23,7 @@ class TranslationService {
   final LLMTranslator _llmTranslator = LLMTranslator();
   static const String _cachePrefix = 'translation_cache_';
 
-  /// 根据应用当前 locale 获取翻译目标语言代码
-  Future<Locale> _getEffectiveLocale() async {
-    final prefs = await SharedPreferences.getInstance();
+  Locale _getEffectiveLocaleFromPreferences(SharedPreferences prefs) {
     final language = prefs.getString('locale_language');
     if (language == null) {
       return PlatformDispatcher.instance.locale;
@@ -33,6 +32,39 @@ class TranslationService {
     return script != null
         ? Locale.fromSubtags(languageCode: language, scriptCode: script)
         : Locale(language);
+  }
+
+  _TranslationLanguageConfig _getLanguageConfig(
+    SharedPreferences prefs,
+    String selectedSource,
+  ) {
+    final appLocale = _getEffectiveLocaleFromPreferences(prefs);
+    final preferences = TranslationLanguagePreferences(
+      sourceLanguage: TranslationSourceLanguage.fromValue(
+        prefs.getString(
+          TranslationLanguagePreferencesNotifier.keySourceLanguage,
+        ),
+      ),
+      targetLanguage: TranslationTargetLanguage.fromValue(
+        prefs.getString(
+          TranslationLanguagePreferencesNotifier.keyTargetLanguage,
+        ),
+      ),
+      customSourceLanguage: prefs.getString(
+            TranslationLanguagePreferencesNotifier.keyCustomSourceLanguage,
+          ) ??
+          '',
+      customTargetLanguage: prefs.getString(
+            TranslationLanguagePreferencesNotifier.keyCustomTargetLanguage,
+          ) ??
+          '',
+    );
+
+    return _TranslationLanguageConfig(
+      preferences: preferences,
+      allowCustomLanguage: selectedSource == TranslationSource.llm.value,
+      targetLocale: preferences.targetLanguage.resolveLocale(appLocale),
+    );
   }
 
   /// 判断 locale 是否是繁体中文
@@ -88,32 +120,57 @@ class TranslationService {
   }
 
   /// 获取 LLM 默认 prompt（基于当前 locale）
-  static String getDefaultLLMPrompt(Locale locale) {
-    final langName = llmTargetLanguageName(locale);
-    return 'You are a professional translator. Translate the following text into $langName. Output ONLY the translated text without any explanations, notes, or markdown code blocks.';
+  static String getDefaultLLMPrompt(
+    Locale locale, {
+    String? sourceLanguageName,
+    String? targetLanguageName,
+  }) {
+    final langName = targetLanguageName ?? llmTargetLanguageName(locale);
+    final sourceInstruction =
+        sourceLanguageName == null ? '' : ' from $sourceLanguageName';
+    return 'You are a professional translator. Translate the following text$sourceInstruction into $langName. Output ONLY the translated text without any explanations, notes, or markdown code blocks.';
+  }
+
+  static bool isGeneratedDefaultLLMPrompt(String prompt) {
+    final trimmed = prompt.trim();
+    return trimmed.startsWith(
+          'You are a professional translator. Translate the following text',
+        ) &&
+        trimmed.contains(' into ') &&
+        trimmed.endsWith(
+          'Output ONLY the translated text without any explanations, notes, or markdown code blocks.',
+        );
   }
 
   /// 获取当前 locale 对应的默认 LLM prompt
   Future<String> getDefaultLLMPromptForCurrentLocale() async {
-    final locale = await _getEffectiveLocale();
-    return getDefaultLLMPrompt(locale);
+    final prefs = await SharedPreferences.getInstance();
+    final selectedSource = prefs.getString('translation_source') ?? 'google';
+    final languageConfig = _getLanguageConfig(prefs, selectedSource);
+    return getDefaultLLMPrompt(
+      languageConfig.targetLocale,
+      sourceLanguageName: languageConfig.llmSourceLanguageName(null),
+      targetLanguageName: languageConfig.llmTargetLanguageName(),
+    );
   }
 
   /// 翻译文本到应用当前语言
   Future<String> translate(String text, {String? sourceLang}) async {
     if (text.isEmpty) return text;
 
-    final locale = await _getEffectiveLocale();
+    final prefs = await SharedPreferences.getInstance();
+    final selectedSource = prefs.getString('translation_source') ?? 'google';
+    final languageConfig = _getLanguageConfig(prefs, selectedSource);
+    final cacheSourceLang = languageConfig.cacheSourceLang(sourceLang);
+    final cacheTargetLang = languageConfig.cacheTargetLang();
+    final targetLocale = languageConfig.targetLocale;
 
     // 检查缓存
     final cachedTranslation =
-        await _getCachedTranslation(text, sourceLang, locale);
+        await _getCachedTranslation(text, cacheSourceLang, cacheTargetLang);
     if (cachedTranslation != null) {
       return cachedTranslation;
     }
-
-    final prefs = await SharedPreferences.getInstance();
-    final selectedSource = prefs.getString('translation_source') ?? 'google';
 
     // 构建尝试列表
     final sourcesToTry = <String>[selectedSource];
@@ -138,19 +195,25 @@ class TranslationService {
         String result;
         if (source == 'youdao') {
           result = await _youdaoTranslator.translate(text,
-              sourceLang: sourceLang, targetLang: _youdaoTargetLang(locale));
+              sourceLang: languageConfig.youdaoSourceLang(sourceLang),
+              targetLang: _youdaoTargetLang(targetLocale));
         } else if (source == 'microsoft') {
           result = await _microsoftTranslator.translate(text,
-              sourceLang: sourceLang, targetLang: _microsoftTargetLang(locale));
+              sourceLang: languageConfig.microsoftSourceLang(sourceLang),
+              targetLang: _microsoftTargetLang(targetLocale));
         } else if (source == 'llm') {
           result = await _llmTranslator.translate(text,
-              sourceLang: sourceLang, locale: locale);
+              sourceLang: languageConfig.llmSourceLanguageName(sourceLang),
+              locale: targetLocale,
+              sourceLanguageName:
+                  languageConfig.llmSourceLanguageName(sourceLang),
+              targetLanguageName: languageConfig.llmTargetLanguageName());
         } else {
           // Google 翻译
           final translation = await _googleTranslator.translate(
             text,
-            from: sourceLang ?? 'auto',
-            to: _googleTargetLang(locale),
+            from: languageConfig.googleSourceLang(sourceLang),
+            to: _googleTargetLang(targetLocale),
           );
           result = translation.text;
         }
@@ -161,7 +224,7 @@ class TranslationService {
         }
 
         // 缓存结果
-        await _cacheTranslation(text, result, sourceLang, locale);
+        await _cacheTranslation(text, result, cacheSourceLang, cacheTargetLang);
 
         return result;
       } catch (e) {
@@ -324,10 +387,10 @@ class TranslationService {
 
   /// 获取缓存的翻译
   Future<String?> _getCachedTranslation(
-      String text, String? sourceLang, Locale targetLocale) async {
+      String text, String sourceLang, String targetLang) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = _getCacheKey(text, sourceLang, targetLocale);
+      final key = _getCacheKey(text, sourceLang, targetLang);
       final cached = prefs.getString(key);
       if (cached != null) {
         final data = json.decode(cached);
@@ -346,10 +409,10 @@ class TranslationService {
 
   /// 缓存翻译结果
   Future<void> _cacheTranslation(String text, String translation,
-      String? sourceLang, Locale targetLocale) async {
+      String sourceLang, String targetLang) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final key = _getCacheKey(text, sourceLang, targetLocale);
+      final key = _getCacheKey(text, sourceLang, targetLang);
       final data = json.encode({
         'translation': translation,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
@@ -361,12 +424,8 @@ class TranslationService {
   }
 
   /// 生成缓存键（包含目标语言）
-  String _getCacheKey(String text, String? sourceLang, Locale targetLocale) {
-    final lang = sourceLang ?? 'auto';
-    final target = targetLocale.scriptCode != null
-        ? '${targetLocale.languageCode}_${targetLocale.scriptCode}'
-        : targetLocale.languageCode;
-    return '$_cachePrefix${lang}_${target}_${text.hashCode}';
+  String _getCacheKey(String text, String sourceLang, String targetLang) {
+    return '$_cachePrefix${sourceLang}_${targetLang}_${text.hashCode}';
   }
 
   /// 清除所有翻译缓存
@@ -393,5 +452,111 @@ class TranslationService {
       _log.captureOutput('Language detection error: $e');
       return 'unknown';
     }
+  }
+}
+
+class _TranslationLanguageConfig {
+  const _TranslationLanguageConfig({
+    required this.preferences,
+    required this.allowCustomLanguage,
+    required this.targetLocale,
+  });
+
+  final TranslationLanguagePreferences preferences;
+  final bool allowCustomLanguage;
+  final Locale targetLocale;
+
+  TranslationSourceLanguage get sourceLanguage {
+    if (!allowCustomLanguage &&
+        preferences.sourceLanguage == TranslationSourceLanguage.custom) {
+      return TranslationSourceLanguage.automatic;
+    }
+    return preferences.sourceLanguage;
+  }
+
+  String googleSourceLang(String? sourceLang) {
+    return _selectedSource(sourceLang, sourceLanguage.googleCode) ?? 'auto';
+  }
+
+  String? youdaoSourceLang(String? sourceLang) {
+    return _selectedSource(sourceLang, sourceLanguage.youdaoCode);
+  }
+
+  String? microsoftSourceLang(String? sourceLang) {
+    return _selectedSource(sourceLang, sourceLanguage.microsoftCode);
+  }
+
+  String cacheSourceLang(String? sourceLang) {
+    if (allowCustomLanguage &&
+        preferences.sourceLanguage == TranslationSourceLanguage.custom &&
+        preferences.customSourceLanguage.isNotEmpty) {
+      return 'custom:${preferences.customSourceLanguage}';
+    }
+    if (sourceLanguage != TranslationSourceLanguage.automatic) {
+      return sourceLanguage.cacheCode;
+    }
+    return sourceLang ?? sourceLanguage.cacheCode;
+  }
+
+  String cacheTargetLang() {
+    if (allowCustomLanguage &&
+        preferences.targetLanguage == TranslationTargetLanguage.custom &&
+        preferences.customTargetLanguage.isNotEmpty) {
+      return 'custom:${preferences.customTargetLanguage}';
+    }
+    return targetLocale.scriptCode != null
+        ? '${targetLocale.languageCode}_${targetLocale.scriptCode}'
+        : targetLocale.languageCode;
+  }
+
+  String? llmSourceLanguageName(String? sourceLang) {
+    if (allowCustomLanguage &&
+        preferences.sourceLanguage == TranslationSourceLanguage.custom &&
+        preferences.customSourceLanguage.isNotEmpty) {
+      return preferences.customSourceLanguage;
+    }
+    if (sourceLanguage != TranslationSourceLanguage.automatic) {
+      return sourceLanguage.llmLanguageName;
+    }
+    if (sourceLang != null && sourceLang != 'auto') {
+      return _llmLanguageNameForCode(sourceLang);
+    }
+    return null;
+  }
+
+  String? llmTargetLanguageName() {
+    if (allowCustomLanguage &&
+        preferences.targetLanguage == TranslationTargetLanguage.custom &&
+        preferences.customTargetLanguage.isNotEmpty) {
+      return preferences.customTargetLanguage;
+    }
+    return null;
+  }
+
+  String? _selectedSource(String? sourceLang, String? preferredSourceCode) {
+    if (sourceLanguage != TranslationSourceLanguage.automatic) {
+      return preferredSourceCode;
+    }
+    return sourceLang;
+  }
+
+  String _llmLanguageNameForCode(String code) {
+    return switch (code.toLowerCase()) {
+      'zh' ||
+      'zh-cn' ||
+      'zh-hans' ||
+      'zh_chs' ||
+      'zh-chs' =>
+        'Simplified Chinese (zh-CN)',
+      'zh-tw' ||
+      'zh-hant' ||
+      'zh_cht' ||
+      'zh-cht' =>
+        'Traditional Chinese (zh-TW)',
+      'en' => 'English',
+      'ja' => 'Japanese',
+      'ru' => 'Russian',
+      _ => code,
+    };
   }
 }

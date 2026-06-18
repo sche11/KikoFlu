@@ -8,7 +8,10 @@ class LLMTranslator {
   final Dio _dio = Dio();
 
   Future<String> translate(String text,
-      {String? sourceLang, Locale? locale}) async {
+      {String? sourceLang,
+      Locale? locale,
+      String? sourceLanguageName,
+      String? targetLanguageName}) async {
     if (text.isEmpty) return text;
 
     try {
@@ -18,8 +21,15 @@ class LLMTranslator {
       final apiKey = prefs.getString('llm_settings_api_key') ?? '';
       final model = prefs.getString('llm_settings_model') ?? 'gpt-3.5-turbo';
       final savedPrompt = prefs.getString('llm_settings_prompt');
-      final prompt = (savedPrompt == null || savedPrompt.isEmpty)
-          ? TranslationService.getDefaultLLMPrompt(locale ?? const Locale('zh'))
+      final useDefaultPrompt = savedPrompt == null ||
+          savedPrompt.isEmpty ||
+          TranslationService.isGeneratedDefaultLLMPrompt(savedPrompt);
+      final prompt = useDefaultPrompt
+          ? TranslationService.getDefaultLLMPrompt(
+              locale ?? const Locale('zh'),
+              sourceLanguageName: sourceLanguageName,
+              targetLanguageName: targetLanguageName,
+            )
           : savedPrompt;
 
       if (apiKey.isEmpty) {

@@ -858,6 +858,56 @@ class SEn extends S {
       'Select translation service provider:';
 
   @override
+  String get translationSourceLanguage => 'Source Language';
+
+  @override
+  String get translationTargetLanguage => 'Target Language';
+
+  @override
+  String get selectTranslationSourceLanguage => 'Select source language:';
+
+  @override
+  String get selectTranslationTargetLanguage => 'Select target language:';
+
+  @override
+  String get translationLanguageAuto => 'Auto Detect';
+
+  @override
+  String get translationLanguageFollowApp => 'Follow App Language';
+
+  @override
+  String get translationLanguageZhHans => 'Simplified Chinese';
+
+  @override
+  String get translationLanguageZhHant => 'Traditional Chinese';
+
+  @override
+  String get translationLanguageEnglish => 'English';
+
+  @override
+  String get translationLanguageJapanese => 'Japanese';
+
+  @override
+  String get translationLanguageRussian => 'Russian';
+
+  @override
+  String get translationLanguageCustom => 'Custom';
+
+  @override
+  String get translationCustomSourceLanguage => 'Custom Source Language';
+
+  @override
+  String get translationCustomTargetLanguage => 'Custom Target Language';
+
+  @override
+  String get translationCustomLanguageHint => 'Language name, e.g. Korean';
+
+  @override
+  String translationCustomLanguageLabel(String value) {
+    return 'Custom: $value';
+  }
+
+  @override
   String get needsConfiguration => 'Needs configuration';
 
   @override

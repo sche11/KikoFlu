@@ -840,6 +840,56 @@ class SJa extends S {
   String get selectTranslationProvider => '翻訳サービスプロバイダーを選択：';
 
   @override
+  String get translationSourceLanguage => 'ソース言語';
+
+  @override
+  String get translationTargetLanguage => 'ターゲット言語';
+
+  @override
+  String get selectTranslationSourceLanguage => 'ソース言語を選択：';
+
+  @override
+  String get selectTranslationTargetLanguage => 'ターゲット言語を選択：';
+
+  @override
+  String get translationLanguageAuto => '自動検出';
+
+  @override
+  String get translationLanguageFollowApp => 'アプリ言語に従う';
+
+  @override
+  String get translationLanguageZhHans => '簡体字中国語';
+
+  @override
+  String get translationLanguageZhHant => '繁体字中国語';
+
+  @override
+  String get translationLanguageEnglish => '英語';
+
+  @override
+  String get translationLanguageJapanese => '日本語';
+
+  @override
+  String get translationLanguageRussian => 'ロシア語';
+
+  @override
+  String get translationLanguageCustom => 'カスタム';
+
+  @override
+  String get translationCustomSourceLanguage => 'カスタムソース言語';
+
+  @override
+  String get translationCustomTargetLanguage => 'カスタムターゲット言語';
+
+  @override
+  String get translationCustomLanguageHint => '言語名、例: Korean';
+
+  @override
+  String translationCustomLanguageLabel(String value) {
+    return 'カスタム: $value';
+  }
+
+  @override
   String get needsConfiguration => '設定が必要';
 
   @override

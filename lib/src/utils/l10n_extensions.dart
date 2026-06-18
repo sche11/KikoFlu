@@ -136,6 +136,36 @@ extension TranslationSourceL10n on TranslationSource {
   }
 }
 
+extension TranslationSourceLanguageL10n on TranslationSourceLanguage {
+  String localizedName(BuildContext context) {
+    final s = S.of(context);
+    return switch (this) {
+      TranslationSourceLanguage.automatic => s.translationLanguageAuto,
+      TranslationSourceLanguage.zhHans => s.translationLanguageZhHans,
+      TranslationSourceLanguage.zhHant => s.translationLanguageZhHant,
+      TranslationSourceLanguage.english => s.translationLanguageEnglish,
+      TranslationSourceLanguage.japanese => s.translationLanguageJapanese,
+      TranslationSourceLanguage.russian => s.translationLanguageRussian,
+      TranslationSourceLanguage.custom => s.translationLanguageCustom,
+    };
+  }
+}
+
+extension TranslationTargetLanguageL10n on TranslationTargetLanguage {
+  String localizedName(BuildContext context) {
+    final s = S.of(context);
+    return switch (this) {
+      TranslationTargetLanguage.followApp => s.translationLanguageFollowApp,
+      TranslationTargetLanguage.zhHans => s.translationLanguageZhHans,
+      TranslationTargetLanguage.zhHant => s.translationLanguageZhHant,
+      TranslationTargetLanguage.english => s.translationLanguageEnglish,
+      TranslationTargetLanguage.japanese => s.translationLanguageJapanese,
+      TranslationTargetLanguage.russian => s.translationLanguageRussian,
+      TranslationTargetLanguage.custom => s.translationLanguageCustom,
+    };
+  }
+}
+
 // ============================================================
 // MyReviewFilter
 // ============================================================

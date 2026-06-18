@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/sort_options.dart';
@@ -93,6 +95,140 @@ enum TranslationSource {
   final String displayName;
   final String value;
   const TranslationSource(this.displayName, this.value);
+}
+
+/// 翻译源语言
+enum TranslationSourceLanguage {
+  automatic('auto'),
+  zhHans('zh_hans'),
+  zhHant('zh_hant'),
+  english('en'),
+  japanese('ja'),
+  russian('ru'),
+  custom('custom');
+
+  final String value;
+  const TranslationSourceLanguage(this.value);
+
+  static TranslationSourceLanguage fromValue(String? value) {
+    return TranslationSourceLanguage.values.firstWhere(
+      (language) => language.value == value,
+      orElse: () => TranslationSourceLanguage.automatic,
+    );
+  }
+
+  String? get googleCode {
+    return switch (this) {
+      TranslationSourceLanguage.automatic => null,
+      TranslationSourceLanguage.zhHans => 'zh-cn',
+      TranslationSourceLanguage.zhHant => 'zh-tw',
+      TranslationSourceLanguage.english => 'en',
+      TranslationSourceLanguage.japanese => 'ja',
+      TranslationSourceLanguage.russian => 'ru',
+      TranslationSourceLanguage.custom => null,
+    };
+  }
+
+  String? get youdaoCode {
+    return switch (this) {
+      TranslationSourceLanguage.automatic => null,
+      TranslationSourceLanguage.zhHans => 'zh-CHS',
+      TranslationSourceLanguage.zhHant => 'zh-CHT',
+      TranslationSourceLanguage.english => 'en',
+      TranslationSourceLanguage.japanese => 'ja',
+      TranslationSourceLanguage.russian => 'ru',
+      TranslationSourceLanguage.custom => null,
+    };
+  }
+
+  String? get microsoftCode {
+    return switch (this) {
+      TranslationSourceLanguage.automatic => null,
+      TranslationSourceLanguage.zhHans => 'zh-Hans',
+      TranslationSourceLanguage.zhHant => 'zh-Hant',
+      TranslationSourceLanguage.english => 'en',
+      TranslationSourceLanguage.japanese => 'ja',
+      TranslationSourceLanguage.russian => 'ru',
+      TranslationSourceLanguage.custom => null,
+    };
+  }
+
+  String get cacheCode => value;
+
+  String? get llmLanguageName {
+    return switch (this) {
+      TranslationSourceLanguage.automatic => null,
+      TranslationSourceLanguage.zhHans => 'Simplified Chinese (zh-CN)',
+      TranslationSourceLanguage.zhHant => 'Traditional Chinese (zh-TW)',
+      TranslationSourceLanguage.english => 'English',
+      TranslationSourceLanguage.japanese => 'Japanese',
+      TranslationSourceLanguage.russian => 'Russian',
+      TranslationSourceLanguage.custom => null,
+    };
+  }
+}
+
+/// 翻译目标语言
+enum TranslationTargetLanguage {
+  followApp('follow_app'),
+  zhHans('zh_hans'),
+  zhHant('zh_hant'),
+  english('en'),
+  japanese('ja'),
+  russian('ru'),
+  custom('custom');
+
+  final String value;
+  const TranslationTargetLanguage(this.value);
+
+  static TranslationTargetLanguage fromValue(String? value) {
+    return TranslationTargetLanguage.values.firstWhere(
+      (language) => language.value == value,
+      orElse: () => TranslationTargetLanguage.followApp,
+    );
+  }
+
+  Locale resolveLocale(Locale appLocale) {
+    return switch (this) {
+      TranslationTargetLanguage.followApp => appLocale,
+      TranslationTargetLanguage.zhHans =>
+        const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+      TranslationTargetLanguage.zhHant =>
+        const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+      TranslationTargetLanguage.english => const Locale('en'),
+      TranslationTargetLanguage.japanese => const Locale('ja'),
+      TranslationTargetLanguage.russian => const Locale('ru'),
+      TranslationTargetLanguage.custom => appLocale,
+    };
+  }
+}
+
+class TranslationLanguagePreferences {
+  final TranslationSourceLanguage sourceLanguage;
+  final TranslationTargetLanguage targetLanguage;
+  final String customSourceLanguage;
+  final String customTargetLanguage;
+
+  const TranslationLanguagePreferences({
+    this.sourceLanguage = TranslationSourceLanguage.automatic,
+    this.targetLanguage = TranslationTargetLanguage.followApp,
+    this.customSourceLanguage = '',
+    this.customTargetLanguage = '',
+  });
+
+  TranslationLanguagePreferences copyWith({
+    TranslationSourceLanguage? sourceLanguage,
+    TranslationTargetLanguage? targetLanguage,
+    String? customSourceLanguage,
+    String? customTargetLanguage,
+  }) {
+    return TranslationLanguagePreferences(
+      sourceLanguage: sourceLanguage ?? this.sourceLanguage,
+      targetLanguage: targetLanguage ?? this.targetLanguage,
+      customSourceLanguage: customSourceLanguage ?? this.customSourceLanguage,
+      customTargetLanguage: customTargetLanguage ?? this.customTargetLanguage,
+    );
+  }
 }
 
 class LLMSettings {
@@ -208,6 +344,91 @@ class TranslationSourceNotifier extends StateNotifier<TranslationSource> {
 final translationSourceProvider =
     StateNotifierProvider<TranslationSourceNotifier, TranslationSource>((ref) {
   return TranslationSourceNotifier();
+});
+
+/// 翻译语言设置
+class TranslationLanguagePreferencesNotifier
+    extends StateNotifier<TranslationLanguagePreferences> {
+  static const String keySourceLanguage = 'translation_source_language';
+  static const String keyTargetLanguage = 'translation_target_language';
+  static const String keyCustomSourceLanguage =
+      'translation_custom_source_language';
+  static const String keyCustomTargetLanguage =
+      'translation_custom_target_language';
+
+  TranslationLanguagePreferencesNotifier()
+      : super(const TranslationLanguagePreferences()) {
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final preferences = TranslationLanguagePreferences(
+        sourceLanguage: TranslationSourceLanguage.fromValue(
+          prefs.getString(keySourceLanguage),
+        ),
+        targetLanguage: TranslationTargetLanguage.fromValue(
+          prefs.getString(keyTargetLanguage),
+        ),
+        customSourceLanguage: prefs.getString(keyCustomSourceLanguage) ?? '',
+        customTargetLanguage: prefs.getString(keyCustomTargetLanguage) ?? '',
+      );
+      if (!mounted) return;
+      state = preferences;
+    } catch (e) {
+      if (!mounted) return;
+      state = const TranslationLanguagePreferences();
+    }
+  }
+
+  Future<void> updateSourceLanguage(
+    TranslationSourceLanguage sourceLanguage,
+  ) async {
+    state = state.copyWith(sourceLanguage: sourceLanguage);
+    await _savePreferences();
+  }
+
+  Future<void> updateTargetLanguage(
+    TranslationTargetLanguage targetLanguage,
+  ) async {
+    state = state.copyWith(targetLanguage: targetLanguage);
+    await _savePreferences();
+  }
+
+  Future<void> updateCustomSourceLanguage(String languageName) async {
+    state = state.copyWith(customSourceLanguage: languageName.trim());
+    await _savePreferences();
+  }
+
+  Future<void> updateCustomTargetLanguage(String languageName) async {
+    state = state.copyWith(customTargetLanguage: languageName.trim());
+    await _savePreferences();
+  }
+
+  Future<void> _savePreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(keySourceLanguage, state.sourceLanguage.value);
+      await prefs.setString(keyTargetLanguage, state.targetLanguage.value);
+      await prefs.setString(
+        keyCustomSourceLanguage,
+        state.customSourceLanguage,
+      );
+      await prefs.setString(
+        keyCustomTargetLanguage,
+        state.customTargetLanguage,
+      );
+    } catch (e) {
+      // ignore
+    }
+  }
+}
+
+final translationLanguagePreferencesProvider = StateNotifierProvider<
+    TranslationLanguagePreferencesNotifier,
+    TranslationLanguagePreferences>((ref) {
+  return TranslationLanguagePreferencesNotifier();
 });
 
 /// 音频格式优先级设置

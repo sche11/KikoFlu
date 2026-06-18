@@ -36,8 +36,7 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_promptController.text.isEmpty) {
-      final locale = Localizations.localeOf(context);
-      _promptController.text = TranslationService.getDefaultLLMPrompt(locale);
+      _fillDefaultPrompt();
     }
   }
 
@@ -52,11 +51,14 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
 
   Future<void> _saveSettings() async {
     if (_formKey.currentState!.validate()) {
+      final prompt = _promptController.text.trim();
       final settings = LLMSettings(
         apiUrl: _apiUrlController.text.trim(),
         apiKey: _apiKeyController.text.trim(),
         model: _modelController.text.trim(),
-        prompt: _promptController.text.trim(),
+        prompt: TranslationService.isGeneratedDefaultLLMPrompt(prompt)
+            ? ''
+            : prompt,
         concurrency: _concurrency.toInt(),
       );
 
@@ -69,11 +71,24 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
     }
   }
 
+  Future<void> _fillDefaultPrompt() async {
+    final prompt =
+        await TranslationService().getDefaultLLMPromptForCurrentLocale();
+    if (!mounted || _promptController.text.isNotEmpty) return;
+    _promptController.text = prompt;
+  }
+
+  Future<void> _restoreDefaultPrompt() async {
+    _promptController.text =
+        await TranslationService().getDefaultLLMPromptForCurrentLocale();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).llmTranslationSettings, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).llmTranslationSettings,
+            style: const TextStyle(fontSize: 18)),
       ),
       body: Form(
         key: _formKey,
@@ -141,7 +156,8 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                       children: [
                         Row(
                           children: [
-                            Text(S.of(context).concurrencyCount, style: const TextStyle(fontSize: 16)),
+                            Text(S.of(context).concurrencyCount,
+                                style: const TextStyle(fontSize: 16)),
                             const SizedBox(width: 8),
                             Text(
                               '${_concurrency.toInt()}',
@@ -154,7 +170,8 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                         ),
                         Text(
                           S.of(context).concurrencyDescription,
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style:
+                              const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                         Slider(
                           value: _concurrency,
@@ -210,11 +227,7 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     TextButton.icon(
-                      onPressed: () {
-                        final locale = Localizations.localeOf(context);
-                        _promptController.text =
-                            TranslationService.getDefaultLLMPrompt(locale);
-                      },
+                      onPressed: _restoreDefaultPrompt,
                       icon: const Icon(Icons.restore),
                       label: Text(S.of(context).restoreDefaultPrompt),
                     ),

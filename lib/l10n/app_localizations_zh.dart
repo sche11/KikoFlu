@@ -839,6 +839,56 @@ class SZh extends S {
   String get selectTranslationProvider => '选择翻译服务提供商：';
 
   @override
+  String get translationSourceLanguage => '源语言';
+
+  @override
+  String get translationTargetLanguage => '目标语言';
+
+  @override
+  String get selectTranslationSourceLanguage => '选择源语言：';
+
+  @override
+  String get selectTranslationTargetLanguage => '选择目标语言：';
+
+  @override
+  String get translationLanguageAuto => '自动检测';
+
+  @override
+  String get translationLanguageFollowApp => '跟随 App 语言';
+
+  @override
+  String get translationLanguageZhHans => '简体中文';
+
+  @override
+  String get translationLanguageZhHant => '繁体中文';
+
+  @override
+  String get translationLanguageEnglish => '英语';
+
+  @override
+  String get translationLanguageJapanese => '日语';
+
+  @override
+  String get translationLanguageRussian => '俄语';
+
+  @override
+  String get translationLanguageCustom => '自定义';
+
+  @override
+  String get translationCustomSourceLanguage => '自定义源语言';
+
+  @override
+  String get translationCustomTargetLanguage => '自定义目标语言';
+
+  @override
+  String get translationCustomLanguageHint => '语言名称，例如 Korean';
+
+  @override
+  String translationCustomLanguageLabel(String value) {
+    return '自定义: $value';
+  }
+
+  @override
   String get needsConfiguration => '需要配置';
 
   @override
@@ -4235,6 +4285,56 @@ class SZhHant extends SZh {
 
   @override
   String get selectTranslationProvider => '選擇翻譯服務提供商：';
+
+  @override
+  String get translationSourceLanguage => '源語言';
+
+  @override
+  String get translationTargetLanguage => '目標語言';
+
+  @override
+  String get selectTranslationSourceLanguage => '選擇源語言：';
+
+  @override
+  String get selectTranslationTargetLanguage => '選擇目標語言：';
+
+  @override
+  String get translationLanguageAuto => '自動偵測';
+
+  @override
+  String get translationLanguageFollowApp => '跟隨 App 語言';
+
+  @override
+  String get translationLanguageZhHans => '簡體中文';
+
+  @override
+  String get translationLanguageZhHant => '繁體中文';
+
+  @override
+  String get translationLanguageEnglish => '英語';
+
+  @override
+  String get translationLanguageJapanese => '日語';
+
+  @override
+  String get translationLanguageRussian => '俄語';
+
+  @override
+  String get translationLanguageCustom => '自訂';
+
+  @override
+  String get translationCustomSourceLanguage => '自訂源語言';
+
+  @override
+  String get translationCustomTargetLanguage => '自訂目標語言';
+
+  @override
+  String get translationCustomLanguageHint => '語言名稱，例如 Korean';
+
+  @override
+  String translationCustomLanguageLabel(String value) {
+    return '自訂: $value';
+  }
 
   @override
   String get needsConfiguration => '需要設定';

@@ -860,6 +860,56 @@ class SRu extends S {
   String get selectTranslationProvider => 'Выберите службу перевода:';
 
   @override
+  String get translationSourceLanguage => 'Исходный язык';
+
+  @override
+  String get translationTargetLanguage => 'Целевой язык';
+
+  @override
+  String get selectTranslationSourceLanguage => 'Выберите исходный язык:';
+
+  @override
+  String get selectTranslationTargetLanguage => 'Выберите целевой язык:';
+
+  @override
+  String get translationLanguageAuto => 'Автоопределение';
+
+  @override
+  String get translationLanguageFollowApp => 'Язык приложения';
+
+  @override
+  String get translationLanguageZhHans => 'Упрощённый китайский';
+
+  @override
+  String get translationLanguageZhHant => 'Традиционный китайский';
+
+  @override
+  String get translationLanguageEnglish => 'Английский';
+
+  @override
+  String get translationLanguageJapanese => 'Японский';
+
+  @override
+  String get translationLanguageRussian => 'Русский';
+
+  @override
+  String get translationLanguageCustom => 'Свой';
+
+  @override
+  String get translationCustomSourceLanguage => 'Свой исходный язык';
+
+  @override
+  String get translationCustomTargetLanguage => 'Свой целевой язык';
+
+  @override
+  String get translationCustomLanguageHint => 'Название языка, например Korean';
+
+  @override
+  String translationCustomLanguageLabel(String value) {
+    return 'Свой: $value';
+  }
+
+  @override
   String get needsConfiguration => 'Требуется настройка';
 
   @override
