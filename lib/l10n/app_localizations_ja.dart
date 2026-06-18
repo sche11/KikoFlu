@@ -3287,6 +3287,33 @@ class SJa extends S {
   String get showWorkCircle => '作品のサークルを表示';
 
   @override
+  String get workCardSizeSubtitle => 'グリッド密度を調整して、カバーを大きくするか現在のサイズを保ちます';
+
+  @override
+  String get workCardFontSize => 'カード文字サイズ';
+
+  @override
+  String get workCardFontSizeSubtitle => '作品カードのタイトルと情報テキストのサイズを調整します';
+
+  @override
+  String get cardSizeNormal => '標準';
+
+  @override
+  String get cardSizeLarge => '大';
+
+  @override
+  String get cardSizeExtraLarge => '特大';
+
+  @override
+  String get fontSizeNormal => '標準';
+
+  @override
+  String get fontSizeLarge => '大';
+
+  @override
+  String get fontSizeExtraLarge => '特大';
+
+  @override
   String get showSubtitleTagOnCard => '作品カードに字幕タグを表示';
 
   @override

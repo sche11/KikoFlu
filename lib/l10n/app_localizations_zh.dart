@@ -3269,6 +3269,33 @@ class SZh extends S {
   String get showWorkCircle => '显示作品所属社团';
 
   @override
+  String get workCardSizeSubtitle => '调整网格密度，让封面更大或保持当前大小';
+
+  @override
+  String get workCardFontSize => '卡片文字大小';
+
+  @override
+  String get workCardFontSizeSubtitle => '调整作品卡片的标题和信息文字大小';
+
+  @override
+  String get cardSizeNormal => '默认';
+
+  @override
+  String get cardSizeLarge => '大';
+
+  @override
+  String get cardSizeExtraLarge => '特大';
+
+  @override
+  String get fontSizeNormal => '默认';
+
+  @override
+  String get fontSizeLarge => '大';
+
+  @override
+  String get fontSizeExtraLarge => '特大';
+
+  @override
   String get showSubtitleTagOnCard => '显示作品卡片上的字幕标签';
 
   @override
@@ -6638,6 +6665,33 @@ class SZhHant extends SZh {
 
   @override
   String get showWorkCircle => '顯示作品所屬社團';
+
+  @override
+  String get workCardSizeSubtitle => '調整網格密度，讓封面更大或維持目前大小';
+
+  @override
+  String get workCardFontSize => '卡片文字大小';
+
+  @override
+  String get workCardFontSizeSubtitle => '調整作品卡片的標題和資訊文字大小';
+
+  @override
+  String get cardSizeNormal => '預設';
+
+  @override
+  String get cardSizeLarge => '大';
+
+  @override
+  String get cardSizeExtraLarge => '特大';
+
+  @override
+  String get fontSizeNormal => '預設';
+
+  @override
+  String get fontSizeLarge => '大';
+
+  @override
+  String get fontSizeExtraLarge => '特大';
 
   @override
   String get showSubtitleTagOnCard => '顯示作品卡片上的字幕標籤';

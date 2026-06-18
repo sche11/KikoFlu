@@ -26,6 +26,33 @@ class WorkCardDisplaySettingsScreen extends ConsumerWidget {
           Card(
             child: Column(
               children: [
+                _SegmentedSettingTile<WorkCardSize>(
+                  icon: Icons.photo_size_select_large,
+                  title: S.of(context).cardSize,
+                  subtitle: S.of(context).workCardSizeSubtitle,
+                  selected: settings.cardSize,
+                  options: {
+                    WorkCardSize.normal: S.of(context).cardSizeNormal,
+                    WorkCardSize.large: S.of(context).cardSizeLarge,
+                    WorkCardSize.extraLarge: S.of(context).cardSizeExtraLarge,
+                  },
+                  onSelected: notifier.updateCardSize,
+                ),
+                Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                _SegmentedSettingTile<WorkCardFontScale>(
+                  icon: Icons.format_size,
+                  title: S.of(context).workCardFontSize,
+                  subtitle: S.of(context).workCardFontSizeSubtitle,
+                  selected: settings.fontScale,
+                  options: {
+                    WorkCardFontScale.normal: S.of(context).fontSizeNormal,
+                    WorkCardFontScale.large: S.of(context).fontSizeLarge,
+                    WorkCardFontScale.extraLarge:
+                        S.of(context).fontSizeExtraLarge,
+                  },
+                  onSelected: notifier.updateFontScale,
+                ),
+                Divider(color: Theme.of(context).colorScheme.outlineVariant),
                 SwitchListTile(
                   secondary: Icon(
                     Icons.star,
@@ -103,6 +130,64 @@ class WorkCardDisplaySettingsScreen extends ConsumerWidget {
                   onChanged: (_) => notifier.toggleSubtitleTag(),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SegmentedSettingTile<T> extends StatelessWidget {
+  const _SegmentedSettingTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.selected,
+    required this.options,
+    required this.onSelected,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final T selected;
+  final Map<T, String> options;
+  final ValueChanged<T> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: Icon(
+              icon,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            title: Text(title),
+            subtitle: Text(subtitle),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<T>(
+                showSelectedIcon: false,
+                segments: [
+                  for (final entry in options.entries)
+                    ButtonSegment<T>(
+                      value: entry.key,
+                      label: Text(entry.value),
+                    ),
+                ],
+                selected: {selected},
+                onSelectionChanged: (selection) {
+                  onSelected(selection.single);
+                },
+              ),
             ),
           ),
         ],

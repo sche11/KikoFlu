@@ -6006,6 +6006,60 @@ abstract class S {
   /// **'Show work\'s circle'**
   String get showWorkCircle;
 
+  /// No description provided for @workCardSizeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust grid density to make covers larger or keep the current size'**
+  String get workCardSizeSubtitle;
+
+  /// No description provided for @workCardFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Text Size'**
+  String get workCardFontSize;
+
+  /// No description provided for @workCardFontSizeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust title and metadata text on work cards'**
+  String get workCardFontSizeSubtitle;
+
+  /// No description provided for @cardSizeNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get cardSizeNormal;
+
+  /// No description provided for @cardSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get cardSizeLarge;
+
+  /// No description provided for @cardSizeExtraLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'XL'**
+  String get cardSizeExtraLarge;
+
+  /// No description provided for @fontSizeNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get fontSizeNormal;
+
+  /// No description provided for @fontSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get fontSizeLarge;
+
+  /// No description provided for @fontSizeExtraLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'XL'**
+  String get fontSizeExtraLarge;
+
   /// No description provided for @showSubtitleTagOnCard.
   ///
   /// In en, this message translates to:

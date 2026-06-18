@@ -129,7 +129,8 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
       VoidCallback cardOnTap, WorkCardDisplaySettings displaySettings) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final titleFontSize = isLandscape ? 13.5 : 11.0;
+    final titleFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 13.5 : 11.0);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -211,10 +212,14 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
       VoidCallback cardOnTap, WorkCardDisplaySettings displaySettings) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final titleFontSize = isLandscape ? 14.5 : 12.0;
-    final bodyFontSize = isLandscape ? 13.5 : 10.0;
-    final priceFontSize = isLandscape ? 13.5 : 10.0;
-    final ratingFontSize = isLandscape ? 13.0 : 9.0;
+    final titleFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 14.5 : 12.0);
+    final bodyFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 13.5 : 10.0);
+    final priceFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 13.5 : 10.0);
+    final ratingFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 13.0 : 9.0);
     final iconSize = isLandscape ? 14.0 : 12.0;
 
     return Card(
@@ -376,8 +381,15 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
       VoidCallback cardOnTap, WorkCardDisplaySettings displaySettings) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final rjFontSize = isLandscape ? 11.0 : 10.0;
-    final titleFontSize = isLandscape ? 16.0 : 14.0;
+    final rjFontSize = displaySettings.scaleFontSize(isLandscape ? 11.0 : 10.0);
+    final titleFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 16.0 : 14.0);
+    final bodyFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 14.0 : 12.0);
+    final metaFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 13.0 : 11.0);
+    final tagFontSize =
+        displaySettings.scaleFontSize(isLandscape ? 13.0 : 11.0);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -475,6 +487,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                                 .bodyMedium
                                 ?.copyWith(
                                   color: Colors.grey[600],
+                                  fontSize: bodyFontSize,
                                 ),
                           ),
                         ),
@@ -486,6 +499,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.red[700],
                                     fontWeight: FontWeight.w600,
+                                    fontSize: metaFontSize,
                                   ),
                         ),
                     ],
@@ -501,6 +515,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.grey[500],
+                                    fontSize: metaFontSize,
                                   ),
                         ),
                       // 评分信息
@@ -523,6 +538,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.amber[700],
                                     fontWeight: FontWeight.w500,
+                                    fontSize: metaFontSize,
                                   ),
                         ),
                       ],
@@ -544,6 +560,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.blue[700],
                                     fontWeight: FontWeight.w500,
+                                    fontSize: metaFontSize,
                                   ),
                         ),
                       ],
@@ -555,6 +572,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.grey[500],
+                                    fontSize: metaFontSize,
                                   ),
                         ),
                     ],
@@ -562,11 +580,11 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
                   const SizedBox(height: 8),
                   // 声优
                   if (widget.work.vas != null && widget.work.vas!.isNotEmpty)
-                    _buildVoiceActorsWrap(context),
+                    _buildVoiceActorsWrap(context, fontSize: tagFontSize),
                   const SizedBox(height: 6),
                   // 标签
                   if (widget.work.tags != null && widget.work.tags!.isNotEmpty)
-                    _buildTagsWrap(context),
+                    _buildTagsWrap(context, fontSize: tagFontSize),
                 ],
               ),
             ],
@@ -650,7 +668,8 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
   Widget _buildRjTag() {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final fontSize = isLandscape ? 13.0 : 11.0;
+    final displaySettings = ref.watch(workCardDisplayProvider);
+    final fontSize = displaySettings.scaleFontSize(isLandscape ? 13.0 : 11.0);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -672,7 +691,8 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
   Widget _buildDateTag() {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final fontSize = isLandscape ? 13.0 : 10.0;
+    final displaySettings = ref.watch(workCardDisplayProvider);
+    final fontSize = displaySettings.scaleFontSize(isLandscape ? 13.0 : 10.0);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -694,7 +714,8 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
   Widget _buildSubtitleTag(BuildContext context, {bool isLocal = false}) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final iconSize = isLandscape ? 16.0 : 14.0;
+    final displaySettings = ref.watch(workCardDisplayProvider);
+    final iconSize = displaySettings.scaleFontSize(isLandscape ? 16.0 : 14.0);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -715,7 +736,8 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
   Widget _buildTagsRow(BuildContext context) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final fontSize = isLandscape ? 13.0 : 10.0;
+    final displaySettings = ref.watch(workCardDisplayProvider);
+    final fontSize = displaySettings.scaleFontSize(isLandscape ? 13.0 : 10.0);
 
     return Container(
       constraints: const BoxConstraints(minHeight: 14),
@@ -738,7 +760,8 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
   Widget _buildVoiceActorsRow(BuildContext context) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final fontSize = isLandscape ? 13.0 : 10.0;
+    final displaySettings = ref.watch(workCardDisplayProvider);
+    final fontSize = displaySettings.scaleFontSize(isLandscape ? 13.0 : 10.0);
 
     return Container(
       constraints: const BoxConstraints(minHeight: 14),
@@ -758,11 +781,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     );
   }
 
-  Widget _buildTagsWrap(BuildContext context) {
-    final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
-    final fontSize = isLandscape ? 13.0 : 11.0;
-
+  Widget _buildTagsWrap(BuildContext context, {required double fontSize}) {
     return Wrap(
       spacing: 4,
       runSpacing: 4,
@@ -778,11 +797,8 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     );
   }
 
-  Widget _buildVoiceActorsWrap(BuildContext context) {
-    final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
-    final fontSize = isLandscape ? 13.0 : 11.0;
-
+  Widget _buildVoiceActorsWrap(BuildContext context,
+      {required double fontSize}) {
     return Wrap(
       spacing: 4,
       runSpacing: 4,

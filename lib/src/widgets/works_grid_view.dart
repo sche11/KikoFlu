@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
+import '../providers/work_card_display_provider.dart';
 import '../providers/works_provider.dart';
 import '../utils/responsive_grid_helper.dart';
 import '../utils/scroll_optimization.dart';
 import 'enhanced_work_card.dart';
 
-class WorksGridView extends StatelessWidget {
+class WorksGridView extends ConsumerWidget {
   final List<Work> works;
   final LayoutType layoutType;
   final ScrollController? scrollController;
@@ -27,19 +29,23 @@ class WorksGridView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final displaySettings = ref.watch(workCardDisplayProvider);
+
     switch (layoutType) {
       case LayoutType.bigGrid:
         return _buildGridView(
           context,
-          crossAxisCount:
-              ResponsiveGridHelper.getBigGridCrossAxisCount(context),
+          crossAxisCount: displaySettings.applyCardSize(
+            ResponsiveGridHelper.getBigGridCrossAxisCount(context),
+          ),
         );
       case LayoutType.smallGrid:
         return _buildGridView(
           context,
-          crossAxisCount:
-              ResponsiveGridHelper.getSmallGridCrossAxisCount(context),
+          crossAxisCount: displaySettings.applyCardSize(
+            ResponsiveGridHelper.getSmallGridCrossAxisCount(context),
+          ),
         );
       case LayoutType.list:
         return _buildListView(context);

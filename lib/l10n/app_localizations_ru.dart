@@ -3392,6 +3392,35 @@ class SRu extends S {
   String get showWorkCircle => 'Показывать кружок произведения';
 
   @override
+  String get workCardSizeSubtitle =>
+      'Настройте плотность сетки, чтобы увеличить обложки или оставить текущий размер';
+
+  @override
+  String get workCardFontSize => 'Размер текста карточки';
+
+  @override
+  String get workCardFontSizeSubtitle =>
+      'Настройте размер заголовка и данных на карточках работ';
+
+  @override
+  String get cardSizeNormal => 'Обычный';
+
+  @override
+  String get cardSizeLarge => 'Крупный';
+
+  @override
+  String get cardSizeExtraLarge => 'XL';
+
+  @override
+  String get fontSizeNormal => 'Обычный';
+
+  @override
+  String get fontSizeLarge => 'Крупный';
+
+  @override
+  String get fontSizeExtraLarge => 'XL';
+
+  @override
   String get showSubtitleTagOnCard =>
       'Показывать метку субтитров на карточке произведения';
 
