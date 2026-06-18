@@ -402,14 +402,14 @@ class FilePreviewResolver {
     required List<dynamic> fileTree,
     required int workId,
     required String hash,
+    String? workDirPath,
   }) async {
     final relativePath = FileTreeUtils.relativePathForHash(fileTree, hash);
     if (relativePath == null) return null;
 
-    final rootPath = await downloadRootPath();
-    final localPath = DownloadFilePathService.localPathForWorkRelativePath(
-      rootPath: rootPath,
-      workId: workId,
+    final workDir = await _resolveWorkDirPath(workId, workDirPath);
+    final localPath = DownloadFilePathService.localPathForRelativePath(
+      rootPath: workDir,
       relativePath: relativePath,
     );
     return LocalPreviewFile(
@@ -424,6 +424,7 @@ class FilePreviewResolver {
     required List<dynamic> fileTree,
     required int workId,
     required String unknownTitle,
+    String? workDirPath,
   }) async {
     final title = FileTreeUtils.titleOf(file, defaultValue: unknownTitle);
     final hashValue = FileTreeUtils.property(file, 'hash');
@@ -440,6 +441,7 @@ class FilePreviewResolver {
       fileTree: fileTree,
       workId: workId,
       hash: hash,
+      workDirPath: workDirPath,
     );
     if (localFile == null) {
       return PreviewDocumentTargetResult.failure(
@@ -464,6 +466,7 @@ class FilePreviewResolver {
     required dynamic file,
     required List<dynamic> fileTree,
     required int workId,
+    String? workDirPath,
   }) async {
     final hashValue = FileTreeUtils.property(file, 'hash');
 
@@ -477,6 +480,7 @@ class FilePreviewResolver {
       fileTree: fileTree,
       workId: workId,
       hash: hashValue.toString(),
+      workDirPath: workDirPath,
     );
     if (localFile == null) {
       return const PreviewVideoTargetResult.failure(
@@ -502,11 +506,13 @@ class FilePreviewResolver {
     required List<dynamic> fileTree,
     required int workId,
     required String hash,
+    String? workDirPath,
   }) async {
     final file = await resolveOfflineLocalFile(
       fileTree: fileTree,
       workId: workId,
       hash: hash,
+      workDirPath: workDirPath,
     );
     if (file == null || !file.exists) return null;
     return file.url;
@@ -517,6 +523,7 @@ class FilePreviewResolver {
     required List<dynamic> fileTree,
     required int workId,
     required String unknownTitle,
+    String? workDirPath,
   }) async {
     final items = <PreviewFileItem>[];
 
@@ -526,6 +533,7 @@ class FilePreviewResolver {
         fileTree: fileTree,
         workId: workId,
         hash: hash,
+        workDirPath: workDirPath,
       );
       if (localUrl == null) continue;
 
@@ -545,6 +553,7 @@ class FilePreviewResolver {
     required List<dynamic> fileTree,
     required int workId,
     required String unknownTitle,
+    String? workDirPath,
   }) async {
     final selectedHash =
         FileTreeUtils.property(selectedFile, 'hash')?.toString();
@@ -564,6 +573,7 @@ class FilePreviewResolver {
       fileTree: fileTree,
       workId: workId,
       unknownTitle: unknownTitle,
+      workDirPath: workDirPath,
     );
 
     if (items.isEmpty) {
@@ -608,6 +618,18 @@ class FilePreviewResolver {
     }
 
     return null;
+  }
+
+  Future<String> _resolveWorkDirPath(int workId, String? workDirPath) async {
+    final explicitPath = workDirPath?.trim();
+    if (explicitPath != null && explicitPath.isNotEmpty) {
+      return explicitPath;
+    }
+
+    return DownloadFilePathService.localPathForRelativePath(
+      rootPath: await downloadRootPath(),
+      relativePath: workId.toString(),
+    );
   }
 
   static Future<bool> _defaultFileExists(String path) {

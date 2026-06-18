@@ -457,12 +457,13 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       final metadata = _sanitizeMetadata(task.workMetadata!);
       final work = Work.fromJson(metadata);
 
-      // 动态构建完整的封面路径
-      final downloadDir = await DownloadService.instance.getDownloadDirectory();
-      final relativeCoverPath = metadata['localCoverPath'] as String?;
-      final localCoverPath = relativeCoverPath != null
-          ? '${downloadDir.path}/$workId/$relativeCoverPath'
-          : null;
+      // 动态构建完整的本地路径
+      final workDir = await DownloadService.instance.getWorkDirectory(
+        workId,
+        metadata: metadata,
+      );
+      final localCoverPath =
+          DownloadService.instance.localCoverPathForMetadata(workDir, metadata);
 
       if (mounted) {
         Navigator.of(context).push(
@@ -471,6 +472,8 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
               work: work,
               isOffline: true,
               localCoverPath: localCoverPath,
+              localCoverRelativePath: metadata['localCoverPath'] as String?,
+              localWorkDirPath: workDir.path,
             ),
           ),
         );
@@ -1127,19 +1130,21 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
       final relativeCoverPath = task.workMetadata!['localCoverPath'] as String?;
       if (relativeCoverPath != null) {
         return FutureBuilder<Directory>(
-          future: DownloadService.instance.getDownloadDirectory(),
+          future: DownloadService.instance.getWorkDirectory(
+            workId,
+            metadata: task.workMetadata,
+          ),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              final localCoverPath =
-                  '${snapshot.data!.path}/$workId/$relativeCoverPath';
-              final coverFile = File(localCoverPath);
-              if (coverFile.existsSync()) {
+              final localCoverPath = DownloadService.instance
+                  .localCoverPathForMetadata(snapshot.data!, task.workMetadata);
+              if (localCoverPath != null && File(localCoverPath).existsSync()) {
                 return Hero(
                   tag: 'offline_work_cover_$workId',
                   child: PrivacyBlurCover(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.file(
-                      coverFile,
+                      File(localCoverPath),
                       fit: BoxFit.cover,
                       width: double.infinity,
                     ),

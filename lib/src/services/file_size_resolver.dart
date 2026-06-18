@@ -19,6 +19,7 @@ class FileSizeResolver {
     required dynamic item,
     required int workId,
     required String parentPath,
+    String? workDirPath,
   }) async {
     final metaSize = FileTreeUtils.property(item, 'size');
     if (metaSize is int && metaSize > 0) {
@@ -29,10 +30,13 @@ class FileSizeResolver {
     if (title.isEmpty) return null;
 
     try {
-      final rootPath = await downloadRootPath();
-      final filePath = DownloadFilePathService.localPathForWorkRelativePath(
-        rootPath: rootPath,
-        workId: workId,
+      final workDir = workDirPath ??
+          DownloadFilePathService.localPathForRelativePath(
+            rootPath: await downloadRootPath(),
+            relativePath: workId.toString(),
+          );
+      final filePath = DownloadFilePathService.localPathForRelativePath(
+        rootPath: workDir,
         relativePath: DownloadFilePathService.localRelativePathForItem(
           item,
           parentPath,

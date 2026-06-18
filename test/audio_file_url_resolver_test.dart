@@ -224,5 +224,31 @@ void main() {
       expect(
           result.requireTarget.artworkUrl, 'file:///downloads/123/cover.jpg');
     });
+
+    test('offline playback target can use an imported RJ work directory',
+        () async {
+      const workDir = '/downloads/[circle][RJ123456]Title';
+      final resolver = AudioFileUrlResolver(
+        resolveDownloadedPath: (_, __) async => null,
+        downloadRootPath: () async => '/downloads',
+        resolveCachedAudioPath: (_) async => null,
+        fileExists: (path) async =>
+            path == '$workDir/Disc 1/track01.mp3' ||
+            path == '$workDir/cover.jpg',
+      );
+
+      final result = await resolver.resolveOfflinePlaybackTarget(
+        file: audioFile(),
+        workId: 123456,
+        parentPath: 'Disc 1',
+        unknownTitle: 'unknown',
+        workDirPath: workDir,
+      );
+
+      expect(result.status, OfflineAudioPlaybackTargetStatus.ready);
+      expect(result.requireTarget.workDir, workDir);
+      expect(result.requireTarget.localPath, '$workDir/Disc 1/track01.mp3');
+      expect(result.requireTarget.artworkUrl, 'file://$workDir/cover.jpg');
+    });
   });
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:path/path.dart' as p;
 
 import '../models/download_task.dart';
 import '../utils/file_icon_utils.dart';
@@ -10,6 +11,7 @@ import 'storage_service.dart';
 import 'kikoeru_api_service.dart';
 import 'download_path_service.dart';
 import 'download_file_path_service.dart';
+import 'local_work_metadata_service.dart';
 import 'log_service.dart';
 
 final _log = LogService.instance;
@@ -25,6 +27,8 @@ class DownloadService {
       StreamController<List<DownloadTask>>.broadcast();
   final List<DownloadTask> _tasks = [];
   final Dio _dio = Dio();
+  final LocalWorkMetadataService _localMetadataService =
+      const LocalWorkMetadataService();
 
   // 并发下载控制
   static const int _maxConcurrentDownloads = 20;
@@ -87,6 +91,57 @@ class DownloadService {
     return workDir.path;
   }
 
+  Directory _workDirectoryForMetadata(
+    Directory downloadDir,
+    int workId,
+    Map<String, dynamic>? metadata,
+  ) {
+    final localDirName =
+        metadata?[LocalWorkMetadataService.localWorkDirNameKey];
+    if (localDirName is String && localDirName.trim().isNotEmpty) {
+      final relativeDir =
+          DownloadFilePathService.normalizeRelativePath(localDirName);
+      if (relativeDir.isNotEmpty) {
+        return Directory(
+          DownloadFilePathService.localPathForRelativePath(
+            rootPath: downloadDir.path,
+            relativePath: relativeDir,
+          ),
+        );
+      }
+    }
+
+    return Directory('${downloadDir.path}/$workId');
+  }
+
+  Future<Directory> getWorkDirectory(
+    int workId, {
+    Map<String, dynamic>? metadata,
+  }) async {
+    final downloadDir = await _getDownloadDirectory();
+    if (metadata != null) {
+      return _workDirectoryForMetadata(downloadDir, workId, metadata);
+    }
+
+    final loadedMetadata = await _loadWorkMetadata(workId);
+    return _workDirectoryForMetadata(downloadDir, workId, loadedMetadata);
+  }
+
+  String? localCoverPathForMetadata(
+    Directory workDir,
+    Map<String, dynamic>? metadata,
+  ) {
+    final relativeCoverPath = metadata?['localCoverPath'];
+    if (relativeCoverPath is! String || relativeCoverPath.trim().isEmpty) {
+      return null;
+    }
+
+    return DownloadFilePathService.localPathForRelativePath(
+      rootPath: workDir.path,
+      relativePath: relativeCoverPath,
+    );
+  }
+
   Future<void> _ensureDirectoryWritable(Directory directory) async {
     if (!await directory.exists()) {
       await directory.create(recursive: true);
@@ -108,10 +163,19 @@ class DownloadService {
   }
 
   // 下载封面图片到本地
-  Future<String?> _downloadCoverImage(int workId, String coverUrl) async {
+  Future<String?> _downloadCoverImage(
+    int workId,
+    String coverUrl, {
+    String? workDirPath,
+  }) async {
     try {
-      final workDir = await _getWorkDownloadDirectory(workId);
-      final coverFile = File('$workDir/cover.jpg');
+      final workDir = workDirPath ?? await _getWorkDownloadDirectory(workId);
+      final coverFile = File(
+        DownloadFilePathService.localPathForRelativePath(
+          rootPath: workDir,
+          relativePath: 'cover.jpg',
+        ),
+      );
 
       // 如果已存在则不重复下载
       if (await coverFile.exists()) {
@@ -153,17 +217,22 @@ class DownloadService {
   // 从硬盘读取作品元数据
   Future<Map<String, dynamic>?> _loadWorkMetadata(int workId) async {
     try {
-      final workDir = await _getWorkDownloadDirectory(workId);
+      final workDir = await _findExistingWorkDirectory(workId);
+      if (workDir == null) return null;
+
       final metadataFile = File('$workDir/work_metadata.json');
 
       if (await metadataFile.exists()) {
         final content = await metadataFile.readAsString();
         final metadata = jsonDecode(content) as Map<String, dynamic>;
+        metadata['id'] = workId;
+        metadata[LocalWorkMetadataService.localWorkDirNameKey] =
+            p.basename(workDir.path);
 
         // 迁移旧的绝对路径为相对路径
         if (metadata.containsKey('localCoverPath')) {
           final coverPath = metadata['localCoverPath'] as String?;
-          if (coverPath != null && coverPath.contains(Platform.pathSeparator)) {
+          if (coverPath != null && p.isAbsolute(coverPath)) {
             // 如果包含路径分隔符，说明是绝对路径，转换为相对路径
             metadata['localCoverPath'] = 'cover.jpg';
             // 保存更新后的元数据
@@ -178,6 +247,26 @@ class DownloadService {
       _log.error('读取作品元数据失败: $e', tag: 'Download');
     }
     return null;
+  }
+
+  Future<Directory?> _findExistingWorkDirectory(int workId) async {
+    final downloadDir = await _getDownloadDirectory();
+    if (!await downloadDir.exists()) return null;
+
+    Directory? fallback;
+    await for (final entity in downloadDir.list(followLinks: false)) {
+      if (entity is! Directory) continue;
+
+      final parsed = _localMetadataService.parseWorkFolder(entity);
+      if (parsed?.id != workId) continue;
+
+      if (p.basename(entity.path) == workId.toString()) {
+        return entity;
+      }
+      fallback ??= entity;
+    }
+
+    return fallback;
   }
 
   // 获取作品元数据（公共方法，优先从内存读取，否则从硬盘读取）
@@ -593,9 +682,13 @@ class DownloadService {
 
   /// 删除单个文件（用于离线详情页）
   /// 删除后会清理空文件夹并同步任务列表
-  Future<void> deleteFile(int workId, String relativePath) async {
+  Future<void> deleteFile(
+    int workId,
+    String relativePath, {
+    String? workDirPath,
+  }) async {
     try {
-      final workDir = await _getWorkDownloadDirectory(workId);
+      final workDir = workDirPath ?? await _getWorkDownloadDirectory(workId);
       final file = File(
         DownloadFilePathService.localPathForRelativePath(
           rootPath: workDir,
@@ -627,7 +720,10 @@ class DownloadService {
         // 只剩下 metadata 和 cover 文件时，删除整个作品文件夹
         final hasOtherFiles = contents.any((entity) {
           final name = entity.path.split(Platform.pathSeparator).last;
-          return name != 'work_metadata.json' && name != 'cover.jpg';
+          return !LocalWorkMetadataService.shouldSkipMetadataFile(
+            name,
+            isRoot: true,
+          );
         });
 
         if (!hasOtherFiles) {
@@ -744,7 +840,7 @@ class DownloadService {
         continue; // 已有元数据，跳过
       }
 
-      _log.info('发现旧版本作品文件夹，尝试升级: RJ$workId', tag: 'Download');
+      _log.info('发现本地作品文件夹，尝试补全元数据: RJ$workId', tag: 'Download');
 
       try {
         // 创建 API 服务实例尝试获取元数据
@@ -760,6 +856,8 @@ class DownloadService {
         workData['children'] = tracks;
 
         // 保存元数据（使用相对路径）
+        workData[LocalWorkMetadataService.localWorkDirNameKey] =
+            p.basename(workDir.path);
         workData['localCoverPath'] = 'cover.jpg';
         await metadataFile.writeAsString(jsonEncode(workData));
         _log.info('已保存作品元数据: RJ$workId', tag: 'Download');
@@ -778,7 +876,8 @@ class DownloadService {
               ? '$normalizedHost/api/cover/$workId?token=$token'
               : '$normalizedHost/api/cover/$workId';
 
-          await _downloadCoverImage(workId, coverUrl);
+          await _downloadCoverImage(workId, coverUrl,
+              workDirPath: workDir.path);
           _log.info('已下载作品封面: RJ$workId', tag: 'Download');
         }
 
@@ -787,8 +886,25 @@ class DownloadService {
 
         _log.info('作品升级成功: RJ$workId', tag: 'Download');
       } catch (e) {
-        _log.error('升级作品失败 RJ$workId: $e', tag: 'Download');
-        // 升级失败不影响继续运行，保持原有文件不变
+        _log.warning(
+          '在线补全作品元数据失败，改用本地基础元数据 RJ$workId: $e',
+          tag: 'Download',
+        );
+        try {
+          final fallbackMetadata =
+              await _localMetadataService.buildFallbackMetadata(
+            workId: workId,
+            workDir: workDir,
+            directoryName: p.basename(workDir.path),
+          );
+          await metadataFile.writeAsString(jsonEncode(fallbackMetadata));
+          _log.info('已生成本地作品基础元数据: RJ$workId', tag: 'Download');
+        } catch (fallbackError) {
+          _log.error(
+            '生成本地作品基础元数据失败 RJ$workId: $fallbackError',
+            tag: 'Download',
+          );
+        }
       }
     }
   }
@@ -847,7 +963,14 @@ class DownloadService {
 
           // 如果找到了对应路径且包含目录，则移动文件
           if (targetPath != null && targetPath.contains('/')) {
-            final targetFile = File('${workDir.path}/$targetPath');
+            final targetFile = File(
+              DownloadFilePathService.localPathForRelativePath(
+                rootPath: workDir.path,
+                relativePath: DownloadFilePathService.safeRelativePath(
+                  targetPath,
+                ),
+              ),
+            );
 
             // 创建目标目录
             await targetFile.parent.create(recursive: true);
@@ -885,9 +1008,10 @@ class DownloadService {
         if (entity is File) {
           final fileName = entity.path.split(Platform.pathSeparator).last;
           // 跳过元数据、封面和临时下载文件
-          if (fileName == 'work_metadata.json' ||
-              fileName == 'cover.jpg' ||
-              fileName.endsWith('.downloading')) {
+          if (LocalWorkMetadataService.shouldSkipMetadataFile(
+            fileName,
+            isRoot: relativePath.isEmpty,
+          )) {
             continue;
           }
           final fullName =
@@ -919,14 +1043,36 @@ class DownloadService {
     }
 
     bool metadataCreated = false;
+    bool metadataChanged = false;
     if (metadata == null) {
       // 没有任何元数据，创建基础元数据
-      metadata = {
-        'id': workId,
-        'title': 'RJ$workId',
-        'children': <dynamic>[],
-      };
+      metadata = await _localMetadataService.buildFallbackMetadata(
+        workId: workId,
+        workDir: workDir,
+        directoryName: p.basename(workDir.path),
+      );
       metadataCreated = true;
+    } else {
+      if (metadata['id'] != workId) {
+        metadata['id'] = workId;
+        metadataChanged = true;
+      }
+      if (metadata[LocalWorkMetadataService.localWorkDirNameKey] !=
+          p.basename(workDir.path)) {
+        metadata[LocalWorkMetadataService.localWorkDirNameKey] =
+            p.basename(workDir.path);
+        metadataChanged = true;
+      }
+
+      final detectedCover = await _localMetadataService.detectCoverRelativePath(
+        workDir,
+        metadata['localCoverPath'],
+      );
+      if (detectedCover != null &&
+          metadata['localCoverPath'] != detectedCover) {
+        metadata['localCoverPath'] = detectedCover;
+        metadataChanged = true;
+      }
     }
 
     // 3. 收集已有文件树中所有文件的相对路径
@@ -937,16 +1083,19 @@ class DownloadService {
       for (final item in items) {
         if (item is! Map<String, dynamic>) continue;
         final type = item['type'] as String? ?? '';
-        final title = item['title'] as String? ?? '';
         if (type == 'folder') {
-          final folderPath = parentPath.isEmpty ? title : '$parentPath/$title';
+          final folderPath = DownloadFilePathService.localRelativePathForItem(
+            item,
+            parentPath,
+          );
           final children = item['children'] as List<dynamic>?;
           if (children != null) {
             collectKnownPaths(children, folderPath);
           }
         } else {
-          final filePath = parentPath.isEmpty ? title : '$parentPath/$title';
-          knownPaths.add(filePath);
+          knownPaths.add(
+            DownloadFilePathService.localRelativePathForItem(item, parentPath),
+          );
         }
       }
     }
@@ -961,7 +1110,7 @@ class DownloadService {
       }
     }
 
-    if (newFiles.isEmpty && !metadataCreated) return;
+    if (newFiles.isEmpty && !metadataCreated && !metadataChanged) return;
 
     // 5. 将新文件添加到 children 树中的正确位置
     final mutableChildren = List<dynamic>.from(existingChildren);
@@ -972,7 +1121,7 @@ class DownloadService {
       final parts = relativePath.split('/');
 
       final fileType = FileIconUtils.inferFileType(parts.last);
-      final syntheticHash = 'local_${workId}_$relativePath';
+      final syntheticHash = 'local:$relativePath';
 
       int? fileSize;
       try {
@@ -983,6 +1132,8 @@ class DownloadService {
         'type': fileType,
         'title': parts.last,
         'hash': syntheticHash,
+        'localRelativePath': relativePath,
+        'relativePath': relativePath,
         if (fileSize != null) 'size': fileSize,
       };
 
@@ -1009,6 +1160,7 @@ class DownloadService {
             folder = <String, dynamic>{
               'type': 'folder',
               'title': folderName,
+              'localRelativePath': parts.take(i + 1).join('/'),
               'children': <dynamic>[],
             };
             currentLevel.add(folder);
@@ -1023,7 +1175,7 @@ class DownloadService {
       _log.info('添加手动文件到文件树: $relativePath (RJ$workId)', tag: 'Download');
     }
 
-    if (newFiles.isNotEmpty || metadataCreated) {
+    if (newFiles.isNotEmpty || metadataCreated || metadataChanged) {
       metadata['children'] = mutableChildren;
       await metadataFile.writeAsString(jsonEncode(metadata));
       _log.info('已更新作品文件树: RJ$workId, 新增 ${newFiles.length} 个文件',
@@ -1068,12 +1220,11 @@ class DownloadService {
       // 扫描硬盘上所有的作品文件夹
       final workFolders = <int, Directory>{};
       await for (final entity in downloadDir.list()) {
-        if (entity is Directory) {
-          final workIdStr = entity.path.split(Platform.pathSeparator).last;
-          final workId = int.tryParse(workIdStr);
-          if (workId != null) {
-            workFolders[workId] = entity;
-          }
+        if (entity is! Directory) continue;
+
+        final folder = _localMetadataService.parseWorkFolder(entity);
+        if (folder != null) {
+          workFolders[folder.id] = entity;
         }
       }
 
@@ -1090,7 +1241,12 @@ class DownloadService {
             _log.warning('作品文件夹不存在，删除任务: ${task.workTitle}', tag: 'Download');
           } else {
             // 检查文件是否存在
-            final file = File('${workDir.path}/${task.fileName}');
+            final file = File(
+              DownloadFilePathService.localPathForRelativePath(
+                rootPath: workDir.path,
+                relativePath: task.fileName,
+              ),
+            );
             if (!await file.exists()) {
               tasksToRemove.add(task.id);
               _log.warning('文件不存在，删除任务: ${task.fileName}', tag: 'Download');
@@ -1134,9 +1290,10 @@ class DownloadService {
               final fileName = entity.path.split(Platform.pathSeparator).last;
 
               // 跳过元数据、封面和临时下载文件
-              if (fileName == 'work_metadata.json' ||
-                  fileName == 'cover.jpg' ||
-                  fileName.endsWith('.downloading')) {
+              if (LocalWorkMetadataService.shouldSkipMetadataFile(
+                fileName,
+                isRoot: relativePath.isEmpty,
+              )) {
                 continue;
               }
 

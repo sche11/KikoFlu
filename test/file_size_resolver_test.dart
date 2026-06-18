@@ -75,6 +75,31 @@ void main() {
       expect(requestedPath, '/downloads/123/Disc_1/track_.mp3');
     });
 
+    test('reads local file length from an imported RJ work directory',
+        () async {
+      String? requestedPath;
+      final resolver = FileSizeResolver(
+        downloadRootPath: () async => '/downloads',
+        fileLength: (path) async {
+          requestedPath = path;
+          return 512;
+        },
+      );
+
+      final size = await resolver.resolveOffline(
+        item: {'title': 'track.mp3'},
+        workId: 123456,
+        parentPath: 'Disc 1',
+        workDirPath: '/downloads/[circle][RJ123456]Title',
+      );
+
+      expect(size, 512);
+      expect(
+        requestedPath,
+        '/downloads/[circle][RJ123456]Title/Disc 1/track.mp3',
+      );
+    });
+
     test('returns null for missing local file or resolver errors', () async {
       final missingResolver = FileSizeResolver(
         downloadRootPath: () async => '/downloads',

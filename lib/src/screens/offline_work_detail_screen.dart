@@ -34,12 +34,16 @@ class OfflineWorkDetailScreen extends ConsumerStatefulWidget {
   final Work work;
   final bool isOffline; // 标记是否为离线模式
   final String? localCoverPath; // 本地封面图片路径
+  final String? localCoverRelativePath; // 本地封面相对作品目录路径
+  final String? localWorkDirPath; // 本地作品目录路径
 
   const OfflineWorkDetailScreen({
     super.key,
     required this.work,
     this.isOffline = true,
     this.localCoverPath,
+    this.localCoverRelativePath,
+    this.localWorkDirPath,
   });
 
   @override
@@ -133,8 +137,9 @@ class _OfflineWorkDetailScreenState
 
       // 获取作品下载目录
       final downloadService = DownloadService.instance;
-      final downloadDir = await downloadService.getDownloadDirectory();
-      final workDir = Directory('${downloadDir.path}/${widget.work.id}');
+      final workDir = widget.localWorkDirPath != null
+          ? Directory(widget.localWorkDirPath!)
+          : await downloadService.getWorkDirectory(widget.work.id);
 
       if (!await workDir.exists()) {
         if (mounted) {
@@ -400,6 +405,8 @@ class _OfflineWorkDetailScreenState
           // 文件浏览器
           OfflineFileExplorerWidget(
             work: work,
+            localWorkDirPath: widget.localWorkDirPath,
+            localCoverRelativePath: widget.localCoverRelativePath,
             fileTree: work.children?.map((e) {
               if (e is Map<String, dynamic>) {
                 return e;

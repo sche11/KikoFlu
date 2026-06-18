@@ -42,11 +42,15 @@ final _log = LogService.instance;
 class OfflineFileExplorerWidget extends ConsumerStatefulWidget {
   final Work work;
   final List<dynamic>? fileTree; // 从 work_metadata.json 中读取的文件树
+  final String? localWorkDirPath;
+  final String? localCoverRelativePath;
 
   const OfflineFileExplorerWidget({
     super.key,
     required this.work,
     this.fileTree,
+    this.localWorkDirPath,
+    this.localCoverRelativePath,
   });
 
   @override
@@ -64,6 +68,7 @@ class _OfflineFileExplorerWidgetState
   String? _mainFolderPath; // 主文件夹路径
   late final FileListController _fileListController;
   int _loadGeneration = 0;
+  String? _workDirPath;
 
   FilePreviewResolver get _previewResolver => FilePreviewResolver(
         downloadRootPath: () async {
@@ -140,8 +145,9 @@ class _OfflineFileExplorerWidgetState
       final downloadDir = await DownloadPathService.getDownloadDirectory();
       if (!_isCurrentLoad(generation)) return;
 
-      final workDir =
-          Directory(p.join(downloadDir.path, widget.work.id.toString()));
+      final workDir = widget.localWorkDirPath != null
+          ? Directory(widget.localWorkDirPath!)
+          : Directory(p.join(downloadDir.path, widget.work.id.toString()));
 
       if (!await workDir.exists()) {
         if (!_isCurrentLoad(generation)) return;
@@ -158,6 +164,7 @@ class _OfflineFileExplorerWidgetState
       );
       if (!_isCurrentLoad(generation)) return;
 
+      _workDirPath = workDir.path;
       _localFiles = scanResult.files;
       // 更新全局文件列表供字幕自动加载使用
       _fileListController.updateFiles(List<dynamic>.from(_localFiles));
@@ -242,6 +249,8 @@ class _OfflineFileExplorerWidgetState
       workId: widget.work.id,
       parentPath: parentPath,
       unknownTitle: l10n.unknown,
+      workDirPath: _workDirPath,
+      coverRelativePath: widget.localCoverRelativePath,
     );
 
     if (!mounted) return;
@@ -328,6 +337,7 @@ class _OfflineFileExplorerWidgetState
       fileTree: _localFiles,
       workId: widget.work.id,
       unknownTitle: l10n.unknown,
+      workDirPath: _workDirPath,
     );
 
     if (!mounted) return;
@@ -378,6 +388,7 @@ class _OfflineFileExplorerWidgetState
       fileTree: _localFiles,
       workId: widget.work.id,
       unknownTitle: l10n.unknown,
+      workDirPath: _workDirPath,
     );
 
     if (!mounted) return;
@@ -434,6 +445,7 @@ class _OfflineFileExplorerWidgetState
       file: videoFile,
       fileTree: _localFiles,
       workId: widget.work.id,
+      workDirPath: _workDirPath,
     );
 
     if (!mounted) return;
@@ -532,6 +544,7 @@ class _OfflineFileExplorerWidgetState
         item: entry.item,
         workId: widget.work.id,
         parentPath: entry.parentPath,
+        workDirPath: _workDirPath,
       ),
       builder: (context, snapshot) {
         final fileSize =
@@ -664,6 +677,7 @@ class _OfflineFileExplorerWidgetState
       await DownloadService.instance.deleteFile(
         widget.work.id,
         request.relativePath,
+        workDirPath: _workDirPath,
       );
 
       // 关闭加载指示器

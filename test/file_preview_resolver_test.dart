@@ -333,6 +333,38 @@ void main() {
       expect(target.requireTarget.url, 'file:///downloads/123/docs_/book_.pdf');
     });
 
+    test('offline resolver can use an imported RJ work directory', () async {
+      const workDir = '/downloads/[circle][RJ123456]Title';
+      final resolver = FilePreviewResolver(
+        downloadRootPath: () async => '/downloads',
+        fileExists: (path) async => path == '$workDir/docs/book.pdf',
+      );
+      final tree = [
+        folderItem('docs', [
+          fileItem('book.pdf', type: 'pdf', hash: 'pdf'),
+        ]),
+      ];
+
+      final local = await resolver.resolveOfflineLocalFile(
+        fileTree: tree,
+        workId: 123456,
+        hash: 'pdf',
+        workDirPath: workDir,
+      );
+      final target = await resolver.resolveOfflineDocumentTarget(
+        file: fileItem('book.pdf', type: 'pdf', hash: 'pdf'),
+        fileTree: tree,
+        workId: 123456,
+        unknownTitle: 'unknown',
+        workDirPath: workDir,
+      );
+
+      expect(local?.path, '$workDir/docs/book.pdf');
+      expect(local?.exists, isTrue);
+      expect(target.status, PreviewDocumentTargetStatus.ready);
+      expect(target.requireTarget.url, 'file://$workDir/docs/book.pdf');
+    });
+
     test(
         'offline document target distinguishes failure states and ready target',
         () async {

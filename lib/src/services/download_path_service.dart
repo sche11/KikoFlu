@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'local_work_metadata_service.dart';
 import 'storage_service.dart';
 import 'log_service.dart';
 
@@ -184,7 +185,7 @@ class DownloadPathService {
   }
 
   /// 迁移文件从旧目录到新目录
-  /// 只迁移符合下载结构的文件（以数字命名的 workId 文件夹）
+  /// 只迁移符合下载结构的文件（数字或 RJ 命名的 workId 文件夹）
   /// 保护用户可能存放在下载目录中的其他文件
   static Future<MigrationResult> _migrateFiles(
     Directory oldDir,
@@ -210,7 +211,9 @@ class DownloadPathService {
         if (entity is Directory) {
           // 获取文件夹名称
           final folderName = entity.path.split(Platform.pathSeparator).last;
-          final workId = int.tryParse(folderName);
+          final workId = LocalWorkMetadataService.parseWorkIdFromName(
+            folderName,
+          );
 
           // 迁移以数字命名的文件夹（作品文件夹）或字幕库文件夹
           if (workId != null || folderName == 'subtitle_library') {
@@ -236,7 +239,8 @@ class DownloadPathService {
                     await Directory(newPath).create(recursive: true);
                   }
                 } catch (e) {
-                  _log.error('复制文件失败: ${fileEntity.path}, 错误: $e', tag: 'DownloadPath');
+                  _log.error('复制文件失败: ${fileEntity.path}, 错误: $e',
+                      tag: 'DownloadPath');
                   errorCount++;
                 }
               }
@@ -246,14 +250,16 @@ class DownloadPathService {
               if (folderName == 'subtitle_library') {
                 _log.info('已迁移字幕库: $folderFileCount 个文件', tag: 'DownloadPath');
               } else {
-                _log.info('已迁移作品文件夹 $folderName: $folderFileCount 个文件', tag: 'DownloadPath');
+                _log.info('已迁移作品文件夹 $folderName: $folderFileCount 个文件',
+                    tag: 'DownloadPath');
               }
 
               // 迁移成功后删除原文件夹
               try {
                 await entity.delete(recursive: true);
               } catch (e) {
-                _log.error('删除原文件夹失败: $folderName, 错误: $e', tag: 'DownloadPath');
+                _log.error('删除原文件夹失败: $folderName, 错误: $e',
+                    tag: 'DownloadPath');
                 errorCount++;
               }
             } catch (e) {
@@ -261,7 +267,7 @@ class DownloadPathService {
               errorCount++;
             }
           } else {
-            // 跳过非数字命名且不是字幕库的文件夹（可能是用户的其他文件）
+            // 跳过非作品命名且不是字幕库的文件夹（可能是用户的其他文件）
             skippedCount++;
             skippedItems.add(folderName);
             _log.debug('跳过文件夹: $folderName', tag: 'DownloadPath');
@@ -290,7 +296,8 @@ class DownloadPathService {
             // 不影响迁移结果
           }
         } else {
-          _log.info('旧目录中还有 ${remainingEntities.length} 个项目，保留目录', tag: 'DownloadPath');
+          _log.info('旧目录中还有 ${remainingEntities.length} 个项目，保留目录',
+              tag: 'DownloadPath');
         }
       } catch (e) {
         _log.error('检查旧目录是否为空时出错: $e', tag: 'DownloadPath');

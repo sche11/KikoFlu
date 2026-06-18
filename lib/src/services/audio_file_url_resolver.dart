@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
-
 import 'download_file_path_service.dart';
 import '../utils/file_tree_utils.dart';
 
@@ -161,6 +159,8 @@ class AudioFileUrlResolver {
     required int workId,
     required String parentPath,
     required String unknownTitle,
+    String? workDirPath,
+    String? coverRelativePath,
   }) async {
     final selectedTitle = FileTreeUtils.titleOf(
       file,
@@ -175,8 +175,11 @@ class AudioFileUrlResolver {
       );
     }
 
-    final rootPath = await downloadRootPath();
-    final workDir = p.join(rootPath, workId.toString());
+    final workDir = workDirPath ??
+        DownloadFilePathService.localPathForRelativePath(
+          rootPath: await downloadRootPath(),
+          relativePath: workId.toString(),
+        );
     final localPath = DownloadFilePathService.localPathForRelativePath(
       rootPath: workDir,
       relativePath: DownloadFilePathService.localRelativePathForItem(
@@ -192,7 +195,10 @@ class AudioFileUrlResolver {
       );
     }
 
-    final coverPath = p.join(workDir, 'cover.jpg');
+    final coverPath = DownloadFilePathService.localPathForRelativePath(
+      rootPath: workDir,
+      relativePath: coverRelativePath ?? 'cover.jpg',
+    );
     final artworkUrl = await fileExists(coverPath) ? 'file://$coverPath' : null;
 
     return OfflineAudioPlaybackTargetResult.ready(
