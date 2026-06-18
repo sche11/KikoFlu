@@ -131,15 +131,32 @@ class LyricState {
 // 字幕控制器
 class LyricController extends StateNotifier<LyricState> {
   final Ref ref;
+  int _loadRequestId = 0;
 
   LyricController(this.ref) : super(LyricState());
+
+  int _beginLoadRequest() => ++_loadRequestId;
+
+  bool _isCurrentLoadRequest(int requestId) {
+    return mounted && requestId == _loadRequestId;
+  }
+
+  void _setStateForLoadRequest(int requestId, LyricState nextState) {
+    if (_isCurrentLoadRequest(requestId)) {
+      state = nextState;
+    }
+  }
 
   // 根据音频轨道查找并加载字幕
   Future<void> loadLyricForTrack(
       AudioTrack track, List<dynamic> allFiles) async {
+    final requestId = _beginLoadRequest();
     _log.captureOutput(
         '[Lyric] 尝试加载: track="${track.title}", workId=${track.workId}, 文件数=${allFiles.length}');
-    state = state.copyWith(isLoading: true, error: null);
+    _setStateForLoadRequest(
+      requestId,
+      state.copyWith(isLoading: true, error: null),
+    );
 
     try {
       // 获取字幕库优先级设置
@@ -152,9 +169,10 @@ class LyricController extends StateNotifier<LyricState> {
       if (isLibraryFirst) {
         // 优先级1：从字幕库查找匹配的字幕文件
         final libraryLyricPath = await _findLyricInLibrary(track);
+        if (!_isCurrentLoadRequest(requestId)) return;
         if (libraryLyricPath != null) {
           _log.captureOutput('[Lyric] 从字幕库加载: $libraryLyricPath');
-          await loadLyricFromLocalFile(libraryLyricPath);
+          await _loadLyricFromLocalFile(libraryLyricPath, requestId);
           return;
         }
       }
@@ -167,15 +185,19 @@ class LyricController extends StateNotifier<LyricState> {
         if (!isLibraryFirst) {
           _log.captureOutput('[Lyric] 文件树未找到，尝试字幕库');
           final libraryLyricPath = await _findLyricInLibrary(track);
+          if (!_isCurrentLoadRequest(requestId)) return;
           if (libraryLyricPath != null) {
             _log.captureOutput('[Lyric] 从字幕库加载: $libraryLyricPath');
-            await loadLyricFromLocalFile(libraryLyricPath);
+            await _loadLyricFromLocalFile(libraryLyricPath, requestId);
             return;
           }
         }
 
         _log.captureOutput('[Lyric] 未找到匹配字幕: track="${track.title}"');
-        state = LyricState(lyrics: [], isLoading: false);
+        _setStateForLoadRequest(
+          requestId,
+          LyricState(lyrics: [], isLoading: false),
+        );
         return;
       }
 
@@ -184,7 +206,7 @@ class LyricController extends StateNotifier<LyricState> {
 
       final localPath = _localPathOf(lyricFile);
       if (localPath != null) {
-        await loadLyricFromLocalFile(localPath);
+        await _loadLyricFromLocalFile(localPath, requestId);
         return;
       }
 
@@ -197,7 +219,10 @@ class LyricController extends StateNotifier<LyricState> {
       final workId = track.workId;
 
       if (hash == null || host.isEmpty || workId == null) {
-        state = LyricState(lyrics: [], isLoading: false);
+        _setStateForLoadRequest(
+          requestId,
+          LyricState(lyrics: [], isLoading: false),
+        );
         return;
       }
 
@@ -216,6 +241,7 @@ class LyricController extends StateNotifier<LyricState> {
         hash: hash,
         fileName: fileName,
       );
+      if (!_isCurrentLoadRequest(requestId)) return;
 
       if (cachedContent != null) {
         _log.captureOutput('[Lyric] 从缓存加载字幕: $hash');
@@ -232,6 +258,7 @@ class LyricController extends StateNotifier<LyricState> {
             headers: StorageService.serverCookieHeaders,
           ),
         );
+        if (!_isCurrentLoadRequest(requestId)) return;
 
         if (response.statusCode == 200) {
           // 使用智能编码检测解码字节
@@ -246,11 +273,15 @@ class LyricController extends StateNotifier<LyricState> {
             hash: hash,
             content: content,
           );
+          if (!_isCurrentLoadRequest(requestId)) return;
         } else {
-          state = LyricState(
-            lyrics: [],
-            isLoading: false,
-            error: 'HTTP ${response.statusCode}',
+          _setStateForLoadRequest(
+            requestId,
+            LyricState(
+              lyrics: [],
+              isLoading: false,
+              error: 'HTTP ${response.statusCode}',
+            ),
           );
           return;
         }
@@ -259,17 +290,23 @@ class LyricController extends StateNotifier<LyricState> {
       // 4. 解析字幕
       final lyrics = LyricParser.parse(content); // 自动检测格式
       _log.captureOutput('[Lyric] 解析完成: ${lyrics.length} 行字幕');
-      state = LyricState(
-        lyrics: lyrics,
-        isLoading: false,
-        lyricUrl: lyricUrl,
+      _setStateForLoadRequest(
+        requestId,
+        LyricState(
+          lyrics: lyrics,
+          isLoading: false,
+          lyricUrl: lyricUrl,
+        ),
       );
     } catch (e) {
       _log.captureOutput('[Lyric] 加载失败: $e');
-      state = LyricState(
-        lyrics: [],
-        isLoading: false,
-        error: '加载字幕失败: $e',
+      _setStateForLoadRequest(
+        requestId,
+        LyricState(
+          lyrics: [],
+          isLoading: false,
+          error: '加载字幕失败: $e',
+        ),
       );
     }
   }
@@ -469,6 +506,7 @@ class LyricController extends StateNotifier<LyricState> {
 
   // 清空字幕
   void clearLyrics() {
+    _beginLoadRequest();
     state = LyricState();
   }
 
@@ -669,7 +707,18 @@ class LyricController extends StateNotifier<LyricState> {
   // 手动加载字幕文件
   /// 从本地文件路径加载字幕（用于字幕库）
   Future<void> loadLyricFromLocalFile(String filePath) async {
-    state = state.copyWith(isLoading: true, error: null);
+    final requestId = _beginLoadRequest();
+    await _loadLyricFromLocalFile(filePath, requestId);
+  }
+
+  Future<void> _loadLyricFromLocalFile(
+    String filePath,
+    int requestId,
+  ) async {
+    _setStateForLoadRequest(
+      requestId,
+      state.copyWith(isLoading: true, error: null),
+    );
 
     try {
       _log.captureOutput('[Lyric] 从本地文件加载字幕: $filePath');
@@ -677,46 +726,62 @@ class LyricController extends StateNotifier<LyricState> {
       // 读取文件内容
       final file = File(filePath);
       if (!await file.exists()) {
-        state = LyricState(
-          lyrics: [],
-          isLoading: false,
-          error: '文件不存在',
+        _setStateForLoadRequest(
+          requestId,
+          LyricState(
+            lyrics: [],
+            isLoading: false,
+            error: '文件不存在',
+          ),
         );
         return;
       }
+      if (!_isCurrentLoadRequest(requestId)) return;
 
       // 使用智能编码检测读取文件
       final (content, encoding) =
           await EncodingUtils.readFileWithEncoding(file);
+      if (!_isCurrentLoadRequest(requestId)) return;
       _log.captureOutput('[Lyric] 检测到文件编码: $encoding');
 
       // 解析字幕
       final lyrics = LyricParser.parse(content);
-      state = LyricState(
-        lyrics: lyrics,
-        isLoading: false,
-        lyricUrl: 'file://$filePath',
+      _setStateForLoadRequest(
+        requestId,
+        LyricState(
+          lyrics: lyrics,
+          isLoading: false,
+          lyricUrl: 'file://$filePath',
+        ),
       );
 
       _log.captureOutput('[Lyric] 成功从本地文件加载字幕，共 ${lyrics.length} 行');
     } catch (e) {
       _log.captureOutput('[Lyric] 从本地文件加载字幕失败: $e');
-      state = LyricState(
-        lyrics: [],
-        isLoading: false,
-        error: '加载字幕失败: $e',
+      if (!_isCurrentLoadRequest(requestId)) return;
+      _setStateForLoadRequest(
+        requestId,
+        LyricState(
+          lyrics: [],
+          isLoading: false,
+          error: '加载字幕失败: $e',
+        ),
       );
       rethrow;
     }
   }
 
   Future<void> loadLyricManually(dynamic lyricFile, {int? workId}) async {
-    state = state.copyWith(isLoading: true, error: null);
+    final requestId = _beginLoadRequest();
+    _setStateForLoadRequest(
+      requestId,
+      state.copyWith(isLoading: true, error: null),
+    );
 
     try {
       final localPath = _localPathOf(lyricFile);
       if (localPath != null) {
-        await loadLyricFromLocalFile(localPath);
+        await _loadLyricFromLocalFile(localPath, requestId);
         return;
       }
 
@@ -727,10 +792,13 @@ class LyricController extends StateNotifier<LyricState> {
       final hash = lyricFile['hash'];
 
       if (hash == null || host.isEmpty) {
-        state = LyricState(
-          lyrics: [],
-          isLoading: false,
-          error: '缺少必要信息',
+        _setStateForLoadRequest(
+          requestId,
+          LyricState(
+            lyrics: [],
+            isLoading: false,
+            error: '缺少必要信息',
+          ),
         );
         return;
       }
@@ -767,6 +835,7 @@ class LyricController extends StateNotifier<LyricState> {
               fileName: fileName,
             )
           : null;
+      if (!_isCurrentLoadRequest(requestId)) return;
 
       if (cachedContent != null) {
         _log.captureOutput('[Lyric] 手动加载 - 从缓存加载字幕: $hash');
@@ -783,6 +852,7 @@ class LyricController extends StateNotifier<LyricState> {
             headers: StorageService.serverCookieHeaders,
           ),
         );
+        if (!_isCurrentLoadRequest(requestId)) return;
 
         if (response.statusCode == 200) {
           // 使用智能编码检测解码字节
@@ -798,12 +868,16 @@ class LyricController extends StateNotifier<LyricState> {
               hash: hash,
               content: content,
             );
+            if (!_isCurrentLoadRequest(requestId)) return;
           }
         } else {
-          state = LyricState(
-            lyrics: [],
-            isLoading: false,
-            error: 'HTTP ${response.statusCode}',
+          _setStateForLoadRequest(
+            requestId,
+            LyricState(
+              lyrics: [],
+              isLoading: false,
+              error: 'HTTP ${response.statusCode}',
+            ),
           );
           return;
         }
@@ -811,16 +885,23 @@ class LyricController extends StateNotifier<LyricState> {
 
       // 4. 解析字幕
       final lyrics = LyricParser.parse(content);
-      state = LyricState(
-        lyrics: lyrics,
-        isLoading: false,
-        lyricUrl: lyricUrl,
+      _setStateForLoadRequest(
+        requestId,
+        LyricState(
+          lyrics: lyrics,
+          isLoading: false,
+          lyricUrl: lyricUrl,
+        ),
       );
     } catch (e) {
-      state = LyricState(
-        lyrics: [],
-        isLoading: false,
-        error: '加载字幕失败: $e',
+      if (!_isCurrentLoadRequest(requestId)) return;
+      _setStateForLoadRequest(
+        requestId,
+        LyricState(
+          lyrics: [],
+          isLoading: false,
+          error: '加载字幕失败: $e',
+        ),
       );
       rethrow;
     }
