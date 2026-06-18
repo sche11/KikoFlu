@@ -1,3 +1,4 @@
+import 'download_file_path_service.dart';
 import '../utils/file_tree_utils.dart';
 
 class FileDeleteRequest {
@@ -21,7 +22,11 @@ class FileDeleteRequestBuilder {
     final title = FileTreeUtils.titleOf(file, defaultValue: unknownTitle);
     return FileDeleteRequest(
       title: title,
-      relativePath: parentPath.isEmpty ? title : '$parentPath/$title',
+      relativePath: DownloadFilePathService.localRelativePathForItem(
+        file,
+        parentPath,
+        defaultTitle: title,
+      ),
     );
   }
 }

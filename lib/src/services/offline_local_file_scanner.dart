@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
+import 'download_file_path_service.dart';
 import '../utils/file_icon_utils.dart';
 import '../utils/file_tree_utils.dart';
 
@@ -96,7 +97,8 @@ class OfflineLocalFileScanner {
     if (children == null || children.isEmpty) return null;
 
     final title = FileTreeUtils.titleOf(item, defaultValue: 'unknown');
-    final folderPath = parentPath.isEmpty ? title : '$parentPath/$title';
+    final folderPath =
+        DownloadFilePathService.localRelativePathForItem(item, parentPath);
     final filteredChildren = await _filterItems(
       children,
       workDirPath,
@@ -129,7 +131,8 @@ class OfflineLocalFileScanner {
     if (hash == null) return null;
 
     final title = FileTreeUtils.titleOf(item, defaultValue: 'unknown');
-    final relativePath = parentPath.isEmpty ? title : '$parentPath/$title';
+    final relativePath =
+        DownloadFilePathService.localRelativePathForItem(item, parentPath);
     final filePath = p.join(workDirPath, relativePath);
 
     final exists = await fileExists(filePath);
@@ -141,15 +144,22 @@ class OfflineLocalFileScanner {
     final fileType = _normalizedType(item, title);
 
     if (item is Map<String, dynamic>) {
-      if (item['type'] == fileType) return item;
+      if (item['type'] == fileType && item['localPath'] == filePath) {
+        return item;
+      }
 
-      return Map<String, dynamic>.from(item)..['type'] = fileType;
+      return Map<String, dynamic>.from(item)
+        ..['type'] = fileType
+        ..['localPath'] = filePath
+        ..['relativePath'] = _normalizeRelativePath(relativePath);
     }
 
     return <String, dynamic>{
       'type': fileType,
       'title': title,
       'hash': hash,
+      'localPath': filePath,
+      'relativePath': _normalizeRelativePath(relativePath),
       'duration': FileTreeUtils.property(item, 'duration'),
       'size': FileTreeUtils.property(item, 'size'),
     };

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../models/work.dart';
+import '../services/download_file_path_service.dart';
 import '../services/download_service.dart';
 import '../utils/string_utils.dart';
 import '../utils/file_icon_utils.dart';
@@ -248,6 +249,17 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
     final workJson = widget.work.toJson();
     // 保留 children 字段用于离线文件浏览
     final workMetadata = Map<String, dynamic>.from(workJson);
+    final children = workMetadata['children'];
+    final annotatedChildren = children is List
+        ? DownloadFilePathService.annotateFileTreeWithLocalPaths(
+            List<dynamic>.from(children),
+          )
+        : const <dynamic>[];
+    if (annotatedChildren.isNotEmpty) {
+      workMetadata['children'] = annotatedChildren;
+    }
+    final localPathsByHash =
+        DownloadFilePathService.localRelativePathsByHash(annotatedChildren);
 
     for (final entry in selectedFilesWithPaths.entries) {
       final file = entry.key;
@@ -256,6 +268,8 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
       // 构建完整的文件名（包含路径）
       final fullFileName =
           relativePath.isEmpty ? file.title : '$relativePath/${file.title}';
+      final localFileName =
+          file.hash != null ? localPathsByHash[file.hash!] : null;
 
       // 处理下载 URL
       String downloadUrl = file.mediaDownloadUrl ?? '';
@@ -302,7 +316,7 @@ class _FileSelectionDialogState extends ConsumerState<FileSelectionDialog> {
       await downloadService.addTask(
         workId: widget.work.id,
         workTitle: widget.work.title,
-        fileName: fullFileName, // 使用包含路径的文件名
+        fileName: localFileName ?? fullFileName, // 使用包含路径的本地文件名
         downloadUrl: downloadUrl,
         hash: file.hash,
         totalBytes: file.size,

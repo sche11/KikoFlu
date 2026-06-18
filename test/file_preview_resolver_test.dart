@@ -296,6 +296,43 @@ void main() {
       expect(missing, isNull);
     });
 
+    test('offline resolver uses localRelativePath for sanitized downloads',
+        () async {
+      final resolver = FilePreviewResolver(
+        downloadRootPath: () async => '/downloads',
+        fileExists: (path) async => path == '/downloads/123/docs_/book_.pdf',
+      );
+      final tree = [
+        folderItem('docs?', [
+          {
+            'type': 'pdf',
+            'title': 'book?.pdf',
+            'hash': 'pdf',
+            'localRelativePath': 'docs_/book_.pdf',
+          },
+        ]),
+      ];
+
+      final local = await resolver.resolveOfflineLocalFile(
+        fileTree: tree,
+        workId: 123,
+        hash: 'pdf',
+      );
+      final target = await resolver.resolveOfflineDocumentTarget(
+        file: fileItem('book?.pdf', type: 'pdf', hash: 'pdf'),
+        fileTree: tree,
+        workId: 123,
+        unknownTitle: 'unknown',
+      );
+
+      expect(local?.relativePath, 'docs_/book_.pdf');
+      expect(local?.path, '/downloads/123/docs_/book_.pdf');
+      expect(local?.exists, isTrue);
+      expect(target.status, PreviewDocumentTargetStatus.ready);
+      expect(target.requireTarget.title, 'book?.pdf');
+      expect(target.requireTarget.url, 'file:///downloads/123/docs_/book_.pdf');
+    });
+
     test(
         'offline document target distinguishes failure states and ready target',
         () async {

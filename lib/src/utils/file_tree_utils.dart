@@ -104,6 +104,20 @@ class FileTreeUtils {
     return parentPath.isEmpty ? title : '$parentPath/$title';
   }
 
+  static String localRelativePathOf(dynamic item, String parentPath) {
+    final explicitPath = property(item, 'localRelativePath');
+    if (explicitPath is String && explicitPath.trim().isNotEmpty) {
+      return explicitPath.replaceAll('\\', '/');
+    }
+
+    final relativePath = property(item, 'relativePath');
+    if (relativePath is String && relativePath.trim().isNotEmpty) {
+      return relativePath.replaceAll('\\', '/');
+    }
+
+    return itemPath(parentPath, item).replaceAll('\\', '/');
+  }
+
   static Set<String> expandedPathsFor(String targetPath) {
     if (targetPath.isEmpty) return {};
 
@@ -338,14 +352,14 @@ class FileTreeUtils {
           final children = childrenOf(item);
           if (children == null) continue;
 
-          final result = find(children, itemPath(parentPath, item));
+          final result = find(children, localRelativePathOf(item, parentPath));
           if (result != null) return result;
           continue;
         }
 
         final itemHash = property(item, 'hash')?.toString();
         if (itemHash == targetHashString) {
-          return itemPath(parentPath, item);
+          return localRelativePathOf(item, parentPath);
         }
       }
 

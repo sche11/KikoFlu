@@ -51,6 +51,30 @@ void main() {
       expect(requestedPath, '/downloads/123/Disc 1/track.mp3');
     });
 
+    test('reads local file length from localRelativePath when present',
+        () async {
+      String? requestedPath;
+      final resolver = FileSizeResolver(
+        downloadRootPath: () async => '/downloads',
+        fileLength: (path) async {
+          requestedPath = path;
+          return 1024;
+        },
+      );
+
+      final size = await resolver.resolveOffline(
+        item: const {
+          'title': 'track?.mp3',
+          'localRelativePath': 'Disc_1/track_.mp3',
+        },
+        workId: 123,
+        parentPath: 'Disc:1',
+      );
+
+      expect(size, 1024);
+      expect(requestedPath, '/downloads/123/Disc_1/track_.mp3');
+    });
+
     test('returns null for missing local file or resolver errors', () async {
       final missingResolver = FileSizeResolver(
         downloadRootPath: () async => '/downloads',

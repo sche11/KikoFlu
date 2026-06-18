@@ -145,21 +145,31 @@ void main() {
 
     test('finds nested relative path by hash', () {
       final tree = [
-        folderItem('Disc 1', [
-          folderItem('Scans', [
-            fileItem('cover.png', hash: 'img-hash'),
-          ]),
-          fileItem('track01.mp3', hash: 'audio-hash'),
-        ]),
+        {
+          'type': 'folder',
+          'title': 'Disc 1',
+          'localRelativePath': 'Disc_1',
+          'children': [
+            folderItem('Scans', [
+              fileItem('cover.png', hash: 'img-hash'),
+            ]),
+            {
+              'type': 'audio',
+              'title': 'track?.mp3',
+              'hash': 'audio-hash',
+              'localRelativePath': 'Disc_1/track_.mp3',
+            },
+          ],
+        },
       ];
 
       expect(
         FileTreeUtils.relativePathForHash(tree, 'img-hash'),
-        'Disc 1/Scans/cover.png',
+        'Disc_1/Scans/cover.png',
       );
       expect(
         FileTreeUtils.relativePathForHash(tree, 'audio-hash'),
-        'Disc 1/track01.mp3',
+        'Disc_1/track_.mp3',
       );
       expect(FileTreeUtils.relativePathForHash(tree, 'missing'), isNull);
       expect(FileTreeUtils.relativePathForHash(tree, null), isNull);

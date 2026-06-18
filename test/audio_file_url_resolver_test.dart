@@ -140,6 +140,37 @@ void main() {
       expect(missing, isNull);
     });
 
+    test('offline resolver prefers localRelativePath for sanitized downloads',
+        () async {
+      final resolver = AudioFileUrlResolver(
+        resolveDownloadedPath: (_, __) async => null,
+        downloadRootPath: () async => '/downloads',
+        resolveCachedAudioPath: (_) async => null,
+        fileExists: (path) async => path == '/downloads/123/Disc_1/track_.mp3',
+      );
+
+      final file = audioFile(title: 'track?.mp3')
+        ..['localRelativePath'] = 'Disc_1/track_.mp3';
+
+      final found = await resolver.resolveOffline(
+        file: file,
+        workDir: '/downloads/123',
+        parentPath: 'Disc:1',
+      );
+      final target = await resolver.resolveOfflinePlaybackTarget(
+        file: file,
+        workId: 123,
+        parentPath: 'Disc:1',
+        unknownTitle: 'unknown',
+      );
+
+      expect(found, 'file:///downloads/123/Disc_1/track_.mp3');
+      expect(target.status, OfflineAudioPlaybackTargetStatus.ready);
+      expect(
+          target.requireTarget.localPath, '/downloads/123/Disc_1/track_.mp3');
+      expect(target.requireTarget.selectedTitle, 'track?.mp3');
+    });
+
     test('offline playback target reports missing hash and missing file',
         () async {
       final resolver = AudioFileUrlResolver(

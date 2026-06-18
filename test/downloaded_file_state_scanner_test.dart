@@ -75,6 +75,57 @@ void main() {
       expect(result.downloadedFiles['image'], isFalse);
     });
 
+    test('uses localRelativePath when metadata points to sanitized file names',
+        () async {
+      final scanner = DownloadedFileStateScanner(
+        resolveDownloadedPath: (_, __) async => null,
+        downloadRootPath: () async => '/downloads',
+        fileExists: (path) async => path == '/downloads/123/Disc_1/track_.mp3',
+      );
+
+      final result = await scanner.scan(
+        workId: 123,
+        fileTree: [
+          folderItem('Disc:1', [
+            {
+              'type': 'audio',
+              'title': 'track?.mp3',
+              'hash': 'audio',
+              'localRelativePath': 'Disc_1/track_.mp3',
+            },
+          ]),
+        ],
+      );
+
+      expect(result.fileRelativePaths['audio'], 'Disc_1/track_.mp3');
+      expect(result.downloadedFiles['audio'], isTrue);
+    });
+
+    test('inherits folder localRelativePath for child file paths', () async {
+      final scanner = DownloadedFileStateScanner(
+        resolveDownloadedPath: (_, __) async => null,
+        downloadRootPath: () async => '/downloads',
+        fileExists: (path) async => path == '/downloads/123/Disc_1/track01.mp3',
+      );
+
+      final result = await scanner.scan(
+        workId: 123,
+        fileTree: [
+          {
+            'type': 'folder',
+            'title': 'Disc:1',
+            'localRelativePath': 'Disc_1',
+            'children': [
+              fileItem('track01.mp3', type: 'audio', hash: 'audio'),
+            ],
+          },
+        ],
+      );
+
+      expect(result.fileRelativePaths['audio'], 'Disc_1/track01.mp3');
+      expect(result.downloadedFiles['audio'], isTrue);
+    });
+
     test('ignores folders and hashless files', () async {
       final scanner = DownloadedFileStateScanner(
         resolveDownloadedPath: (_, __) async => null,

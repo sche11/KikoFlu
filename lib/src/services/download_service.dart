@@ -9,6 +9,7 @@ import 'cache_service.dart';
 import 'storage_service.dart';
 import 'kikoeru_api_service.dart';
 import 'download_path_service.dart';
+import 'download_file_path_service.dart';
 import 'log_service.dart';
 
 final _log = LogService.instance;
@@ -84,6 +85,26 @@ class DownloadService {
       await workDir.create(recursive: true);
     }
     return workDir.path;
+  }
+
+  Future<void> _ensureDirectoryWritable(Directory directory) async {
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    final probe = File(
+      '${directory.path}/.kikoflu_write_test_${DateTime.now().microsecondsSinceEpoch}',
+    );
+    try {
+      await probe.writeAsString('ok', flush: true);
+      await probe.delete();
+    } catch (e) {
+      throw FileSystemException(
+        '无法写入下载目录，请检查外置存储权限或重新选择下载路径',
+        directory.path,
+        e is FileSystemException ? e.osError : null,
+      );
+    }
   }
 
   // 下载封面图片到本地
@@ -194,6 +215,11 @@ class DownloadService {
     String? coverUrl,
     String? relativePath, // 相对路径，用于按文件树组织
   }) async {
+    final safeFileName = relativePath != null && relativePath.isNotEmpty
+        ? '${DownloadFilePathService.safeRelativePath(relativePath)}/'
+            '${DownloadFilePathService.safePathSegment(fileName)}'
+        : DownloadFilePathService.safeRelativePath(fileName);
+
     // 检查是否已存在
     final existingTask = _tasks.firstWhere(
       (t) => t.hash == hash && t.workId == workId,
@@ -229,9 +255,7 @@ class DownloadService {
       if (cachedFile != null) {
         // 从缓存移动到下载目录
         final workDir = await _getWorkDownloadDirectory(workId);
-        final targetPath = relativePath != null && relativePath.isNotEmpty
-            ? '$workDir/$relativePath/$fileName'
-            : '$workDir/$fileName';
+        final targetPath = '$workDir/$safeFileName';
         final targetFile = File(targetPath);
 
         // 确保目录存在
@@ -241,16 +265,11 @@ class DownloadService {
           await File(cachedFile).copy(targetPath);
         }
 
-        // 使用完整的文件名（包含相对路径），以便后续检测
-        final fullFileName = relativePath != null && relativePath.isNotEmpty
-            ? '$relativePath/$fileName'
-            : fileName;
-
         final task = DownloadTask(
           id: hash,
           workId: workId,
           workTitle: workTitle,
-          fileName: fullFileName, // 使用包含路径的完整文件名
+          fileName: safeFileName, // 使用包含路径的完整文件名
           downloadUrl: downloadUrl,
           hash: hash,
           totalBytes: totalBytes ?? await targetFile.length(),
@@ -278,7 +297,7 @@ class DownloadService {
       id: hash ?? '${workId}_${DateTime.now().millisecondsSinceEpoch}',
       workId: workId,
       workTitle: workTitle,
-      fileName: fileName,
+      fileName: safeFileName,
       downloadUrl: downloadUrl,
       hash: hash,
       totalBytes: totalBytes,
@@ -344,6 +363,7 @@ class DownloadService {
         immediate: true);
 
     final workDir = await _getWorkDownloadDirectory(task.workId);
+    await _ensureDirectoryWritable(Directory(workDir));
     // 使用fileName中的路径信息（如果包含/）
     final filePath = '$workDir/${task.fileName}';
     final tempFilePath = '$filePath.downloading'; // 临时文件路径

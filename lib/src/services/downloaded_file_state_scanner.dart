@@ -79,19 +79,18 @@ class DownloadedFileStateScanner {
     for (final item in items) {
       final isFolder = FileTreeUtils.isFolder(item);
       final hash = FileTreeUtils.property(item, 'hash')?.toString();
-      final title = FileTreeUtils.titleOf(item, defaultValue: 'unknown');
 
       if (!isFolder && hash != null) {
         downloadedFiles[hash] = false;
         fileRelativePaths[hash] =
-            parentPath.isEmpty ? title : '$parentPath/$title';
+            FileTreeUtils.localRelativePathOf(item, parentPath);
       }
 
       final children = FileTreeUtils.childrenOf(item);
       if (children == null) continue;
 
       final nextPath = isFolder
-          ? (parentPath.isEmpty ? title : '$parentPath/$title')
+          ? FileTreeUtils.localRelativePathOf(item, parentPath)
           : parentPath;
       _collectFilePaths(
         children,

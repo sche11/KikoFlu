@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
+import 'download_file_path_service.dart';
 import '../utils/file_tree_utils.dart';
 
 typedef AudioDownloadedPathResolver = Future<String?> Function(
@@ -142,12 +143,9 @@ class AudioFileUrlResolver {
     required String workDir,
     required String parentPath,
   }) async {
-    final fileTitle = FileTreeUtils.titleOf(file);
-    if (fileTitle.isEmpty) return null;
-
-    final filePath = parentPath.isEmpty
-        ? p.join(workDir, fileTitle)
-        : p.join(workDir, parentPath, fileTitle);
+    final relativePath =
+        DownloadFilePathService.localRelativePathForItem(file, parentPath);
+    final filePath = p.join(workDir, relativePath);
     if (await fileExists(filePath)) {
       return 'file://$filePath';
     }
@@ -175,9 +173,10 @@ class AudioFileUrlResolver {
 
     final rootPath = await downloadRootPath();
     final workDir = p.join(rootPath, workId.toString());
-    final localPath = parentPath.isEmpty
-        ? p.join(workDir, selectedTitle)
-        : p.join(workDir, parentPath, selectedTitle);
+    final localPath = p.join(
+      workDir,
+      DownloadFilePathService.localRelativePathForItem(file, parentPath),
+    );
 
     if (!await fileExists(localPath)) {
       return OfflineAudioPlaybackTargetResult.failure(

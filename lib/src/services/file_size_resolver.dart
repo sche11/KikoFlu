@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
+import 'download_file_path_service.dart';
 import '../utils/file_tree_utils.dart';
 
 typedef FileSizeDownloadRootProvider = Future<String> Function();
@@ -31,13 +32,11 @@ class FileSizeResolver {
 
     try {
       final rootPath = await downloadRootPath();
-      final filePathParts = [
+      final filePath = p.join(
         rootPath,
         workId.toString(),
-        if (parentPath.isNotEmpty) parentPath,
-        title,
-      ];
-      final filePath = p.joinAll(filePathParts);
+        DownloadFilePathService.localRelativePathForItem(item, parentPath),
+      );
 
       return await fileLength(filePath);
     } catch (_) {

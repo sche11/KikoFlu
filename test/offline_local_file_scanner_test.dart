@@ -83,11 +83,15 @@ void main() {
 
       final children = folder['children'] as List<dynamic>;
       expect(children, hasLength(1));
-      expect(children.single, {
-        'type': 'audio',
-        'title': 'track01.mp3',
-        'hash': 'track',
-      });
+      expect(children.single, containsPair('type', 'audio'));
+      expect(children.single, containsPair('title', 'track01.mp3'));
+      expect(children.single, containsPair('hash', 'track'));
+      expect(
+        children.single,
+        containsPair('localPath', '/downloads/123/Disc 1/track01.mp3'),
+      );
+      expect(
+          children.single, containsPair('relativePath', 'Disc 1/track01.mp3'));
       expect(track['type'], 'file');
     });
 
@@ -108,6 +112,8 @@ void main() {
         'type': 'video',
         'title': 'video.bin',
         'hash': 'video',
+        'localPath': '/downloads/123/video.bin',
+        'relativePath': 'video.bin',
       });
     });
 
@@ -144,6 +150,8 @@ void main() {
               'type': 'pdf',
               'title': 'script.pdf',
               'hash': 'pdf',
+              'localPath': '/downloads/123/Disc/script.pdf',
+              'relativePath': 'Disc/script.pdf',
               'duration': 12,
               'size': 2048,
             },

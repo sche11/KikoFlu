@@ -20,6 +20,24 @@ void main() {
       expect(request.relativePath, 'Disc 1/track01.mp3');
     });
 
+    test('uses localRelativePath when deleting sanitized downloads', () {
+      const builder = FileDeleteRequestBuilder();
+
+      final request = builder.build(
+        file: const {
+          'type': 'audio',
+          'title': 'track?.mp3',
+          'hash': 'audio',
+          'localRelativePath': 'Disc_1/track_.mp3',
+        },
+        parentPath: 'Disc:1',
+        unknownTitle: 'unknown',
+      );
+
+      expect(request.title, 'track?.mp3');
+      expect(request.relativePath, 'Disc_1/track_.mp3');
+    });
+
     test('uses unknown title fallback for hash-only files', () {
       const builder = FileDeleteRequestBuilder();
 
