@@ -74,7 +74,9 @@ jobs:
 
   windows:
     name: Windows Build
-    runs-on: windows-latest
+    # windows-latest currently ships newer VS/CMake versions that break
+    # older native Flutter plugins used by this project.
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v6
       
