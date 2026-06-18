@@ -258,7 +258,9 @@ class TranslationService {
     final source = prefs.getString('translation_source') ?? 'google';
     int concurrency = 1;
     if (source == 'llm') {
-      concurrency = prefs.getInt('llm_settings_concurrency') ?? 3;
+      concurrency = LLMSettings.normalizeConcurrency(
+        prefs.getInt('llm_settings_concurrency'),
+      );
     }
 
     final results = List<String>.filled(texts.length, '');
@@ -342,7 +344,9 @@ class TranslationService {
     final source = prefs.getString('translation_source') ?? 'google';
     int concurrency = 1;
     if (source == 'llm') {
-      concurrency = prefs.getInt('llm_settings_concurrency') ?? 3;
+      concurrency = LLMSettings.normalizeConcurrency(
+        prefs.getInt('llm_settings_concurrency'),
+      );
     }
 
     // 并发翻译

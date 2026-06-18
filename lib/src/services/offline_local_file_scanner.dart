@@ -195,7 +195,11 @@ class OfflineLocalFileScanner {
       }
 
       if (entity is Directory) {
-        final existingFolder = _findFolder(targetItems, title);
+        final existingFolder = _findFolder(
+          targetItems,
+          title: title,
+          relativePath: normalizedRelativePath,
+        );
         final children = existingFolder == null
             ? <dynamic>[]
             : List<dynamic>.from(
@@ -240,10 +244,23 @@ class OfflineLocalFileScanner {
     }
   }
 
-  dynamic _findFolder(List<dynamic> items, String title) {
+  dynamic _findFolder(
+    List<dynamic> items, {
+    required String title,
+    required String relativePath,
+  }) {
     for (final item in items) {
-      if (FileTreeUtils.isFolder(item) &&
-          FileTreeUtils.titleOf(item) == title) {
+      if (!FileTreeUtils.isFolder(item)) continue;
+
+      if (FileTreeUtils.titleOf(item) == title) {
+        return item;
+      }
+
+      final localRelativePath = DownloadFilePathService.localRelativePathOf(
+        item,
+      );
+      if (localRelativePath != null &&
+          _normalizeRelativePath(localRelativePath) == relativePath) {
         return item;
       }
     }

@@ -73,6 +73,43 @@ void main() {
     );
   });
 
+  test('LLM settings normalize invalid concurrency values', () async {
+    SharedPreferences.setMockInitialValues({
+      'llm_settings_concurrency': 0,
+    });
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(
+      container.read(llmSettingsProvider).concurrency,
+      LLMSettings.defaultConcurrency,
+    );
+    await _pumpAsyncPreferenceLoad();
+
+    expect(
+      container.read(llmSettingsProvider).concurrency,
+      LLMSettings.minConcurrency,
+    );
+    expect(
+      const LLMSettings().copyWith(concurrency: 99).concurrency,
+      LLMSettings.maxConcurrency,
+    );
+
+    await container.read(llmSettingsProvider.notifier).updateSettings(
+          const LLMSettings(concurrency: -5),
+        );
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(
+      container.read(llmSettingsProvider).concurrency,
+      LLMSettings.minConcurrency,
+    );
+    expect(
+      prefs.getInt('llm_settings_concurrency'),
+      LLMSettings.minConcurrency,
+    );
+  });
+
   test('LLM default prompt uses custom target language and auto source',
       () async {
     SharedPreferences.setMockInitialValues({

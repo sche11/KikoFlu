@@ -214,6 +214,61 @@ void main() {
       );
     });
 
+    test('merges discovered files into folders with sanitized local paths',
+        () async {
+      final workDir = await Directory.systemTemp.createTemp(
+        'offline_local_file_scanner_',
+      );
+      addTearDown(() async {
+        if (await workDir.exists()) {
+          await workDir.delete(recursive: true);
+        }
+      });
+
+      await File(p.join(workDir.path, 'Disc_1', 'track_.mp3'))
+          .create(recursive: true);
+      await File(p.join(workDir.path, 'Disc_1', 'bonus.wav'))
+          .writeAsString('audio');
+
+      final result = await const OfflineLocalFileScanner().scan(
+        fileTree: [
+          {
+            'type': 'folder',
+            'title': 'Disc:1',
+            'localRelativePath': 'Disc_1',
+            'children': [
+              {
+                'type': 'audio',
+                'title': 'track?.mp3',
+                'hash': 'track',
+                'localRelativePath': 'Disc_1/track_.mp3',
+              },
+            ],
+          },
+        ],
+        workDirPath: workDir.path,
+      );
+
+      expect(result.files, hasLength(1));
+      final folder = result.files.single as Map<String, dynamic>;
+      expect(folder['title'], 'Disc:1');
+
+      final children = folder['children'] as List<dynamic>;
+      expect(
+        children
+            .cast<Map<String, dynamic>>()
+            .map((item) => item['title'])
+            .toSet(),
+        {'track?.mp3', 'bonus.wav'},
+      );
+      expect(
+        result.files
+            .cast<Map<String, dynamic>>()
+            .where((item) => item['title'] == 'Disc_1'),
+        isEmpty,
+      );
+    });
+
     test('skips app metadata, hidden files, and partial downloads', () async {
       final workDir = await Directory.systemTemp.createTemp(
         'offline_local_file_scanner_',

@@ -586,7 +586,9 @@ class LyricController extends StateNotifier<LyricState> {
       final source = prefs.getString('translation_source') ?? 'google';
       int concurrency = 1;
       if (source == 'llm') {
-        concurrency = prefs.getInt('llm_settings_concurrency') ?? 3;
+        concurrency = LLMSettings.normalizeConcurrency(
+          prefs.getInt('llm_settings_concurrency'),
+        );
       }
 
       final chunkResults = List<String>.filled(chunks.length, '');

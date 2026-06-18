@@ -153,6 +153,10 @@ class TranslationLanguagePreferences {
 }
 
 class LLMSettings {
+  static const int minConcurrency = 1;
+  static const int maxConcurrency = 10;
+  static const int defaultConcurrency = 3;
+
   final String apiUrl;
   final String apiKey;
   final String model;
@@ -164,8 +168,13 @@ class LLMSettings {
     this.apiKey = '',
     this.model = 'gpt-3.5-turbo',
     this.prompt = '',
-    this.concurrency = 3,
+    this.concurrency = defaultConcurrency,
   });
+
+  static int normalizeConcurrency(int? value) {
+    final raw = value ?? defaultConcurrency;
+    return raw.clamp(minConcurrency, maxConcurrency).toInt();
+  }
 
   LLMSettings copyWith({
     String? apiUrl,
@@ -179,7 +188,9 @@ class LLMSettings {
       apiKey: apiKey ?? this.apiKey,
       model: model ?? this.model,
       prompt: prompt ?? this.prompt,
-      concurrency: concurrency ?? this.concurrency,
+      concurrency: concurrency == null
+          ? this.concurrency
+          : normalizeConcurrency(concurrency),
     );
   }
 }
@@ -199,7 +210,9 @@ class LLMSettingsNotifier extends StateNotifier<LLMSettings> {
         apiKey: prefs.getString('${_prefix}api_key') ?? state.apiKey,
         model: prefs.getString('${_prefix}model') ?? state.model,
         prompt: prefs.getString('${_prefix}prompt') ?? state.prompt,
-        concurrency: prefs.getInt('${_prefix}concurrency') ?? state.concurrency,
+        concurrency: LLMSettings.normalizeConcurrency(
+          prefs.getInt('${_prefix}concurrency'),
+        ),
       );
     } catch (e) {
       // ignore
@@ -207,14 +220,20 @@ class LLMSettingsNotifier extends StateNotifier<LLMSettings> {
   }
 
   Future<void> updateSettings(LLMSettings settings) async {
-    state = settings;
+    final normalizedSettings = settings.copyWith(
+      concurrency: LLMSettings.normalizeConcurrency(settings.concurrency),
+    );
+    state = normalizedSettings;
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('${_prefix}api_url', settings.apiUrl);
-      await prefs.setString('${_prefix}api_key', settings.apiKey);
-      await prefs.setString('${_prefix}model', settings.model);
-      await prefs.setString('${_prefix}prompt', settings.prompt);
-      await prefs.setInt('${_prefix}concurrency', settings.concurrency);
+      await prefs.setString('${_prefix}api_url', normalizedSettings.apiUrl);
+      await prefs.setString('${_prefix}api_key', normalizedSettings.apiKey);
+      await prefs.setString('${_prefix}model', normalizedSettings.model);
+      await prefs.setString('${_prefix}prompt', normalizedSettings.prompt);
+      await prefs.setInt(
+        '${_prefix}concurrency',
+        normalizedSettings.concurrency,
+      );
     } catch (e) {
       // ignore
     }
