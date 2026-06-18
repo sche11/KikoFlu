@@ -14,6 +14,7 @@ class DownloadFilePathService {
     r'^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$',
     caseSensitive: false,
   );
+  static final RegExp _windowsDriveSegment = RegExp(r'^[a-zA-Z]:');
 
   static String safeRelativePath(String relativePath) {
     final normalized = relativePath.replaceAll('\\', '/');
@@ -99,11 +100,37 @@ class DownloadFilePathService {
     required dynamic item,
     String parentPath = '',
   }) {
-    return p.join(
-      rootPath,
-      workId.toString(),
-      localRelativePathForItem(item, parentPath),
+    return localPathForWorkRelativePath(
+      rootPath: rootPath,
+      workId: workId,
+      relativePath: localRelativePathForItem(item, parentPath),
     );
+  }
+
+  static String localPathForWorkRelativePath({
+    required String rootPath,
+    required int workId,
+    required String relativePath,
+    p.Context? context,
+  }) {
+    final pathContext = context ?? p.context;
+    return localPathForRelativePath(
+      rootPath: pathContext.join(rootPath, workId.toString()),
+      relativePath: relativePath,
+      context: pathContext,
+    );
+  }
+
+  static String localPathForRelativePath({
+    required String rootPath,
+    required String relativePath,
+    p.Context? context,
+  }) {
+    final pathContext = context ?? p.context;
+    final segments = relativePathSegments(relativePath);
+    if (segments.isEmpty) return rootPath;
+
+    return pathContext.joinAll([rootPath, ...segments]);
   }
 
   static List<dynamic> annotateFileTreeWithLocalPaths(List<dynamic> fileTree) {
@@ -137,7 +164,20 @@ class DownloadFilePathService {
   }
 
   static String normalizeRelativePath(String relativePath) {
-    return relativePath.replaceAll('\\', '/');
+    return relativePathSegments(relativePath).join('/');
+  }
+
+  static List<String> relativePathSegments(String relativePath) {
+    return relativePath
+        .replaceAll('\\', '/')
+        .split('/')
+        .where((segment) {
+          final trimmed = segment.trim();
+          return trimmed.isNotEmpty && trimmed != '.' && trimmed != '..';
+        })
+        .map(_neutralizePathRootSegment)
+        .where((segment) => segment.isNotEmpty)
+        .toList(growable: false);
   }
 
   static String? parentPathOf(String relativePath) {
@@ -157,6 +197,14 @@ class DownloadFilePathService {
     }
 
     return value.substring(0, maxLength);
+  }
+
+  static String _neutralizePathRootSegment(String segment) {
+    final trimmed = segment.trim();
+    if (_windowsDriveSegment.hasMatch(trimmed)) {
+      return trimmed.replaceFirst(':', '_');
+    }
+    return segment;
   }
 
   static List<dynamic> _annotateItems(

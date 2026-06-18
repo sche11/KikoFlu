@@ -255,7 +255,10 @@ class DownloadService {
       if (cachedFile != null) {
         // 从缓存移动到下载目录
         final workDir = await _getWorkDownloadDirectory(workId);
-        final targetPath = '$workDir/$safeFileName';
+        final targetPath = DownloadFilePathService.localPathForRelativePath(
+          rootPath: workDir,
+          relativePath: safeFileName,
+        );
         final targetFile = File(targetPath);
 
         // 确保目录存在
@@ -365,7 +368,10 @@ class DownloadService {
     final workDir = await _getWorkDownloadDirectory(task.workId);
     await _ensureDirectoryWritable(Directory(workDir));
     // 使用fileName中的路径信息（如果包含/）
-    final filePath = '$workDir/${task.fileName}';
+    final filePath = DownloadFilePathService.localPathForRelativePath(
+      rootPath: workDir,
+      relativePath: task.fileName,
+    );
     final tempFilePath = '$filePath.downloading'; // 临时文件路径
     final file = File(filePath);
     final tempFile = File(tempFilePath);
@@ -551,7 +557,12 @@ class DownloadService {
     // 删除文件
     if (task.status == DownloadStatus.completed) {
       final workDir = await _getWorkDownloadDirectory(workId);
-      final file = File('$workDir/${task.fileName}');
+      final file = File(
+        DownloadFilePathService.localPathForRelativePath(
+          rootPath: workDir,
+          relativePath: task.fileName,
+        ),
+      );
       if (await file.exists()) {
         await file.delete();
       }
@@ -585,7 +596,12 @@ class DownloadService {
   Future<void> deleteFile(int workId, String relativePath) async {
     try {
       final workDir = await _getWorkDownloadDirectory(workId);
-      final file = File('$workDir/$relativePath');
+      final file = File(
+        DownloadFilePathService.localPathForRelativePath(
+          rootPath: workDir,
+          relativePath: relativePath,
+        ),
+      );
 
       if (!await file.exists()) {
         throw Exception('文件不存在');
@@ -677,7 +693,12 @@ class DownloadService {
     if (task.id.isEmpty) return null;
 
     final workDir = await _getWorkDownloadDirectory(workId);
-    final file = File('$workDir/${task.fileName}');
+    final file = File(
+      DownloadFilePathService.localPathForRelativePath(
+        rootPath: workDir,
+        relativePath: task.fileName,
+      ),
+    );
     if (await file.exists()) {
       return file.path;
     }

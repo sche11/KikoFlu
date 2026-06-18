@@ -143,9 +143,13 @@ class AudioFileUrlResolver {
     required String workDir,
     required String parentPath,
   }) async {
-    final relativePath =
-        DownloadFilePathService.localRelativePathForItem(file, parentPath);
-    final filePath = p.join(workDir, relativePath);
+    final filePath = DownloadFilePathService.localPathForRelativePath(
+      rootPath: workDir,
+      relativePath: DownloadFilePathService.localRelativePathForItem(
+        file,
+        parentPath,
+      ),
+    );
     if (await fileExists(filePath)) {
       return 'file://$filePath';
     }
@@ -173,9 +177,12 @@ class AudioFileUrlResolver {
 
     final rootPath = await downloadRootPath();
     final workDir = p.join(rootPath, workId.toString());
-    final localPath = p.join(
-      workDir,
-      DownloadFilePathService.localRelativePathForItem(file, parentPath),
+    final localPath = DownloadFilePathService.localPathForRelativePath(
+      rootPath: workDir,
+      relativePath: DownloadFilePathService.localRelativePathForItem(
+        file,
+        parentPath,
+      ),
     );
 
     if (!await fileExists(localPath)) {
@@ -210,7 +217,11 @@ class AudioFileUrlResolver {
     if (relativePath == null) return null;
 
     final rootPath = await downloadRootPath();
-    final filePath = p.join(rootPath, workId.toString(), relativePath);
+    final filePath = DownloadFilePathService.localPathForWorkRelativePath(
+      rootPath: rootPath,
+      workId: workId,
+      relativePath: relativePath,
+    );
     if (await fileExists(filePath)) {
       return filePath;
     }

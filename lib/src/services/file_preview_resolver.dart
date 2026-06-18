@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
-
+import 'download_file_path_service.dart';
 import '../utils/file_tree_utils.dart';
 
 typedef PreviewDownloadRootProvider = Future<String> Function();
@@ -408,7 +407,11 @@ class FilePreviewResolver {
     if (relativePath == null) return null;
 
     final rootPath = await downloadRootPath();
-    final localPath = p.join(rootPath, workId.toString(), relativePath);
+    final localPath = DownloadFilePathService.localPathForWorkRelativePath(
+      rootPath: rootPath,
+      workId: workId,
+      relativePath: relativePath,
+    );
     return LocalPreviewFile(
       relativePath: relativePath,
       path: localPath,
@@ -592,7 +595,11 @@ class FilePreviewResolver {
 
     try {
       final rootPath = await downloadRootPath();
-      final localPath = p.join(rootPath, workId.toString(), relativePath);
+      final localPath = DownloadFilePathService.localPathForWorkRelativePath(
+        rootPath: rootPath,
+        workId: workId,
+        relativePath: relativePath,
+      );
       if (await fileExists(localPath)) {
         return 'file://$localPath';
       }

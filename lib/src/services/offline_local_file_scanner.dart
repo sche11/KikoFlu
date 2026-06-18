@@ -133,7 +133,10 @@ class OfflineLocalFileScanner {
     final title = FileTreeUtils.titleOf(item, defaultValue: 'unknown');
     final relativePath =
         DownloadFilePathService.localRelativePathForItem(item, parentPath);
-    final filePath = p.join(workDirPath, relativePath);
+    final filePath = DownloadFilePathService.localPathForRelativePath(
+      rootPath: workDirPath,
+      relativePath: relativePath,
+    );
 
     final exists = await fileExists(filePath);
     final isDownloading = await fileExists('$filePath.downloading');

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kikoeru_flutter/src/services/download_file_path_service.dart';
+import 'package:path/path.dart' as p;
 
 Map<String, dynamic> fileItem(
   String title, {
@@ -35,6 +36,58 @@ void main() {
       );
       expect(DownloadFilePathService.safeRelativePath('../..'), 'download');
       expect(DownloadFilePathService.safeRelativePath('aux.txt'), '_aux.txt');
+    });
+
+    test('normalizes stored relative paths without allowing rooted segments',
+        () {
+      expect(
+        DownloadFilePathService.normalizeRelativePath(
+          r'..\C:\tmp//Disc 1\.\track.mp3',
+        ),
+        'C_/tmp/Disc 1/track.mp3',
+      );
+      expect(
+        DownloadFilePathService.normalizeRelativePath(r'\\server\share\file'),
+        'server/share/file',
+      );
+    });
+
+    test('joins stored relative paths with platform path separators', () {
+      final windows = p.Context(style: p.Style.windows);
+      final posix = p.Context(style: p.Style.posix);
+
+      expect(
+        DownloadFilePathService.localPathForWorkRelativePath(
+          rootPath: r'C:\Downloads',
+          workId: 123,
+          relativePath: 'Disc 1/track.mp3',
+          context: windows,
+        ),
+        r'C:\Downloads\123\Disc 1\track.mp3',
+      );
+      expect(
+        DownloadFilePathService.localPathForWorkRelativePath(
+          rootPath: '/downloads',
+          workId: 123,
+          relativePath: 'Disc 1/track.mp3',
+          context: posix,
+        ),
+        '/downloads/123/Disc 1/track.mp3',
+      );
+    });
+
+    test('neutralizes absolute-looking relative paths when joining', () {
+      final windows = p.Context(style: p.Style.windows);
+
+      expect(
+        DownloadFilePathService.localPathForWorkRelativePath(
+          rootPath: r'D:\KikoFlu',
+          workId: 123,
+          relativePath: r'..\C:\Windows\system32\drivers\etc\hosts',
+          context: windows,
+        ),
+        r'D:\KikoFlu\123\C_\Windows\system32\drivers\etc\hosts',
+      );
     });
 
     test('truncates long path segments while keeping extensions', () {

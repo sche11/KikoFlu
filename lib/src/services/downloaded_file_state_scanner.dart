@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
-
+import 'download_file_path_service.dart';
 import '../utils/file_tree_utils.dart';
 
 typedef DownloadedPathResolver = Future<String?> Function(
@@ -58,7 +57,11 @@ class DownloadedFileStateScanner {
       final relativePath = fileRelativePaths[hash];
       if (relativePath == null) continue;
 
-      final localPath = p.join(rootPath, workId.toString(), relativePath);
+      final localPath = DownloadFilePathService.localPathForWorkRelativePath(
+        rootPath: rootPath,
+        workId: workId,
+        relativePath: relativePath,
+      );
       if (await fileExists(localPath)) {
         downloadedFiles[hash] = true;
       }
