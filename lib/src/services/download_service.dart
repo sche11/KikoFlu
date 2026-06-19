@@ -218,7 +218,13 @@ class DownloadService {
   Future<Map<String, dynamic>?> _loadWorkMetadata(int workId) async {
     try {
       final workDir = await _findExistingWorkDirectory(workId);
-      if (workDir == null) return null;
+      if (workDir == null) {
+        _log.warning(
+          '未找到作品目录，无法加载元数据: workId=$workId',
+          tag: 'Download',
+        );
+        return null;
+      }
 
       final metadataFile = File('$workDir/work_metadata.json');
 
@@ -230,6 +236,12 @@ class DownloadService {
         }
         metadata[LocalWorkMetadataService.localWorkDirNameKey] =
             p.basename(workDir.path);
+        _log.debug(
+          '已从磁盘加载元数据: workId=$workId, dir=${p.basename(workDir.path)}, '
+          'metadataId=${metadata['id']}, sourceId=${metadata['source_id']}, '
+          'children=${(metadata['children'] as List?)?.length ?? 0}',
+          tag: 'Download',
+        );
 
         // 迁移旧的绝对路径为相对路径
         if (metadata.containsKey('localCoverPath')) {
@@ -245,6 +257,10 @@ class DownloadService {
 
         return metadata;
       }
+      _log.warning(
+        '作品目录存在但缺少 work_metadata.json: workId=$workId, dir=${workDir.path}',
+        tag: 'Download',
+      );
     } catch (e) {
       _log.error('读取作品元数据失败: $e', tag: 'Download');
     }
@@ -253,7 +269,10 @@ class DownloadService {
 
   Future<Directory?> _findExistingWorkDirectory(int workId) async {
     final downloadDir = await _getDownloadDirectory();
-    if (!await downloadDir.exists()) return null;
+    if (!await downloadDir.exists()) {
+      _log.warning('下载根目录不存在: ${downloadDir.path}', tag: 'Download');
+      return null;
+    }
 
     Directory? fallback;
     await for (final entity in downloadDir.list(followLinks: false)) {
@@ -263,11 +282,21 @@ class DownloadService {
       if (parsed?.id != workId) continue;
 
       if (p.basename(entity.path) == workId.toString()) {
+        _log.debug(
+          '匹配作品目录: workId=$workId, dir=${entity.path}, exact=true',
+          tag: 'Download',
+        );
         return entity;
       }
       fallback ??= entity;
     }
 
+    if (fallback != null) {
+      _log.debug(
+        '匹配作品目录: workId=$workId, dir=${fallback.path}, exact=false',
+        tag: 'Download',
+      );
+    }
     return fallback;
   }
 
@@ -293,10 +322,16 @@ class DownloadService {
     );
 
     if (task.id.isNotEmpty && task.workMetadata != null) {
+      _log.debug(
+        '从内存任务获取元数据: workId=$workId, task=${task.id}, '
+        'metadataId=${task.workMetadata?['id']}, sourceId=${task.workMetadata?['source_id']}',
+        tag: 'Download',
+      );
       return task.workMetadata;
     }
 
     // 如果内存中没有，从硬盘读取
+    _log.info('内存任务无元数据，尝试从磁盘恢复: workId=$workId', tag: 'Download');
     return await _loadWorkMetadata(workId);
   }
 
@@ -1227,16 +1262,23 @@ class DownloadService {
 
       // 扫描硬盘上所有的作品文件夹
       final workFolders = <int, Directory>{};
+      var ignoredDirectoryCount = 0;
       await for (final entity in downloadDir.list()) {
         if (entity is! Directory) continue;
 
         final folder = _localMetadataService.parseWorkFolder(entity);
         if (folder != null) {
           workFolders[folder.id] = entity;
+        } else {
+          ignoredDirectoryCount++;
+          _log.debug('忽略无法识别为作品的目录: ${entity.path}', tag: 'Download');
         }
       }
 
-      _log.info('发现 ${workFolders.length} 个作品文件夹', tag: 'Download');
+      _log.info(
+        '发现 ${workFolders.length} 个作品文件夹，忽略 $ignoredDirectoryCount 个目录',
+        tag: 'Download',
+      );
 
       // 第一步：删除硬盘上不存在的已完成任务
       final tasksToRemove = <String>[];
@@ -1290,6 +1332,12 @@ class DownloadService {
         // 加载元数据（现在可能已经通过升级创建了）
         final metadata = await _loadWorkMetadata(workId);
         final workTitle = metadata?['title'] as String? ?? 'RJ$workId';
+        if (metadata == null) {
+          _log.warning(
+            '扫描作品文件时未加载到元数据，将创建无详情任务: workId=$workId, dir=${workDir.path}',
+            tag: 'Download',
+          );
+        }
 
         // 递归扫描文件夹中的所有文件
         Future<void> scanDirectory(Directory dir, String relativePath) async {
@@ -1366,6 +1414,12 @@ class DownloadService {
           final metadata = await _loadWorkMetadata(task.workId);
           if (metadata != null) {
             _tasks[i] = task.copyWith(workMetadata: metadata);
+          } else {
+            _log.warning(
+              '完成任务仍缺少元数据: workId=${task.workId}, task=${task.id}, '
+              'file=${task.fileName}',
+              tag: 'Download',
+            );
           }
         }
       }

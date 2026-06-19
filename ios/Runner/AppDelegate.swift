@@ -43,6 +43,10 @@ class AudioHapticsBridge {
     private var engine: CHHapticEngine?
     private var impactGenerator: UIImpactFeedbackGenerator?
     private var streamAnalysisGeneration = 0
+    private var loggedHapticsCapability = false
+    private var loggedCoreHapticsFailure = false
+    private var loggedFallbackPulse = false
+    private var loggedReadableAlias = false
 
     init(controller: FlutterViewController) {
         channel = FlutterMethodChannel(
@@ -165,6 +169,10 @@ class AudioHapticsBridge {
             if readableURL.shouldRemove {
                 try? FileManager.default.removeItem(at: readableURL.url)
             }
+        }
+        if readableURL.shouldRemove && !loggedReadableAlias {
+            sendDiagnostic("iOS 分析文件没有可识别扩展名，已创建临时别名: \(readableURL.url.lastPathComponent)")
+            loggedReadableAlias = true
         }
         let url = readableURL.url
         let file = try AVAudioFile(forReading: url)
@@ -425,9 +433,25 @@ class AudioHapticsBridge {
         }
     }
 
+    private func sendDiagnostic(_ message: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.channel.invokeMethod("diagnostic", arguments: ["message": message])
+        }
+    }
+
     private func pulse(intensity: Double, durationMs: Int) {
         let clampedIntensity = max(0.1, min(1.0, intensity))
         let clampedDuration = max(0.01, min(0.12, Double(durationMs) / 1000.0))
+        if !loggedHapticsCapability {
+            if #available(iOS 13.0, *) {
+                sendDiagnostic(
+                    "iOS 触感能力: supportsHaptics=\(CHHapticEngine.capabilitiesForHardware().supportsHaptics), supportsAudio=\(CHHapticEngine.capabilitiesForHardware().supportsAudio)"
+                )
+            } else {
+                sendDiagnostic("iOS 触感能力: CoreHaptics unavailable below iOS 13")
+            }
+            loggedHapticsCapability = true
+        }
 
         if #available(iOS 13.0, *), CHHapticEngine.capabilitiesForHardware().supportsHaptics {
             do {
@@ -463,10 +487,18 @@ class AudioHapticsBridge {
                 try player?.start(atTime: 0)
                 return
             } catch {
+                if !loggedCoreHapticsFailure {
+                    sendDiagnostic("CoreHaptics 播放失败，降级到 UIImpactFeedbackGenerator: \(error.localizedDescription)")
+                    loggedCoreHapticsFailure = true
+                }
                 // Fall back below.
             }
         }
 
+        if !loggedFallbackPulse {
+            sendDiagnostic("使用 UIImpactFeedbackGenerator 触感降级路径")
+            loggedFallbackPulse = true
+        }
         let style: UIImpactFeedbackGenerator.FeedbackStyle =
             clampedIntensity > 0.72 ? .heavy : (clampedIntensity > 0.42 ? .medium : .light)
         impactGenerator = UIImpactFeedbackGenerator(style: style)

@@ -440,7 +440,8 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
 
   void _openWorkDetail(int workId, DownloadTask task) async {
     _log.captureOutput(
-        '[LocalDownloads] 打开作品详情: workId=$workId, hasMetadata=${task.workMetadata != null}');
+        '[LocalDownloads] 打开作品详情: workId=$workId, task=${task.id}, '
+        'file=${task.fileName}, hasMetadata=${task.workMetadata != null}');
 
     final loadedMetadata = task.workMetadata ??
         await DownloadService.instance.getWorkMetadata(workId);
@@ -448,7 +449,9 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
     if (!mounted) return;
 
     if (loadedMetadata == null) {
-      _log.captureOutput('[LocalDownloads] 错误：任务没有元数据');
+      _log.captureOutput(
+        '[LocalDownloads] 错误：任务没有元数据，磁盘恢复也失败: workId=$workId, task=${task.id}',
+      );
       _showSnackBarSafe(
         SnackBar(
           content: Text(S.of(context).noWorkMetadataForOffline),
@@ -460,6 +463,11 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
 
     try {
       final metadata = _sanitizeMetadata(loadedMetadata);
+      _log.captureOutput(
+        '[LocalDownloads] 已获得离线元数据: workId=$workId, '
+        'metadataId=${metadata['id']}, sourceId=${metadata['source_id']}, '
+        'localDir=${metadata['localWorkDirName']}',
+      );
       final work = Work.fromJson(metadata);
 
       // 动态构建完整的本地路径
