@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/update_provider.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 import '../../l10n/app_localizations.dart';
 
 class AboutScreen extends ConsumerStatefulWidget {
@@ -115,7 +116,7 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
             children: [
               // Update check card - shown at top if update available
               if (updateInfo != null && updateInfo.hasNewVersion)
-                Card(
+                SettingsSectionCard(
                   color: Theme.of(context).colorScheme.secondaryContainer,
                   child: ListTile(
                     leading: Icon(
@@ -148,11 +149,12 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
               if (updateInfo != null && updateInfo.hasNewVersion)
                 const SizedBox(height: 16),
 
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.verified, color: primaryColor),
-                  title: Text(S.of(context).versionInfo),
-                  subtitle: Text(S.of(context).currentVersion(versionLabel)),
+              SettingsSectionCard(
+                child: SettingsListTile(
+                  icon: Icons.verified,
+                  iconColor: primaryColor,
+                  title: S.of(context).versionInfo,
+                  subtitle: S.of(context).currentVersion(versionLabel),
                   trailing: isCheckingUpdate
                       ? const SizedBox(
                           width: 20,
@@ -166,29 +168,32 @@ class _AboutScreenState extends ConsumerState<AboutScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.person_outline, color: primaryColor),
-                  title: Text(S.of(context).author),
-                  subtitle: const Text('Meteor-Sage'),
+              SettingsSectionCard(
+                child: SettingsListTile(
+                  icon: Icons.person_outline,
+                  iconColor: primaryColor,
+                  title: S.of(context).author,
+                  subtitle: 'Meteor-Sage',
                 ),
               ),
               const SizedBox(height: 16),
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.link, color: primaryColor),
-                  title: Text(S.of(context).projectRepo),
-                  subtitle: Text(_repoUri.toString()),
+              SettingsSectionCard(
+                child: SettingsListTile(
+                  icon: Icons.link,
+                  iconColor: primaryColor,
+                  title: S.of(context).projectRepo,
+                  subtitle: _repoUri.toString(),
                   trailing: const Icon(Icons.open_in_new),
                   onTap: () => _openRepository(),
                 ),
               ),
               const SizedBox(height: 16),
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.gavel_outlined, color: primaryColor),
-                  title: Text(S.of(context).openSourceLicense),
-                  subtitle: const Text('LICENSE'),
+              SettingsSectionCard(
+                child: SettingsListTile(
+                  icon: Icons.gavel_outlined,
+                  iconColor: primaryColor,
+                  title: S.of(context).openSourceLicense,
+                  subtitle: 'LICENSE',
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => _showLicenseDialog(data.license),
                 ),

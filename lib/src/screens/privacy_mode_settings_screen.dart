@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 /// 防社死设置页面
 class PrivacyModeSettingsScreen extends ConsumerStatefulWidget {
@@ -67,7 +68,8 @@ class _PrivacyModeSettingsScreenState
                     .read(privacyModeSettingsProvider.notifier)
                     .setCustomTitle(title);
                 Navigator.pop(context);
-                SnackBarUtil.showSuccess(context, S.of(context).replaceTitleSaved);
+                SnackBarUtil.showSuccess(
+                    context, S.of(context).replaceTitleSaved);
               }
             },
             child: Text(S.of(context).save),
@@ -83,13 +85,14 @@ class _PrivacyModeSettingsScreenState
 
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).privacyModeSettingsTitle, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).privacyModeSettingsTitle,
+            style: const TextStyle(fontSize: 18)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // 说明卡片
-          Card(
+          SettingsSectionCard(
             color: Theme.of(context).colorScheme.primaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -135,18 +138,16 @@ class _PrivacyModeSettingsScreenState
           const SizedBox(height: 16),
 
           // 主开关
-          Card(
-            child: SwitchListTile(
-              secondary: Icon(
-                settings.enabled ? Icons.shield : Icons.shield_outlined,
-                color: settings.enabled
-                    ? Colors.green
-                    : Theme.of(context).colorScheme.primary,
-              ),
-              title: Text(S.of(context).enablePrivacyMode),
-              subtitle: Text(
-                settings.enabled ? S.of(context).privacyModeEnabledSubtitle : S.of(context).privacyModeDisabledSubtitle,
-              ),
+          SettingsSectionCard(
+            child: SettingsSwitchTile(
+              icon: settings.enabled ? Icons.shield : Icons.shield_outlined,
+              iconColor: settings.enabled
+                  ? Colors.green
+                  : Theme.of(context).colorScheme.primary,
+              title: S.of(context).enablePrivacyMode,
+              subtitle: settings.enabled
+                  ? S.of(context).privacyModeEnabledSubtitle
+                  : S.of(context).privacyModeDisabledSubtitle,
               value: settings.enabled,
               onChanged: (value) {
                 ref
@@ -158,7 +159,7 @@ class _PrivacyModeSettingsScreenState
           const SizedBox(height: 16),
 
           // 详细设置
-          Card(
+          SettingsSectionCard(
             child: Column(
               children: [
                 // 标题说明
@@ -192,73 +193,56 @@ class _PrivacyModeSettingsScreenState
                 ),
 
                 // 通知封面模糊
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.notifications_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).blurNotificationCover),
-                  subtitle: Text(S.of(context).blurNotificationCoverSubtitle),
+                SettingsSwitchTile(
+                  icon: Icons.notifications_outlined,
+                  title: S.of(context).blurNotificationCover,
+                  subtitle: S.of(context).blurNotificationCoverSubtitle,
                   value: settings.blurCover,
-                  onChanged: settings.enabled
-                      ? (value) {
-                          ref
-                              .read(privacyModeSettingsProvider.notifier)
-                              .setBlurCover(value);
-                        }
-                      : null,
+                  enabled: settings.enabled,
+                  onChanged: (value) {
+                    ref
+                        .read(privacyModeSettingsProvider.notifier)
+                        .setBlurCover(value);
+                  },
                 ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                const SettingsDivider(),
 
                 // 应用内封面模糊
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.blur_on,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).blurInAppCover),
-                  subtitle: Text(S.of(context).blurInAppCoverSubtitle),
+                SettingsSwitchTile(
+                  icon: Icons.blur_on,
+                  title: S.of(context).blurInAppCover,
+                  subtitle: S.of(context).blurInAppCoverSubtitle,
                   value: settings.blurCoverInApp,
-                  onChanged: settings.enabled
-                      ? (value) {
-                          ref
-                              .read(privacyModeSettingsProvider.notifier)
-                              .setBlurCoverInApp(value);
-                        }
-                      : null,
+                  enabled: settings.enabled,
+                  onChanged: (value) {
+                    ref
+                        .read(privacyModeSettingsProvider.notifier)
+                        .setBlurCoverInApp(value);
+                  },
                 ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                const SettingsDivider(),
 
                 // 标题替换
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.text_fields,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).replaceTitle),
-                  subtitle: Text(S.of(context).replaceTitleSubtitle),
+                SettingsSwitchTile(
+                  icon: Icons.text_fields,
+                  title: S.of(context).replaceTitle,
+                  subtitle: S.of(context).replaceTitleSubtitle,
                   value: settings.maskTitle,
-                  onChanged: settings.enabled
-                      ? (value) {
-                          ref
-                              .read(privacyModeSettingsProvider.notifier)
-                              .setMaskTitle(value);
-                        }
-                      : null,
+                  enabled: settings.enabled,
+                  onChanged: (value) {
+                    ref
+                        .read(privacyModeSettingsProvider.notifier)
+                        .setMaskTitle(value);
+                  },
                 ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                const SettingsDivider(),
 
                 // 自定义标题
-                ListTile(
+                SettingsListTile(
                   enabled: settings.enabled && settings.maskTitle,
-                  leading: Icon(
-                    Icons.edit,
-                    color: settings.enabled && settings.maskTitle
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  title: Text(S.of(context).replaceTitleContent),
-                  subtitle: Text(settings.customTitle),
+                  icon: Icons.edit,
+                  title: S.of(context).replaceTitleContent,
+                  subtitle: settings.customTitle,
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: settings.enabled && settings.maskTitle
                       ? _showEditTitleDialog
@@ -270,7 +254,7 @@ class _PrivacyModeSettingsScreenState
           const SizedBox(height: 16),
 
           // 效果举例
-          Card(
+          SettingsSectionCard(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Padding(
               padding: const EdgeInsets.all(16),

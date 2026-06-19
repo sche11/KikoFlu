@@ -23,6 +23,7 @@ import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
 import '../widgets/download_fab.dart';
 import '../widgets/radio_option_group.dart';
+import '../widgets/settings_section.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -180,71 +181,56 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildAccountCard(BuildContext context) {
     final privacySettings = ref.watch(privacyModeSettingsProvider);
 
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.manage_accounts,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text(S.of(context).accountManagement),
-            subtitle: Text(S.of(context).accountManagementSubtitle),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const AccountManagementScreen(),
-                ),
-              );
-            },
-          ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant),
-          ListTile(
-            leading: Icon(Icons.privacy_tip_outlined,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text(S.of(context).privacyMode),
-            subtitle: Text(
-              privacySettings.enabled
-                  ? S.of(context).privacyModeEnabled
-                  : S.of(context).privacyModeDisabled,
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const PrivacyModeSettingsScreen(),
-                ),
-              );
-            },
-          ),
-          // 显示悬浮字幕 (Android & Windows & macOS & iOS)
-          if (Platform.isAndroid ||
-              Platform.isWindows ||
-              Platform.isMacOS ||
-              Platform.isIOS) ...[
-            Divider(color: Theme.of(context).colorScheme.outlineVariant),
-            _buildFloatingLyricTile(context),
-          ],
+    return SettingsSectionList(
+      children: [
+        SettingsNavigationTile(
+          icon: Icons.manage_accounts,
+          title: S.of(context).accountManagement,
+          subtitle: S.of(context).accountManagementSubtitle,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const AccountManagementScreen(),
+              ),
+            );
+          },
+        ),
+        SettingsNavigationTile(
+          icon: Icons.privacy_tip_outlined,
+          title: S.of(context).privacyMode,
+          subtitle: privacySettings.enabled
+              ? S.of(context).privacyModeEnabled
+              : S.of(context).privacyModeDisabled,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const PrivacyModeSettingsScreen(),
+              ),
+            );
+          },
+        ),
+        // 显示悬浮字幕 (Android & Windows & macOS & iOS)
+        if (Platform.isAndroid ||
+            Platform.isWindows ||
+            Platform.isMacOS ||
+            Platform.isIOS)
+          _buildFloatingLyricTile(context),
 
-          // 仅在安卓平台显示权限管理
-          if (Platform.isAndroid) ...[
-            Divider(color: Theme.of(context).colorScheme.outlineVariant),
-            ListTile(
-              leading: Icon(Icons.security,
-                  color: Theme.of(context).colorScheme.primary),
-              title: Text(S.of(context).permissionManagement),
-              subtitle: Text(S.of(context).permissionManagementSubtitle),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const PermissionsScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ],
-      ),
+        // 仅在安卓平台显示权限管理
+        if (Platform.isAndroid)
+          SettingsNavigationTile(
+            icon: Icons.security,
+            title: S.of(context).permissionManagement,
+            subtitle: S.of(context).permissionManagementSubtitle,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const PermissionsScreen(),
+                ),
+              );
+            },
+          ),
+      ],
     );
   }
 
@@ -255,21 +241,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Column(
       children: [
-        SwitchListTile(
-          secondary: Icon(
-            Icons.subtitles_outlined,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          title: Text(S.of(context).desktopFloatingLyric),
-          subtitle: Text(
-            isEnabled
-                ? S.of(context).floatingLyricEnabled
-                : S.of(context).privacyModeDisabled,
-            style: TextStyle(
-              color: isEnabled
-                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.8)
-                  : null,
-            ),
+        SettingsSwitchTile(
+          icon: Icons.subtitles_outlined,
+          title: S.of(context).desktopFloatingLyric,
+          subtitle: isEnabled
+              ? S.of(context).floatingLyricEnabled
+              : S.of(context).privacyModeDisabled,
+          subtitleStyle: TextStyle(
+            color: isEnabled
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.8)
+                : null,
           ),
           value: isEnabled,
           onChanged: (value) async {
@@ -285,15 +266,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           },
         ),
         if (isEnabled) ...[
-          Divider(
-            height: 1,
-            color: Theme.of(context).colorScheme.outlineVariant,
-            indent: 72,
-          ),
-          ListTile(
+          const SettingsDivider(),
+          SettingsListTile(
             leading: const SizedBox(width: 24), // 占位对齐
-            title: Text(S.of(context).styleSettings),
-            subtitle: Text(S.of(context).styleSettingsSubtitle),
+            title: S.of(context).styleSettings,
+            subtitle: S.of(context).styleSettingsSubtitle,
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Navigator.of(context).push(
@@ -304,25 +281,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             },
           ),
           if (Platform.isAndroid) ...[
-            Divider(
-              height: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-              indent: 72,
-            ),
+            const SettingsDivider(),
             _buildFloatingLyricTouchTile(context),
           ],
           if (Platform.isIOS) ...[
-            Divider(
-              height: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-              indent: 72,
-            ),
+            const SettingsDivider(),
             _buildFloatingFPSTile(context),
-            Divider(
-              height: 1,
-              color: Theme.of(context).colorScheme.outlineVariant,
-              indent: 72,
-            ),
+            const SettingsDivider(),
             _buildFloatingNetworkSpeedTile(context),
           ],
         ],
@@ -333,14 +298,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// 悬浮字幕触摸开关（仅 Android）
   Widget _buildFloatingLyricTouchTile(BuildContext context) {
     final touchEnabled = ref.watch(floatingLyricTouchEnabledProvider);
-    return SwitchListTile(
+    return SettingsSwitchTile(
       secondary: const SizedBox(width: 24),
-      title: Text(S.of(context).floatingLyricTouch),
-      subtitle: Text(
-        touchEnabled
-            ? S.of(context).floatingLyricTouchEnabled
-            : S.of(context).floatingLyricTouchDisabled,
-      ),
+      title: S.of(context).floatingLyricTouch,
+      subtitle: touchEnabled
+          ? S.of(context).floatingLyricTouchEnabled
+          : S.of(context).floatingLyricTouchDisabled,
       value: !touchEnabled,
       onChanged: (value) async {
         await ref.read(floatingLyricTouchEnabledProvider.notifier).toggle();
@@ -351,14 +314,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   /// 悬浮窗 FPS 显示开关（仅 iOS）
   Widget _buildFloatingFPSTile(BuildContext context) {
     final fpsEnabled = ref.watch(floatingLyricFPSEnabledProvider);
-    return SwitchListTile(
+    return SettingsSwitchTile(
       secondary: const SizedBox(width: 24),
-      title: Text(S.of(context).floatingFPS),
-      subtitle: Text(
-        fpsEnabled
-            ? S.of(context).floatingFPSEnabled
-            : S.of(context).floatingFPSDisabled,
-      ),
+      title: S.of(context).floatingFPS,
+      subtitle: fpsEnabled
+          ? S.of(context).floatingFPSEnabled
+          : S.of(context).floatingFPSDisabled,
       value: fpsEnabled,
       onChanged: (value) async {
         await ref.read(floatingLyricFPSEnabledProvider.notifier).toggle();
@@ -370,14 +331,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildFloatingNetworkSpeedTile(BuildContext context) {
     final networkSpeedEnabled =
         ref.watch(floatingLyricNetworkSpeedEnabledProvider);
-    return SwitchListTile(
+    return SettingsSwitchTile(
       secondary: const SizedBox(width: 24),
-      title: Text(S.of(context).floatingNetworkSpeed),
-      subtitle: Text(
-        networkSpeedEnabled
-            ? S.of(context).floatingNetworkSpeedEnabled
-            : S.of(context).floatingNetworkSpeedDisabled,
-      ),
+      title: S.of(context).floatingNetworkSpeed,
+      subtitle: networkSpeedEnabled
+          ? S.of(context).floatingNetworkSpeedEnabled
+          : S.of(context).floatingNetworkSpeedDisabled,
       value: networkSpeedEnabled,
       onChanged: (value) async {
         await ref
@@ -388,36 +347,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildDownloadAndCacheCard(BuildContext context) {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.folder_outlined,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text(S.of(context).downloadPath),
-            subtitle: Text(S.of(context).downloadPathSubtitle),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const DownloadPathSettingsScreen(),
-                ),
-              );
-            },
-          ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant),
-          ListTile(
-            leading: Icon(Icons.storage,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text(S.of(context).cacheManagement),
-            subtitle: Text(S.of(context).currentCache(_cacheSize)),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              _showCacheManagementDialog();
-            },
-          ),
-        ],
-      ),
+    return SettingsSectionList(
+      children: [
+        SettingsNavigationTile(
+          icon: Icons.folder_outlined,
+          title: S.of(context).downloadPath,
+          subtitle: S.of(context).downloadPathSubtitle,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const DownloadPathSettingsScreen(),
+              ),
+            );
+          },
+        ),
+        SettingsNavigationTile(
+          icon: Icons.storage,
+          title: S.of(context).cacheManagement,
+          subtitle: S.of(context).currentCache(_cacheSize),
+          onTap: _showCacheManagementDialog,
+        ),
+      ],
     );
   }
 
@@ -463,190 +413,173 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildAppearanceAndAboutCard(BuildContext context) {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(Icons.palette,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text(S.of(context).themeSettings),
-            subtitle: Text(S.of(context).themeSettingsSubtitle),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ThemeSettingsScreen(),
-                ),
-              );
-            },
-          ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant),
-          Consumer(
-            builder: (context, ref, _) {
-              final currentLocale = ref.watch(localeProvider);
-              String localeLabel;
-              if (currentLocale == null) {
-                localeLabel = S.of(context).languageSystem;
-              } else if (currentLocale.scriptCode == 'Hant') {
-                localeLabel = S.of(context).languageZhTw;
-              } else {
-                localeLabel = switch (currentLocale.languageCode) {
-                  'zh' => S.of(context).languageZh,
-                  'en' => S.of(context).languageEn,
-                  'ja' => S.of(context).languageJa,
-                  'ru' => S.of(context).languageRu,
-                  _ => currentLocale.languageCode,
-                };
-              }
-              return ListTile(
-                leading: Icon(Icons.language,
-                    color: Theme.of(context).colorScheme.primary),
-                title: Text(S.of(context).settingsLanguage),
-                subtitle: Text(localeLabel),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () => _showLanguagePicker(context, ref),
-              );
-            },
-          ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant),
-          ListTile(
-            leading: Icon(Icons.dashboard_customize,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text(S.of(context).uiSettings),
-            subtitle: Text(S.of(context).uiSettingsSubtitle),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const UiSettingsScreen(),
-                ),
-              );
-            },
-          ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant),
-          ListTile(
-            leading:
-                Icon(Icons.tune, color: Theme.of(context).colorScheme.primary),
-            title: Text(S.of(context).preferenceSettings),
-            subtitle: Text(S.of(context).preferenceSettingsSubtitle),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const PreferencesScreen(),
-                ),
-              );
-            },
-          ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant),
-          ListTile(
-            leading: Icon(Icons.article_outlined,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text(S.of(context).logTitle),
-            subtitle: Text(S.of(context).logSubtitle),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const LogScreen(),
-                ),
-              );
-            },
-          ),
-          Divider(color: Theme.of(context).colorScheme.outlineVariant),
-          Consumer(
-            builder: (context, ref, _) {
-              final showRedDot = ref.watch(showUpdateRedDotProvider);
-              final hasNewVersion = ref.watch(hasNewVersionProvider);
+    return SettingsSectionList(
+      children: [
+        SettingsNavigationTile(
+          icon: Icons.palette,
+          title: S.of(context).themeSettings,
+          subtitle: S.of(context).themeSettingsSubtitle,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const ThemeSettingsScreen(),
+              ),
+            );
+          },
+        ),
+        Consumer(
+          builder: (context, ref, _) {
+            final currentLocale = ref.watch(localeProvider);
+            String localeLabel;
+            if (currentLocale == null) {
+              localeLabel = S.of(context).languageSystem;
+            } else if (currentLocale.scriptCode == 'Hant') {
+              localeLabel = S.of(context).languageZhTw;
+            } else {
+              localeLabel = switch (currentLocale.languageCode) {
+                'zh' => S.of(context).languageZh,
+                'en' => S.of(context).languageEn,
+                'ja' => S.of(context).languageJa,
+                'ru' => S.of(context).languageRu,
+                _ => currentLocale.languageCode,
+              };
+            }
+            return SettingsNavigationTile(
+              icon: Icons.language,
+              title: S.of(context).settingsLanguage,
+              subtitle: localeLabel,
+              onTap: () => _showLanguagePicker(context, ref),
+            );
+          },
+        ),
+        SettingsNavigationTile(
+          icon: Icons.dashboard_customize,
+          title: S.of(context).uiSettings,
+          subtitle: S.of(context).uiSettingsSubtitle,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const UiSettingsScreen(),
+              ),
+            );
+          },
+        ),
+        SettingsNavigationTile(
+          icon: Icons.tune,
+          title: S.of(context).preferenceSettings,
+          subtitle: S.of(context).preferenceSettingsSubtitle,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const PreferencesScreen(),
+              ),
+            );
+          },
+        ),
+        SettingsNavigationTile(
+          icon: Icons.article_outlined,
+          title: S.of(context).logTitle,
+          subtitle: S.of(context).logSubtitle,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const LogScreen(),
+              ),
+            );
+          },
+        ),
+        Consumer(
+          builder: (context, ref, _) {
+            final showRedDot = ref.watch(showUpdateRedDotProvider);
+            final hasNewVersion = ref.watch(hasNewVersionProvider);
 
-              return ListTile(
-                leading: Stack(
-                  children: [
-                    Icon(Icons.info_outline,
-                        color: Theme.of(context).colorScheme.primary),
-                    // Red dot indicator for updates (only when not notified)
-                    if (showRedDot)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(context).colorScheme.surface,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                title: Text(S.of(context).aboutTitle),
-                subtitle: Text(S.of(context).aboutSubtitle),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (hasNewVersion)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
+            return SettingsListTile(
+              leading: Stack(
+                children: [
+                  Icon(Icons.info_outline,
+                      color: Theme.of(context).colorScheme.primary),
+                  // Red dot indicator for updates (only when not notified)
+                  if (showRedDot)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 8,
+                        height: 8,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Theme.of(context).colorScheme.primaryContainer,
-                              Theme.of(context).colorScheme.secondaryContainer,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.red,
+                          shape: BoxShape.circle,
                           border: Border.all(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withValues(alpha: 0.3),
+                            color: Theme.of(context).colorScheme.surface,
                             width: 1,
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.new_releases,
-                              size: 14,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              S.of(context).hasNewVersion,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
+                      ),
+                    ),
+                ],
+              ),
+              title: S.of(context).aboutTitle,
+              subtitle: S.of(context).aboutSubtitle,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasNewVersion)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.primaryContainer,
+                            Theme.of(context).colorScheme.secondaryContainer,
                           ],
                         ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.3),
+                          width: 1,
+                        ),
                       ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_ios),
-                  ],
-                ),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const AboutScreen(),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.new_releases,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            S.of(context).hasNewVersion,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward_ios),
+                ],
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AboutScreen(),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -812,7 +745,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // 当前缓存大小
-                                Card(
+                                SettingsSectionCard(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .surfaceContainerHighest,
@@ -876,7 +809,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 // 使用量详情
-                                Card(
+                                SettingsSectionCard(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .surfaceContainerHighest,
@@ -1037,7 +970,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // 当前缓存大小
-                        Card(
+                        SettingsSectionCard(
                           color: Theme.of(context)
                               .colorScheme
                               .surfaceContainerHighest,

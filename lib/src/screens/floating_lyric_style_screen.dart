@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/floating_lyric_style_provider.dart';
 import '../utils/l10n_extensions.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 class FloatingLyricStyleScreen extends ConsumerWidget {
   const FloatingLyricStyleScreen({super.key});
@@ -53,7 +54,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
   }
 
   Widget _buildPreviewCard(BuildContext context, FloatingLyricStyle style) {
-    return Card(
+    return SettingsSectionCard(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -94,7 +95,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
   }
 
   Widget _buildPresetsCard(BuildContext context, WidgetRef ref) {
-    return Card(
+    return SettingsSectionCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -129,7 +130,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
 
   Widget _buildFontSizeCard(
       BuildContext context, WidgetRef ref, FloatingLyricStyle style) {
-    return Card(
+    return SettingsSectionCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -171,7 +172,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
 
   Widget _buildOpacityCard(
       BuildContext context, WidgetRef ref, FloatingLyricStyle style) {
-    return Card(
+    return SettingsSectionCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -213,7 +214,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
 
   Widget _buildColorsCard(
       BuildContext context, WidgetRef ref, FloatingLyricStyle style) {
-    return Card(
+    return SettingsSectionCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -336,7 +337,7 @@ class FloatingLyricStyleScreen extends ConsumerWidget {
 
   Widget _buildShapeCard(
       BuildContext context, WidgetRef ref, FloatingLyricStyle style) {
-    return Card(
+    return SettingsSectionCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

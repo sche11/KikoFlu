@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../utils/snackbar_util.dart';
+import '../widgets/settings_section.dart';
 
 /// 权限管理页面（仅安卓平台）
 class PermissionsScreen extends StatefulWidget {
@@ -54,17 +55,20 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
       if (mounted) {
         if (status.isGranted) {
-          SnackBarUtil.showSuccess(context, S.of(context).notificationPermissionGranted);
+          SnackBarUtil.showSuccess(
+              context, S.of(context).notificationPermissionGranted);
           await _checkPermissions();
         } else if (status.isDenied) {
-          SnackBarUtil.showWarning(context, S.of(context).notificationPermissionDenied);
+          SnackBarUtil.showWarning(
+              context, S.of(context).notificationPermissionDenied);
         } else if (status.isPermanentlyDenied) {
           _showOpenSettingsDialog(S.of(context).notificationPermission);
         }
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, S.of(context).requestNotificationFailed(e.toString()));
+        SnackBarUtil.showError(
+            context, S.of(context).requestNotificationFailed(e.toString()));
       }
     }
   }
@@ -75,17 +79,20 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
       if (mounted) {
         if (status.isGranted) {
-          SnackBarUtil.showSuccess(context, S.of(context).backgroundPermissionGranted);
+          SnackBarUtil.showSuccess(
+              context, S.of(context).backgroundPermissionGranted);
           await _checkPermissions();
         } else if (status.isDenied) {
-          SnackBarUtil.showWarning(context, S.of(context).backgroundPermissionDenied);
+          SnackBarUtil.showWarning(
+              context, S.of(context).backgroundPermissionDenied);
         } else if (status.isPermanentlyDenied) {
           _showOpenSettingsDialog(S.of(context).backgroundRunningPermission);
         }
       }
     } catch (e) {
       if (mounted) {
-        SnackBarUtil.showError(context, S.of(context).requestBackgroundFailed(e.toString()));
+        SnackBarUtil.showError(
+            context, S.of(context).requestBackgroundFailed(e.toString()));
       }
     }
   }
@@ -95,7 +102,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(S.of(context).permissionRequired(permissionName)),
-        content: Text(S.of(context).permissionPermanentlyDenied(permissionName)),
+        content:
+            Text(S.of(context).permissionPermanentlyDenied(permissionName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -123,7 +131,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     if (!Platform.isAndroid) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(S.of(context).permissionManagement, style: const TextStyle(fontSize: 18)),
+          title: Text(S.of(context).permissionManagement,
+              style: const TextStyle(fontSize: 18)),
         ),
         body: Center(
           child: Column(
@@ -154,7 +163,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(S.of(context).permissionManagement, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).permissionManagement,
+            style: const TextStyle(fontSize: 18)),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -169,68 +179,42 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 // 权限说明
-                Card(
+                SettingsInfoCard(
+                  icon: Icons.lightbulb_outline,
+                  title: S.of(context).permissionExplanation,
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.lightbulb_outline,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              S.of(context).permissionExplanation,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        _buildPermissionExplanation(
-                          context,
-                          S.of(context).notificationPermission,
-                          S.of(context).notificationPermissionDesc,
-                        ),
-                        const SizedBox(height: 8),
-                        _buildPermissionExplanation(
-                          context,
-                          S.of(context).backgroundRunningPermission,
-                          S.of(context).backgroundRunningPermissionDesc,
-                        ),
-                      ],
-                    ),
+                  iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPermissionExplanation(
+                        context,
+                        S.of(context).notificationPermission,
+                        S.of(context).notificationPermissionDesc,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildPermissionExplanation(
+                        context,
+                        S.of(context).backgroundRunningPermission,
+                        S.of(context).backgroundRunningPermissionDesc,
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 // 通知权限
-                Card(
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.notifications_outlined,
-                      color: _notificationGranted
-                          ? Colors.green
-                          : Theme.of(context).colorScheme.primary,
-                      size: 32,
-                    ),
-                    title: Text(S.of(context).notificationPermission),
-                    subtitle: Text(
-                      _notificationGranted
-                          ? S.of(context).notificationGrantedStatus
-                          : S.of(context).notificationDeniedStatus,
-                    ),
+                SettingsSectionCard(
+                  child: SettingsListTile(
+                    icon: Icons.notifications_outlined,
+                    iconColor: _notificationGranted
+                        ? Colors.green
+                        : Theme.of(context).colorScheme.primary,
+                    iconSize: 32,
+                    title: S.of(context).notificationPermission,
+                    subtitle: _notificationGranted
+                        ? S.of(context).notificationGrantedStatus
+                        : S.of(context).notificationDeniedStatus,
                     trailing: _notificationGranted
                         ? const Icon(Icons.check_circle, color: Colors.green)
                         : FilledButton(
@@ -242,21 +226,17 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 const SizedBox(height: 8),
 
                 // 后台运行权限
-                Card(
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.battery_charging_full,
-                      color: _ignoreBatteryOptimizationsGranted
-                          ? Colors.green
-                          : Theme.of(context).colorScheme.primary,
-                      size: 32,
-                    ),
-                    title: Text(S.of(context).backgroundRunningPermission),
-                    subtitle: Text(
-                      _ignoreBatteryOptimizationsGranted
-                          ? S.of(context).backgroundGrantedStatus
-                          : S.of(context).notificationDeniedStatus,
-                    ),
+                SettingsSectionCard(
+                  child: SettingsListTile(
+                    icon: Icons.battery_charging_full,
+                    iconColor: _ignoreBatteryOptimizationsGranted
+                        ? Colors.green
+                        : Theme.of(context).colorScheme.primary,
+                    iconSize: 32,
+                    title: S.of(context).backgroundRunningPermission,
+                    subtitle: _ignoreBatteryOptimizationsGranted
+                        ? S.of(context).backgroundGrantedStatus
+                        : S.of(context).notificationDeniedStatus,
                     trailing: _ignoreBatteryOptimizationsGranted
                         ? const Icon(Icons.check_circle, color: Colors.green)
                         : FilledButton(

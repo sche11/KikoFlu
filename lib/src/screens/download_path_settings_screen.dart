@@ -9,6 +9,7 @@ import '../services/log_service.dart';
 import '../providers/settings_provider.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 class DownloadPathSettingsScreen extends ConsumerStatefulWidget {
   const DownloadPathSettingsScreen({super.key});
@@ -317,24 +318,11 @@ class _DownloadPathSettingsScreenState
               padding: const EdgeInsets.all(16),
               children: [
                 // 平台提示
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _getPlatformHint(context),
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
+                SettingsInfoCard(
+                  icon: Icons.info_outline,
+                  child: Text(
+                    _getPlatformHint(context),
+                    style: const TextStyle(fontSize: 13),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -345,7 +333,7 @@ class _DownloadPathSettingsScreenState
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                Card(
+                SettingsSectionCard(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: _isLoading
@@ -426,7 +414,7 @@ class _DownloadPathSettingsScreenState
                     ),
                   ],
                 ] else ...[
-                  Card(
+                  SettingsSectionCard(
                     color: Theme.of(context)
                         .colorScheme
                         .errorContainer
@@ -446,7 +434,7 @@ class _DownloadPathSettingsScreenState
                 const SizedBox(height: 24),
 
                 // 说明文本
-                Card(
+                SettingsSectionCard(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(

@@ -11,6 +11,7 @@ import '../utils/l10n_extensions.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/radio_option_group.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 import '../widgets/sort_dialog.dart';
 
 /// 偏好设置页面
@@ -425,191 +426,146 @@ class PreferencesScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.library_books,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).subtitleLibraryPriority),
-                  subtitle: Text(S
-                      .of(context)
-                      .currentSettingLabel(priority.localizedName(context))),
-                  trailing: const Icon(Icons.arrow_forward_ios),
+          SettingsSectionList(
+            children: [
+              SettingsNavigationTile(
+                icon: Icons.library_books,
+                title: S.of(context).subtitleLibraryPriority,
+                subtitle: S
+                    .of(context)
+                    .currentSettingLabel(priority.localizedName(context)),
+                onTap: () => _showSubtitleLibraryPriorityDialog(context, ref),
+              ),
+              SettingsNavigationTile(
+                icon: Icons.sort,
+                title: S.of(context).defaultSortSettingTitle,
+                subtitle:
+                    '${defaultSort.order.localizedLabel(context)} - ${defaultSort.direction.localizedLabel(context)}',
+                onTap: () => _showDefaultSortDialog(context, ref),
+              ),
+              SettingsNavigationTile(
+                icon: Icons.translate,
+                title: S.of(context).translationSource,
+                subtitle: S.of(context).currentSettingLabel(
+                      translationSource.localizedName(context),
+                    ),
+                onTap: () => _showTranslationSourceDialog(context, ref),
+              ),
+              SettingsNavigationTile(
+                icon: Icons.language,
+                title: S.of(context).translationTargetLanguage,
+                subtitle: S.of(context).currentSettingLabel(
+                      _targetLanguageLabel(
+                        context,
+                        translationLanguagePreferences,
+                        translationSource == TranslationSource.llm,
+                      ),
+                    ),
+                onTap: () => _showTranslationTargetLanguageDialog(context, ref),
+              ),
+              if (translationSource == TranslationSource.llm)
+                SettingsNavigationTile(
+                  icon: Icons.settings_input_component,
+                  title: S.of(context).llmSettings,
+                  subtitle: S.of(context).llmSettingsSubtitle,
                   onTap: () {
-                    _showSubtitleLibraryPriorityDialog(context, ref);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const LLMSettingsScreen(),
+                      ),
+                    );
                   },
                 ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.sort,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).defaultSortSettingTitle),
-                  subtitle: Text(
-                      '${defaultSort.order.localizedLabel(context)} - ${defaultSort.direction.localizedLabel(context)}'),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    _showDefaultSortDialog(context, ref);
-                  },
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.translate,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).translationSource),
-                  subtitle: Text(S.of(context).currentSettingLabel(
-                      translationSource.localizedName(context))),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    _showTranslationSourceDialog(context, ref);
-                  },
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.language,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).translationTargetLanguage),
-                  subtitle: Text(
-                      S.of(context).currentSettingLabel(_targetLanguageLabel(
-                            context,
-                            translationLanguagePreferences,
-                            translationSource == TranslationSource.llm,
-                          ))),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    _showTranslationTargetLanguageDialog(context, ref);
-                  },
-                ),
-                if (translationSource == TranslationSource.llm) ...[
-                  Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                  ListTile(
-                    leading: Icon(Icons.settings_input_component,
-                        color: Theme.of(context).colorScheme.primary),
-                    title: Text(S.of(context).llmSettings),
-                    subtitle: Text(S.of(context).llmSettingsSubtitle),
-                    trailing: const Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const LLMSettingsScreen(),
+              SettingsNavigationTile(
+                icon: Icons.audio_file,
+                title: S.of(context).audioFormatPreference,
+                subtitle: S.of(context).audioFormatSubtitle,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AudioFormatSettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+              SettingsSwitchTile(
+                icon: Icons.screen_lock_portrait,
+                title: S.of(context).keepScreenAwake,
+                subtitle: S.of(context).keepScreenAwakeDesc,
+                value: ref.watch(keepScreenAwakeProvider),
+                onChanged: (value) {
+                  ref.read(keepScreenAwakeProvider.notifier).setEnabled(value);
+                },
+              ),
+              if (Theme.of(context).platform == TargetPlatform.android ||
+                  Theme.of(context).platform == TargetPlatform.iOS)
+                _AudioHapticsSettingsTile(ref: ref),
+              SettingsNavigationTile(
+                icon: Icons.block,
+                title: S.of(context).blockingSettings,
+                subtitle: S.of(context).blockingSettingsSubtitle,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const BlockedItemsScreen(),
+                    ),
+                  );
+                },
+              ),
+              // 仅在 Android, Windows 和 macOS 平台上显示音频直通设置
+              if (Theme.of(context).platform == TargetPlatform.android ||
+                  Theme.of(context).platform == TargetPlatform.windows ||
+                  Theme.of(context).platform == TargetPlatform.macOS)
+                SettingsSwitchTile(
+                  icon: Icons.surround_sound,
+                  title: S.of(context).audioPassthrough,
+                  subtitle: (Theme.of(context).platform ==
+                              TargetPlatform.windows ||
+                          Theme.of(context).platform == TargetPlatform.macOS)
+                      ? S.of(context).audioPassthroughDescWindows
+                      : S.of(context).audioPassthroughDescAndroid,
+                  subtitleStyle: const TextStyle(fontSize: 12),
+                  value: ref.watch(audioPassthroughProvider),
+                  onChanged: (value) async {
+                    if (value) {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text(S.of(context).warning),
+                          content: Text(S.of(context).audioPassthroughWarning),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text(S.of(context).cancel),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text(S.of(context).confirm),
+                            ),
+                          ],
                         ),
                       );
-                    },
-                  ),
-                ],
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.audio_file,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).audioFormatPreference),
-                  subtitle: Text(S.of(context).audioFormatSubtitle),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const AudioFormatSettingsScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(Icons.screen_lock_portrait,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).keepScreenAwake),
-                  subtitle: Text(
-                    S.of(context).keepScreenAwakeDesc,
-                  ),
-                  value: ref.watch(keepScreenAwakeProvider),
-                  onChanged: (value) {
-                    ref
-                        .read(keepScreenAwakeProvider.notifier)
-                        .setEnabled(value);
-                  },
-                ),
-                if (Theme.of(context).platform == TargetPlatform.android ||
-                    Theme.of(context).platform == TargetPlatform.iOS) ...[
-                  Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                  _AudioHapticsSettingsTile(ref: ref),
-                ],
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.block,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).blockingSettings),
-                  subtitle: Text(S.of(context).blockingSettingsSubtitle),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const BlockedItemsScreen(),
-                      ),
-                    );
-                  },
-                ),
-                // 仅在 Android, Windows 和 macOS 平台上显示音频直通设置
-                if (Theme.of(context).platform == TargetPlatform.android ||
-                    Theme.of(context).platform == TargetPlatform.windows ||
-                    Theme.of(context).platform == TargetPlatform.macOS) ...[
-                  Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                  SwitchListTile(
-                    secondary: Icon(Icons.surround_sound,
-                        color: Theme.of(context).colorScheme.primary),
-                    title: Text(S.of(context).audioPassthrough),
-                    subtitle: Text(
-                      (Theme.of(context).platform == TargetPlatform.windows ||
-                              Theme.of(context).platform ==
-                                  TargetPlatform.macOS)
-                          ? S.of(context).audioPassthroughDescWindows
-                          : S.of(context).audioPassthroughDescAndroid,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    value: ref.watch(audioPassthroughProvider),
-                    onChanged: (value) async {
-                      if (value) {
-                        final confirmed = await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(S.of(context).warning),
-                            content:
-                                Text(S.of(context).audioPassthroughWarning),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                                child: Text(S.of(context).cancel),
-                              ),
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                                child: Text(S.of(context).confirm),
-                              ),
-                            ],
-                          ),
-                        );
 
-                        if (confirmed != true) return;
-                      }
+                      if (confirmed != true) return;
+                    }
 
-                      ref.read(audioPassthroughProvider.notifier).toggle(value);
-                      if (context.mounted) {
-                        SnackBarUtil.showSuccess(
-                          context,
-                          value
-                              ? ((Theme.of(context).platform ==
-                                          TargetPlatform.windows ||
-                                      Theme.of(context).platform ==
-                                          TargetPlatform.macOS)
-                                  ? S.of(context).exclusiveModeEnabled
-                                  : S.of(context).audioPassthroughEnabled)
-                              : S.of(context).audioPassthroughDisabled,
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ],
-            ),
+                    ref.read(audioPassthroughProvider.notifier).toggle(value);
+                    if (context.mounted) {
+                      SnackBarUtil.showSuccess(
+                        context,
+                        value
+                            ? ((Theme.of(context).platform ==
+                                        TargetPlatform.windows ||
+                                    Theme.of(context).platform ==
+                                        TargetPlatform.macOS)
+                                ? S.of(context).exclusiveModeEnabled
+                                : S.of(context).audioPassthroughEnabled)
+                            : S.of(context).audioPassthroughDisabled,
+                      );
+                    }
+                  },
+                ),
+            ],
           ),
         ],
       ),

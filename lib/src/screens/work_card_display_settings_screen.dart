@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/work_card_display_provider.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 class WorkCardDisplaySettingsScreen extends ConsumerWidget {
   const WorkCardDisplaySettingsScreen({super.key});
@@ -23,114 +24,83 @@ class WorkCardDisplaySettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: Column(
-              children: [
-                _SegmentedSettingTile<WorkCardSize>(
-                  icon: Icons.photo_size_select_large,
-                  title: S.of(context).cardSize,
-                  subtitle: S.of(context).workCardSizeSubtitle,
-                  selected: settings.cardSize,
-                  options: {
-                    WorkCardSize.normal: S.of(context).cardSizeNormal,
-                    WorkCardSize.large: S.of(context).cardSizeLarge,
-                    WorkCardSize.extraLarge: S.of(context).cardSizeExtraLarge,
-                  },
-                  onSelected: notifier.updateCardSize,
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                _SegmentedSettingTile<WorkCardFontScale>(
-                  icon: Icons.format_size,
-                  title: S.of(context).workCardFontSize,
-                  subtitle: S.of(context).workCardFontSizeSubtitle,
-                  selected: settings.fontScale,
-                  options: {
-                    WorkCardFontScale.normal: S.of(context).fontSizeNormal,
-                    WorkCardFontScale.large: S.of(context).fontSizeLarge,
-                    WorkCardFontScale.extraLarge:
-                        S.of(context).fontSizeExtraLarge,
-                  },
-                  onSelected: notifier.updateFontScale,
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.star,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).ratingInfo),
-                  subtitle: Text(S.of(context).showRatingAndReviewCount),
-                  value: settings.showRating,
-                  onChanged: (_) => notifier.toggleRating(),
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.attach_money,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).priceInfo),
-                  subtitle: Text(S.of(context).showWorkPrice),
-                  value: settings.showPrice,
-                  onChanged: (_) => notifier.togglePrice(),
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.access_time,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).durationInfo),
-                  subtitle: Text(S.of(context).showWorkTotalDuration),
-                  value: settings.showDuration,
-                  onChanged: (_) => notifier.toggleDuration(),
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.shopping_cart,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).salesInfo),
-                  subtitle: Text(S.of(context).showWorkSalesCount),
-                  value: settings.showSales,
-                  onChanged: (_) => notifier.toggleSales(),
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.calendar_today,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).releaseDateInfo),
-                  subtitle: Text(S.of(context).showWorkReleaseDate),
-                  value: settings.showReleaseDate,
-                  onChanged: (_) => notifier.toggleReleaseDate(),
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.group,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).circleInfo),
-                  subtitle: Text(S.of(context).showWorkCircle),
-                  value: settings.showCircle,
-                  onChanged: (_) => notifier.toggleCircle(),
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.closed_caption,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).subtitleTagLabel),
-                  subtitle: Text(S.of(context).showSubtitleTagOnCard),
-                  value: settings.showSubtitleTag,
-                  onChanged: (_) => notifier.toggleSubtitleTag(),
-                ),
-              ],
-            ),
+          SettingsSectionList(
+            children: [
+              _SegmentedSettingTile<WorkCardSize>(
+                icon: Icons.photo_size_select_large,
+                title: S.of(context).cardSize,
+                subtitle: S.of(context).workCardSizeSubtitle,
+                selected: settings.cardSize,
+                options: {
+                  WorkCardSize.normal: S.of(context).cardSizeNormal,
+                  WorkCardSize.large: S.of(context).cardSizeLarge,
+                  WorkCardSize.extraLarge: S.of(context).cardSizeExtraLarge,
+                },
+                onSelected: notifier.updateCardSize,
+              ),
+              _SegmentedSettingTile<WorkCardFontScale>(
+                icon: Icons.format_size,
+                title: S.of(context).workCardFontSize,
+                subtitle: S.of(context).workCardFontSizeSubtitle,
+                selected: settings.fontScale,
+                options: {
+                  WorkCardFontScale.normal: S.of(context).fontSizeNormal,
+                  WorkCardFontScale.large: S.of(context).fontSizeLarge,
+                  WorkCardFontScale.extraLarge:
+                      S.of(context).fontSizeExtraLarge,
+                },
+                onSelected: notifier.updateFontScale,
+              ),
+              SettingsSwitchTile(
+                icon: Icons.star,
+                title: S.of(context).ratingInfo,
+                subtitle: S.of(context).showRatingAndReviewCount,
+                value: settings.showRating,
+                onChanged: (_) => notifier.toggleRating(),
+              ),
+              SettingsSwitchTile(
+                icon: Icons.attach_money,
+                title: S.of(context).priceInfo,
+                subtitle: S.of(context).showWorkPrice,
+                value: settings.showPrice,
+                onChanged: (_) => notifier.togglePrice(),
+              ),
+              SettingsSwitchTile(
+                icon: Icons.access_time,
+                title: S.of(context).durationInfo,
+                subtitle: S.of(context).showWorkTotalDuration,
+                value: settings.showDuration,
+                onChanged: (_) => notifier.toggleDuration(),
+              ),
+              SettingsSwitchTile(
+                icon: Icons.shopping_cart,
+                title: S.of(context).salesInfo,
+                subtitle: S.of(context).showWorkSalesCount,
+                value: settings.showSales,
+                onChanged: (_) => notifier.toggleSales(),
+              ),
+              SettingsSwitchTile(
+                icon: Icons.calendar_today,
+                title: S.of(context).releaseDateInfo,
+                subtitle: S.of(context).showWorkReleaseDate,
+                value: settings.showReleaseDate,
+                onChanged: (_) => notifier.toggleReleaseDate(),
+              ),
+              SettingsSwitchTile(
+                icon: Icons.group,
+                title: S.of(context).circleInfo,
+                subtitle: S.of(context).showWorkCircle,
+                value: settings.showCircle,
+                onChanged: (_) => notifier.toggleCircle(),
+              ),
+              SettingsSwitchTile(
+                icon: Icons.closed_caption,
+                title: S.of(context).subtitleTagLabel,
+                subtitle: S.of(context).showSubtitleTagOnCard,
+                value: settings.showSubtitleTag,
+                onChanged: (_) => notifier.toggleSubtitleTag(),
+              ),
+            ],
           ),
         ],
       ),

@@ -7,6 +7,7 @@ import '../providers/player_buttons_provider.dart';
 import '../utils/l10n_extensions.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 /// 播放器按钮设置页面
 class PlayerButtonsSettingsScreen extends ConsumerStatefulWidget {
@@ -124,7 +125,8 @@ class _PlayerButtonsSettingsScreenState
 
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).playerButtonSettings, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).playerButtonSettings,
+            style: const TextStyle(fontSize: 18)),
         actions: [
           TextButton.icon(
             onPressed: _resetToDefault,
@@ -139,39 +141,13 @@ class _PlayerButtonsSettingsScreenState
           : Column(
               children: [
                 // 说明卡片
-                Card(
+                SettingsInfoCard(
+                  icon: Icons.info_outline,
+                  title: S.of(context).buttonDisplayRules,
                   margin: const EdgeInsets.all(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 20,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              S.of(context).buttonDisplayRules,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          S.of(context).buttonDisplayRulesDesc(maxVisible),
-                          style: const TextStyle(fontSize: 12, height: 1.5),
-                        ),
-                      ],
-                    ),
+                  child: Text(
+                    S.of(context).buttonDisplayRulesDesc(maxVisible),
+                    style: const TextStyle(fontSize: 12, height: 1.5),
                   ),
                 ),
                 // 按钮列表
@@ -192,7 +168,7 @@ class _PlayerButtonsSettingsScreenState
                       final button = _buttonOrder[index];
                       final isVisible = index < maxVisible;
 
-                      return Card(
+                      return SettingsSectionCard(
                         key: ValueKey(button),
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
@@ -206,7 +182,9 @@ class _PlayerButtonsSettingsScreenState
                           ),
                           title: Text(button.localizedLabel(context)),
                           subtitle: Text(
-                            isVisible ? S.of(context).shownInPlayer : S.of(context).shownInMoreMenu,
+                            isVisible
+                                ? S.of(context).shownInPlayer
+                                : S.of(context).shownInMoreMenu,
                             style: TextStyle(
                               color: isVisible
                                   ? Theme.of(context).colorScheme.primary

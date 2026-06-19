@@ -6,6 +6,7 @@ import '../providers/my_tabs_display_provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/server_utils.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 class MyTabsDisplaySettingsScreen extends ConsumerWidget {
   const MyTabsDisplaySettingsScreen({super.key});
@@ -28,83 +29,45 @@ class MyTabsDisplaySettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // 显示选项卡片
-          Card(
-            child: Column(
-              children: [
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.favorite,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).onlineMarks),
-                  subtitle: Text(S.of(context).showOnlineMarks),
-                  value: settings.showOnlineMarks,
-                  onChanged: (value) => notifier.setShowOnlineMarks(value),
+          SettingsSectionList(
+            children: [
+              SettingsSwitchTile(
+                icon: Icons.favorite,
+                title: S.of(context).onlineMarks,
+                subtitle: S.of(context).showOnlineMarks,
+                value: settings.showOnlineMarks,
+                onChanged: (value) => notifier.setShowOnlineMarks(value),
+              ),
+              SettingsListTile(
+                enabled: false,
+                icon: Icons.download,
+                title: S.of(context).historyRecord,
+                subtitle: S.of(context).cannotBeDisabled,
+                trailing: const Switch(value: true, onChanged: null),
+              ),
+              if (isOfficialServer)
+                SettingsSwitchTile(
+                  icon: Icons.playlist_play,
+                  title: S.of(context).playlists,
+                  subtitle: S.of(context).showPlaylists,
+                  value: settings.showPlaylists,
+                  onChanged: (value) => notifier.setShowPlaylists(value),
                 ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  enabled: false,
-                  leading: Icon(
-                    Icons.download,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  title: Text(S.of(context).historyRecord),
-                  subtitle: Text(
-                    S.of(context).cannotBeDisabled,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  trailing: const Switch(
-                    value: true,
-                    onChanged: null,
-                  ),
-                ),
-                if (isOfficialServer) ...[
-                  Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                  SwitchListTile(
-                    secondary: Icon(
-                      Icons.playlist_play,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    title: Text(S.of(context).playlists),
-                    subtitle: Text(S.of(context).showPlaylists),
-                    value: settings.showPlaylists,
-                    onChanged: (value) => notifier.setShowPlaylists(value),
-                  ),
-                ],
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                SwitchListTile(
-                  secondary: Icon(
-                    Icons.subtitles,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  title: Text(S.of(context).subtitleLibrary),
-                  subtitle: Text(S.of(context).showSubtitleLibrary),
-                  value: settings.showSubtitleLibrary,
-                  onChanged: (value) => notifier.setShowSubtitleLibrary(value),
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  enabled: false,
-                  leading: Icon(
-                    Icons.download,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  title: Text(S.of(context).downloaded),
-                  subtitle: Text(
-                    S.of(context).cannotBeDisabled,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  trailing: const Switch(
-                    value: true,
-                    onChanged: null,
-                  ),
-                ),
-              ],
-            ),
+              SettingsSwitchTile(
+                icon: Icons.subtitles,
+                title: S.of(context).subtitleLibrary,
+                subtitle: S.of(context).showSubtitleLibrary,
+                value: settings.showSubtitleLibrary,
+                onChanged: (value) => notifier.setShowSubtitleLibrary(value),
+              ),
+              SettingsListTile(
+                enabled: false,
+                icon: Icons.download,
+                title: S.of(context).downloaded,
+                subtitle: S.of(context).cannotBeDisabled,
+                trailing: const Switch(value: true, onChanged: null),
+              ),
+            ],
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/player_lyric_style_provider.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 class PlayerLyricStyleScreen extends ConsumerWidget {
   const PlayerLyricStyleScreen({super.key});
@@ -124,7 +125,7 @@ class PlayerLyricStyleScreen extends ConsumerWidget {
               ),
         ),
         const SizedBox(height: 16),
-        Card(
+        SettingsSectionCard(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(children: children),

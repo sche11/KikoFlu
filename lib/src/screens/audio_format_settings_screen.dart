@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 class AudioFormatSettingsScreen extends ConsumerStatefulWidget {
   const AudioFormatSettingsScreen({super.key});
@@ -80,7 +81,8 @@ class _AudioFormatSettingsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ScrollableAppBar(
-        title: Text(S.of(context).audioFormatPriority, style: const TextStyle(fontSize: 18)),
+        title: Text(S.of(context).audioFormatPriority,
+            style: const TextStyle(fontSize: 18)),
         actions: [
           TextButton.icon(
             onPressed: _resetToDefault,
@@ -95,39 +97,13 @@ class _AudioFormatSettingsScreenState
           : Column(
               children: [
                 // 说明卡片
-                Card(
+                SettingsInfoCard(
+                  icon: Icons.info_outline,
+                  title: S.of(context).priorityDescription,
                   margin: const EdgeInsets.all(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 20,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              S.of(context).priorityDescription,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          S.of(context).audioFormatPriorityDesc,
-                          style: const TextStyle(fontSize: 12, height: 1.5),
-                        ),
-                      ],
-                    ),
+                  child: Text(
+                    S.of(context).audioFormatPriorityDesc,
+                    style: const TextStyle(fontSize: 12, height: 1.5),
                   ),
                 ),
 
@@ -147,7 +123,7 @@ class _AudioFormatSettingsScreenState
                     },
                     itemBuilder: (context, index) {
                       final format = _formatOrder[index];
-                      return Card(
+                      return SettingsSectionCard(
                         key: ValueKey(format),
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(

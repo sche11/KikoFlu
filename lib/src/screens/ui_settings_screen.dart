@@ -7,6 +7,7 @@ import 'work_detail_display_settings_screen.dart';
 import 'work_card_display_settings_screen.dart';
 import 'my_tabs_display_settings_screen.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 import '../providers/settings_provider.dart';
 
 class UiSettingsScreen extends ConsumerWidget {
@@ -26,113 +27,93 @@ class UiSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.tune,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).playerButtonSettings),
-                  subtitle: Text(S.of(context).playerButtonSettingsSubtitle),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const PlayerButtonsSettingsScreen(),
-                      ),
+          SettingsSectionList(
+            children: [
+              SettingsNavigationTile(
+                icon: Icons.tune,
+                title: S.of(context).playerButtonSettings,
+                subtitle: S.of(context).playerButtonSettingsSubtitle,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const PlayerButtonsSettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+              SettingsNavigationTile(
+                icon: Icons.lyrics,
+                title: S.of(context).playerLyricStyle,
+                subtitle: S.of(context).playerLyricStyleSubtitle,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const PlayerLyricStyleScreen(),
+                    ),
+                  );
+                },
+              ),
+              SettingsNavigationTile(
+                icon: Icons.visibility,
+                title: S.of(context).workDetailDisplaySettings,
+                subtitle: S.of(context).workDetailDisplaySubtitle,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const WorkDetailDisplaySettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+              SettingsNavigationTile(
+                icon: Icons.grid_view,
+                title: S.of(context).workCardDisplaySettings,
+                subtitle: S.of(context).workCardDisplaySubtitle,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const WorkCardDisplaySettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+              SettingsNavigationTile(
+                icon: Icons.tab,
+                title: S.of(context).myTabsDisplaySettings,
+                subtitle: S.of(context).myTabsDisplaySubtitle,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const MyTabsDisplaySettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+              SettingsListTile(
+                icon: Icons.format_list_numbered,
+                title: S.of(context).pageSizeSettings,
+                subtitle: S.of(context).pageSizeCurrent(pageSize),
+                trailing: DropdownButton<int>(
+                  value: pageSize,
+                  underline: const SizedBox(),
+                  items: [20, 40, 60, 100].map((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text(value.toString()),
                     );
+                  }).toList(),
+                  onChanged: (int? newValue) {
+                    if (newValue != null) {
+                      ref
+                          .read(pageSizeProvider.notifier)
+                          .updatePageSize(newValue);
+                    }
                   },
                 ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.lyrics,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).playerLyricStyle),
-                  subtitle: Text(S.of(context).playerLyricStyleSubtitle),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const PlayerLyricStyleScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.visibility,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).workDetailDisplaySettings),
-                  subtitle: Text(S.of(context).workDetailDisplaySubtitle),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const WorkDetailDisplaySettingsScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.grid_view,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).workCardDisplaySettings),
-                  subtitle: Text(S.of(context).workCardDisplaySubtitle),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const WorkCardDisplaySettingsScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.tab,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).myTabsDisplaySettings),
-                  subtitle: Text(S.of(context).myTabsDisplaySubtitle),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const MyTabsDisplaySettingsScreen(),
-                      ),
-                    );
-                  },
-                ),
-                Divider(color: Theme.of(context).colorScheme.outlineVariant),
-                ListTile(
-                  leading: Icon(Icons.format_list_numbered,
-                      color: Theme.of(context).colorScheme.primary),
-                  title: Text(S.of(context).pageSizeSettings),
-                  subtitle: Text(S.of(context).pageSizeCurrent(pageSize)),
-                  trailing: DropdownButton<int>(
-                    value: pageSize,
-                    underline: const SizedBox(),
-                    items: [20, 40, 60, 100].map((int value) {
-                      return DropdownMenuItem<int>(
-                        value: value,
-                        child: Text(value.toString()),
-                      );
-                    }).toList(),
-                    onChanged: (int? newValue) {
-                      if (newValue != null) {
-                        ref
-                            .read(pageSizeProvider.notifier)
-                            .updatePageSize(newValue);
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

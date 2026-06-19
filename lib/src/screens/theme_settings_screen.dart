@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/radio_option_group.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 class ThemeSettingsScreen extends ConsumerWidget {
   const ThemeSettingsScreen({super.key});
@@ -22,7 +23,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // 主题模式选择
-          Card(
+          SettingsSectionCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -67,7 +68,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // 颜色方案选择
-          Card(
+          SettingsSectionCard(
             child: RadioGroup<ColorSchemeType>(
               groupValue: themeSettings.colorSchemeType,
               onChanged: (value) {
@@ -134,7 +135,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
                     S.of(context).colorSchemeForestGreenDesc,
                     const Color(0xFF3A6F41),
                   ),
-                  const Divider(),
+                  const SettingsDivider(),
                   InkWell(
                     onTap: () {
                       ref
@@ -229,7 +230,7 @@ class ThemeSettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // 预览卡片
-          Card(
+          SettingsSectionCard(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(

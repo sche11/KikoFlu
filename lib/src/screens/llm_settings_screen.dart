@@ -5,6 +5,7 @@ import '../providers/settings_provider.dart';
 import '../services/translation_service.dart';
 import '../utils/snackbar_util.dart';
 import '../widgets/scrollable_appbar.dart';
+import '../widgets/settings_section.dart';
 
 class LLMSettingsScreen extends ConsumerStatefulWidget {
   const LLMSettingsScreen({super.key});
@@ -95,7 +96,7 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
+            SettingsSectionCard(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -192,7 +193,7 @@ class _LLMSettingsScreenState extends ConsumerState<LLMSettingsScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Card(
+            SettingsSectionCard(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
