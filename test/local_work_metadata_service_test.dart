@@ -6,6 +6,7 @@ import 'package:kikoeru_flutter/src/services/local_work_metadata_service.dart';
 void main() {
   group('LocalWorkMetadataService', () {
     test('parses numeric and RJ style work folders', () {
+      expect(LocalWorkMetadataService.parseWorkIdFromName('1234'), 1234);
       expect(LocalWorkMetadataService.parseWorkIdFromName('123456'), 123456);
       expect(LocalWorkMetadataService.parseWorkIdFromName('RJ395908'), 395908);
       expect(

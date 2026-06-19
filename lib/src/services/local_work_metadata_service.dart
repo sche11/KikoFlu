@@ -32,7 +32,7 @@ class LocalWorkMetadataService {
   };
 
   static final RegExp _rjPattern = RegExp(r'RJ(\d{5,8})', caseSensitive: false);
-  static final RegExp _numericFolderPattern = RegExp(r'^\d{5,8}$');
+  static final RegExp _numericFolderPattern = RegExp(r'^\d+$');
 
   static const List<String> _coverBaseNames = [
     'cover',
@@ -72,7 +72,8 @@ class LocalWorkMetadataService {
 
     final trimmed = name.trim();
     if (_numericFolderPattern.hasMatch(trimmed)) {
-      return int.tryParse(trimmed);
+      final parsed = int.tryParse(trimmed);
+      return parsed != null && parsed > 0 ? parsed : null;
     }
 
     return null;

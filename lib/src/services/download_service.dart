@@ -225,7 +225,9 @@ class DownloadService {
       if (await metadataFile.exists()) {
         final content = await metadataFile.readAsString();
         final metadata = jsonDecode(content) as Map<String, dynamic>;
-        metadata['id'] = workId;
+        if (_metadataIdAsPositiveInt(metadata['id']) == null) {
+          metadata['id'] = workId;
+        }
         metadata[LocalWorkMetadataService.localWorkDirNameKey] =
             p.basename(workDir.path);
 
@@ -267,6 +269,12 @@ class DownloadService {
     }
 
     return fallback;
+  }
+
+  int? _metadataIdAsPositiveInt(dynamic value) {
+    final parsed = value is int ? value : int.tryParse(value?.toString() ?? '');
+    if (parsed == null || parsed <= 0) return null;
+    return parsed;
   }
 
   // 获取作品元数据（公共方法，优先从内存读取，否则从硬盘读取）
@@ -1053,7 +1061,7 @@ class DownloadService {
       );
       metadataCreated = true;
     } else {
-      if (metadata['id'] != workId) {
+      if (_metadataIdAsPositiveInt(metadata['id']) == null) {
         metadata['id'] = workId;
         metadataChanged = true;
       }

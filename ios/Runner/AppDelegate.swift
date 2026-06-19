@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import AVKit
+import AudioToolbox
 import CoreHaptics
 
 @main
@@ -159,7 +160,13 @@ class AudioHapticsBridge {
         startFrame: Int = 0,
         maxEnergyFrames: Int? = nil
     ) throws -> [String: Any] {
-        let url = URL(fileURLWithPath: path)
+        let readableURL = readableAudioURL(path: path)
+        defer {
+            if readableURL.shouldRemove {
+                try? FileManager.default.removeItem(at: readableURL.url)
+            }
+        }
+        let url = readableURL.url
         let file = try AVAudioFile(forReading: url)
         let sourceFormat = file.processingFormat
         let sampleRate = sourceFormat.sampleRate
@@ -318,6 +325,69 @@ class AudioHapticsBridge {
         return path
     }
 
+    private func readableAudioURL(path: String) -> (url: URL, shouldRemove: Bool) {
+        let url = URL(fileURLWithPath: path)
+        if isKnownAudioExtension(url.pathExtension) {
+            return (url, false)
+        }
+
+        guard let extensionHint = sniffAudioExtension(path: path) else {
+            return (url, false)
+        }
+
+        let aliasName = "kikoflu_haptics_\(abs(path.hashValue)).\(extensionHint)"
+        let aliasURL = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent(aliasName)
+        try? FileManager.default.removeItem(at: aliasURL)
+
+        do {
+            try FileManager.default.linkItem(at: url, to: aliasURL)
+            return (aliasURL, true)
+        } catch {
+            do {
+                try FileManager.default.copyItem(at: url, to: aliasURL)
+                return (aliasURL, true)
+            } catch {
+                return (url, false)
+            }
+        }
+    }
+
+    private func isKnownAudioExtension(_ value: String) -> Bool {
+        switch value.lowercased() {
+        case "mp3", "m4a", "mp4", "aac", "wav", "aiff", "aif", "caf":
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func sniffAudioExtension(path: String) -> String? {
+        guard let handle = FileHandle(forReadingAtPath: path) else { return nil }
+        defer { try? handle.close() }
+        let data = handle.readData(ofLength: 16)
+        let bytes = [UInt8](data)
+        if bytes.count >= 3 && bytes[0] == 0x49 && bytes[1] == 0x44 && bytes[2] == 0x33 {
+            return "mp3"
+        }
+        if bytes.count >= 2 && bytes[0] == 0xff && (bytes[1] & 0xe0) == 0xe0 {
+            return "mp3"
+        }
+        if bytes.count >= 12 &&
+            bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46 &&
+            bytes[8] == 0x57 && bytes[9] == 0x41 && bytes[10] == 0x56 && bytes[11] == 0x45 {
+            return "wav"
+        }
+        if bytes.count >= 8 &&
+            bytes[4] == 0x66 && bytes[5] == 0x74 && bytes[6] == 0x79 && bytes[7] == 0x70 {
+            return "m4a"
+        }
+        if bytes.count >= 2 && bytes[0] == 0xff && (bytes[1] == 0xf1 || bytes[1] == 0xf9) {
+            return "aac"
+        }
+        return nil
+    }
+
     private func sendAnalysisChunk(
         analysisToken: Int,
         frameMs: Int,
@@ -357,6 +427,7 @@ class AudioHapticsBridge {
 
     private func pulse(intensity: Double, durationMs: Int) {
         let clampedIntensity = max(0.1, min(1.0, intensity))
+        let clampedDuration = max(0.01, min(0.12, Double(durationMs) / 1000.0))
 
         if #available(iOS 13.0, *), CHHapticEngine.capabilitiesForHardware().supportsHaptics {
             do {
@@ -368,14 +439,25 @@ class AudioHapticsBridge {
                     }
                 }
                 try engine?.start()
-                let event = CHHapticEvent(
-                    eventType: .hapticTransient,
-                    parameters: [
-                        CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(clampedIntensity)),
-                        CHHapticEventParameter(parameterID: .hapticSharpness, value: Float(max(0.25, min(1.0, clampedIntensity + 0.15)))),
-                    ],
-                    relativeTime: 0
-                )
+                let parameters = [
+                    CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(clampedIntensity)),
+                    CHHapticEventParameter(parameterID: .hapticSharpness, value: Float(max(0.25, min(1.0, clampedIntensity + 0.15)))),
+                ]
+                let event: CHHapticEvent
+                if clampedDuration > 0.045 {
+                    event = CHHapticEvent(
+                        eventType: .hapticContinuous,
+                        parameters: parameters,
+                        relativeTime: 0,
+                        duration: clampedDuration
+                    )
+                } else {
+                    event = CHHapticEvent(
+                        eventType: .hapticTransient,
+                        parameters: parameters,
+                        relativeTime: 0
+                    )
+                }
                 let pattern = try CHHapticPattern(events: [event], parameters: [])
                 let player = try engine?.makePlayer(with: pattern)
                 try player?.start(atTime: 0)
@@ -393,6 +475,9 @@ class AudioHapticsBridge {
             impactGenerator?.impactOccurred(intensity: CGFloat(clampedIntensity))
         } else {
             impactGenerator?.impactOccurred()
+        }
+        if clampedIntensity > 0.85 {
+            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
         }
     }
 }

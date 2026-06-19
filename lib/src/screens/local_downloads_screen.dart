@@ -442,7 +442,12 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
     _log.captureOutput(
         '[LocalDownloads] 打开作品详情: workId=$workId, hasMetadata=${task.workMetadata != null}');
 
-    if (task.workMetadata == null) {
+    final loadedMetadata = task.workMetadata ??
+        await DownloadService.instance.getWorkMetadata(workId);
+
+    if (!mounted) return;
+
+    if (loadedMetadata == null) {
       _log.captureOutput('[LocalDownloads] 错误：任务没有元数据');
       _showSnackBarSafe(
         SnackBar(
@@ -454,7 +459,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
     }
 
     try {
-      final metadata = _sanitizeMetadata(task.workMetadata!);
+      final metadata = _sanitizeMetadata(loadedMetadata);
       final work = Work.fromJson(metadata);
 
       // 动态构建完整的本地路径
@@ -657,7 +662,8 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
                                       final workId = currentPageWorkIds[index];
                                       final workTasks =
                                           currentPageTasks[workId]!;
-                                      final firstTask = workTasks.first;
+                                      final firstTask =
+                                          _preferredMetadataTask(workTasks);
                                       final isSelected =
                                           _selectedWorkIds.contains(workId);
 
@@ -860,6 +866,13 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
               ),
             ),
     );
+  }
+
+  DownloadTask _preferredMetadataTask(List<DownloadTask> tasks) {
+    for (final task in tasks) {
+      if (task.workMetadata != null) return task;
+    }
+    return tasks.first;
   }
 
   Widget _buildSearchBar() {
