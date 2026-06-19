@@ -19,7 +19,7 @@ class SettingsSectionCard extends StatelessWidget {
     final theme = Theme.of(context);
     final shape = theme.cardTheme.shape;
     final side = BorderSide(
-      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.16),
+      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.06),
       width: 0.5,
     );
 
@@ -257,7 +257,7 @@ class SettingsSwitchTile extends StatelessWidget {
 class SettingsDivider extends StatelessWidget {
   const SettingsDivider({
     super.key,
-    this.indent = 64,
+    this.indent = 52,
     this.endIndent = 0,
   });
 
