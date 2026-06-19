@@ -148,5 +148,76 @@ void main() {
 
       expect(scanTitles, ['cover.webp', 'folder.png']);
     });
+
+    test('uses imported metadata aliases before directory fallback', () async {
+      final tempDir = await Directory.systemTemp.createTemp('kikoflu_local_');
+      addTearDown(() => tempDir.delete(recursive: true));
+
+      final workDir = Directory('${tempDir.path}/RJ765432');
+      await workDir.create(recursive: true);
+      await File('${workDir.path}/metadata.json').writeAsString('''
+{
+  "work": {
+    "work_name": "Imported title",
+    "product_id": "rj765432",
+    "product_url": "https://example.test/RJ765432",
+    "circle": {"name": "Imported circle"},
+    "release_date": "2024-05-06"
+  }
+}
+''');
+      await File('${workDir.path}/track.mp3').writeAsBytes([1, 2, 3]);
+
+      const service = LocalWorkMetadataService();
+      final imported = await service.loadImportedMetadata(
+        workDir: workDir,
+        workId: 765432,
+      );
+      final metadata = await service.buildFallbackMetadata(
+        workId: 765432,
+        workDir: workDir,
+        directoryName: 'RJ765432',
+        existingMetadata: imported,
+      );
+
+      expect(metadata['title'], 'Imported title');
+      expect(metadata['source_id'], 'RJ765432');
+      expect(metadata['source_url'], 'https://example.test/RJ765432');
+      expect(metadata['name'], 'Imported circle');
+      expect(metadata['release'], '2024-05-06');
+
+      final children = metadata['children'] as List<dynamic>;
+      expect(children, hasLength(1));
+      expect((children.single as Map<String, dynamic>)['title'], 'track.mp3');
+    });
+
+    test('keeps nested generic json files in the imported file tree', () async {
+      final tempDir = await Directory.systemTemp.createTemp('kikoflu_local_');
+      addTearDown(() => tempDir.delete(recursive: true));
+
+      final workDir = Directory('${tempDir.path}/RJ111111');
+      await workDir.create(recursive: true);
+      await File('${workDir.path}/metadata.json')
+          .writeAsString('{"title":"Root metadata"}');
+      await File('${workDir.path}/Docs/info.json').create(recursive: true);
+
+      final metadata =
+          await const LocalWorkMetadataService().buildFallbackMetadata(
+        workId: 111111,
+        workDir: workDir,
+        directoryName: 'RJ111111',
+      );
+
+      final children = metadata['children'] as List<dynamic>;
+      final docsFolder = children.cast<Map<String, dynamic>>().singleWhere(
+            (item) => item['title'] == 'Docs',
+          );
+      expect(
+        (docsFolder['children'] as List<dynamic>)
+            .cast<Map<String, dynamic>>()
+            .map((item) => item['title']),
+        ['info.json'],
+      );
+    });
   });
 }

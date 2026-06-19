@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -26,12 +27,25 @@ class LocalWorkMetadataService {
   static const String metadataFileName = 'work_metadata.json';
   static const String localWorkDirNameKey = 'localWorkDirName';
 
-  static const Set<String> reservedFileNames = {
+  static const Set<String> metadataFileNames = {
     metadataFileName,
+    'metadata.json',
+    'work.json',
+    'work_info.json',
+    'workinfo.json',
+    'info.json',
+    'product.json',
+    'dlsite.json',
+  };
+
+  static const Set<String> reservedFileNames = {
+    ...metadataFileNames,
     'cover.jpg',
   };
 
   static final RegExp _rjPattern = RegExp(r'RJ(\d{5,8})', caseSensitive: false);
+  static final RegExp _sourceJsonPattern =
+      RegExp(r'^(?:RJ|BJ|VJ)\d{5,8}\.json$', caseSensitive: false);
   static final RegExp _numericFolderPattern = RegExp(r'^\d+$');
 
   static const List<String> _coverBaseNames = [
@@ -109,6 +123,28 @@ class LocalWorkMetadataService {
     }
 
     return metadata;
+  }
+
+  Future<Map<String, dynamic>?> loadImportedMetadata({
+    required Directory workDir,
+    required int workId,
+  }) async {
+    for (final fileName in _metadataCandidateFileNames(workId)) {
+      final file = File(p.join(workDir.path, fileName));
+      if (!await file.exists()) continue;
+
+      try {
+        final decoded = jsonDecode(await file.readAsString());
+        final metadata = _normalizeImportedMetadata(decoded);
+        if (metadata != null && metadata.isNotEmpty) {
+          return metadata;
+        }
+      } catch (_) {
+        // Local metadata is best-effort. Invalid files should not block import.
+      }
+    }
+
+    return null;
   }
 
   Future<List<dynamic>> buildFileTree(Directory workDir) async {
@@ -252,6 +288,7 @@ class LocalWorkMetadataService {
     if (title.startsWith('.')) return true;
     if (title.endsWith('.downloading')) return true;
     if (title == metadataFileName) return true;
+    if (isRoot && _isMetadataFileName(title)) return true;
     if (isRoot && reservedFileNames.contains(title)) return true;
     if (isRoot && _isCoverFileName(title)) return true;
     return false;
@@ -270,6 +307,153 @@ class LocalWorkMetadataService {
 
     final baseName = p.basenameWithoutExtension(title).toLowerCase();
     return _coverBaseNames.contains(baseName);
+  }
+
+  static bool _isMetadataFileName(String title) {
+    final normalized = title.toLowerCase();
+    return metadataFileNames.contains(normalized) ||
+        _sourceJsonPattern.hasMatch(title);
+  }
+
+  static List<String> _metadataCandidateFileNames(int workId) {
+    final normalizedId = formatRJCode(workId);
+    return [
+      metadataFileName,
+      'metadata.json',
+      'work.json',
+      'work_info.json',
+      'workInfo.json',
+      'workinfo.json',
+      'info.json',
+      'product.json',
+      'dlsite.json',
+      '$normalizedId.json',
+      '${normalizedId.toLowerCase()}.json',
+    ];
+  }
+
+  static Map<String, dynamic>? _normalizeImportedMetadata(dynamic decoded) {
+    if (decoded is! Map) return null;
+
+    final root = Map<String, dynamic>.from(decoded);
+    final nested = _firstMap(root, const [
+      'work',
+      'product',
+      'data',
+      'metadata',
+    ]);
+    final source = <String, dynamic>{
+      ...root,
+      if (nested != null) ...nested,
+    };
+
+    final normalized = Map<String, dynamic>.from(source);
+
+    final title = _firstCleanString(source, const [
+      'title',
+      'workTitle',
+      'work_name',
+      'workName',
+      'product_name',
+      'productName',
+      'display_name',
+      'displayName',
+      'name',
+    ]);
+    if (title != null) normalized['title'] = title;
+
+    final sourceId = _firstCleanString(source, const [
+      'source_id',
+      'sourceId',
+      'product_id',
+      'productId',
+      'productID',
+      'dlsite_id',
+      'dlsiteId',
+      'workno',
+      'workNo',
+    ]);
+    if (sourceId != null) {
+      normalized['source_id'] = _normalizeSourceId(sourceId);
+    }
+
+    final sourceUrl = _firstCleanString(source, const [
+      'source_url',
+      'sourceUrl',
+      'product_url',
+      'productUrl',
+      'dlsite_url',
+      'dlsiteUrl',
+      'url',
+    ]);
+    if (sourceUrl != null) normalized['source_url'] = sourceUrl;
+
+    final circleName = _circleName(source);
+    if (circleName != null) normalized['name'] = circleName;
+
+    final release = _firstCleanString(source, const [
+      'release',
+      'release_date',
+      'releaseDate',
+      'date',
+    ]);
+    if (release != null) normalized['release'] = release;
+
+    return normalized;
+  }
+
+  static Map<String, dynamic>? _firstMap(
+    Map<String, dynamic> source,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final value = source[key];
+      if (value is Map) return Map<String, dynamic>.from(value);
+    }
+    return null;
+  }
+
+  static String? _firstCleanString(
+    Map<String, dynamic> source,
+    List<String> keys,
+  ) {
+    for (final key in keys) {
+      final value = _cleanString(source[key]);
+      if (value != null) return value;
+    }
+    return null;
+  }
+
+  static String _normalizeSourceId(String value) {
+    final trimmed = value.trim();
+    final match = RegExp(
+      r'^(RJ|BJ|VJ)(\d{5,8})$',
+      caseSensitive: false,
+    ).firstMatch(trimmed);
+    if (match == null) return trimmed;
+    return '${match.group(1)!.toUpperCase()}${match.group(2)!}';
+  }
+
+  static String? _circleName(Map<String, dynamic> source) {
+    final circle = source['circle'];
+    if (circle is String) {
+      final normalized = _cleanString(circle);
+      if (normalized != null) return normalized;
+    } else if (circle is Map) {
+      final name = _firstCleanString(
+        Map<String, dynamic>.from(circle),
+        const ['name', 'title'],
+      );
+      if (name != null) return name;
+    }
+
+    return _firstCleanString(source, const [
+      'circle_name',
+      'circleName',
+      'maker_name',
+      'makerName',
+      'brand',
+    ]);
   }
 
   static String _titleFromDirectoryName(String directoryName, int workId) {

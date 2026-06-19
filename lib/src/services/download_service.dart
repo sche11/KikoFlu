@@ -980,11 +980,17 @@ class DownloadService {
           tag: 'Download',
         );
         try {
+          final importedMetadata =
+              await _localMetadataService.loadImportedMetadata(
+            workDir: workDir,
+            workId: workId,
+          );
           final fallbackMetadata =
               await _localMetadataService.buildFallbackMetadata(
             workId: workId,
             workDir: workDir,
             directoryName: p.basename(workDir.path),
+            existingMetadata: importedMetadata,
           );
           await metadataFile.writeAsString(jsonEncode(fallbackMetadata));
           _log.info('已生成本地作品基础元数据: RJ$workId', tag: 'Download');
