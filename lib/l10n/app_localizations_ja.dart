@@ -922,7 +922,7 @@ class SJa extends S {
 
   @override
   String get audioHapticsDesc =>
-      'ダウンロード済み音声のみ対応。音声の特徴に合わせて端末を振動させます。バッテリー消費が増える場合があります。';
+      'ダウンロード済み音声のみ対応し、アプリが前面にある時だけ有効です。音声の特徴に合わせて端末を振動させます。バッテリー消費が増える場合があります。';
 
   @override
   String get audioHapticsIntensity => '強度';

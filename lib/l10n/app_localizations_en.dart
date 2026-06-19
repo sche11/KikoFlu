@@ -940,7 +940,7 @@ class SEn extends S {
 
   @override
   String get audioHapticsDesc =>
-      'Downloaded audio only. Make the device vibrate with audio features. May increase battery use.';
+      'Downloaded audio only, foreground only. Make the device vibrate with audio features. May increase battery use.';
 
   @override
   String get audioHapticsIntensity => 'Intensity';

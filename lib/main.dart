@@ -24,6 +24,7 @@ import 'src/services/storage_service.dart';
 import 'src/services/account_database.dart';
 import 'src/services/cache_service.dart';
 import 'src/services/download_service.dart';
+import 'src/services/audio_haptics_service.dart';
 import 'src/services/floating_lyric_service.dart';
 import 'src/services/log_service.dart';
 import 'src/services/audio_player_service.dart';
@@ -362,6 +363,9 @@ class _KikoeruAppState extends ConsumerState<KikoeruApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    final isForegroundActive = state == AppLifecycleState.resumed;
+    AudioHapticsService.instance.setForegroundActive(isForegroundActive);
+
     // 应用进入后台时立即 flush 播放历史
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||

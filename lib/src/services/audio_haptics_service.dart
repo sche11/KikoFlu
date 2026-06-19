@@ -36,6 +36,7 @@ class AudioHapticsService {
   AudioHapticsPlayingProvider? _playingProvider;
 
   bool _enabled = false;
+  bool _isForegroundActive = true;
   double _intensity = 0.85;
   List<AudioHapticEvent> _events = const [];
   Timer? _timer;
@@ -77,6 +78,24 @@ class AudioHapticsService {
 
     if (!_enabled) {
       await stop(clearSource: false);
+    }
+  }
+
+  void setForegroundActive(bool isActive) {
+    if (_isForegroundActive == isActive) return;
+    _isForegroundActive = isActive;
+    _hapticsLog.info(
+      '前台状态更新: active=$_isForegroundActive',
+      tag: 'AudioHaptics',
+    );
+
+    if (!_isForegroundActive) {
+      unawaited(pause());
+      return;
+    }
+
+    if (_enabled && _events.isNotEmpty && (_playingProvider?.call() ?? false)) {
+      start();
     }
   }
 
@@ -127,7 +146,7 @@ class AudioHapticsService {
         'events=${_events.length}, startIndex=$_nextEventIndex',
         tag: 'AudioHaptics',
       );
-      if (_playingProvider?.call() ?? false) {
+      if (_isForegroundActive && (_playingProvider?.call() ?? false)) {
         start();
       }
     } catch (e) {
@@ -151,7 +170,7 @@ class AudioHapticsService {
   }
 
   void start() {
-    if (!_enabled || _events.isEmpty) return;
+    if (!_enabled || !_isForegroundActive || _events.isEmpty) return;
     if (_timer?.isActive ?? false) return;
     _timer?.cancel();
     if (!_timerStartLogged) {
@@ -188,7 +207,7 @@ class AudioHapticsService {
   }
 
   Future<void> _tick() async {
-    if (!_enabled || _events.isEmpty) return;
+    if (!_enabled || !_isForegroundActive || _events.isEmpty) return;
     final isPlaying = _playingProvider?.call() ?? false;
     if (!isPlaying) return;
 
@@ -214,6 +233,7 @@ class AudioHapticsService {
   }
 
   Future<void> _pulse(AudioHapticEvent event) async {
+    if (!_enabled || !_isForegroundActive) return;
     try {
       await _channel.invokeMethod<void>('pulse', {
         'intensity': event.intensity,
@@ -275,13 +295,11 @@ class AudioHapticsService {
   }
 
   String? _localPathFromTrack(AudioTrack track) {
-    final localPath = LocalFileUrl.pathFromUrl(track.url);
-    if (localPath != null) return localPath;
-
     final sourcePath = track.sourcePath;
     if (sourcePath != null && sourcePath.isNotEmpty) return sourcePath;
 
-    return null;
+    final localPath = LocalFileUrl.pathFromUrl(track.url);
+    return localPath != null && localPath.isNotEmpty ? localPath : null;
   }
 
   void _resetDiagnosticsForNewAnalysis() {

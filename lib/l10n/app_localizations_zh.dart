@@ -919,7 +919,7 @@ class SZh extends S {
   String get audioHaptics => '音频触感反馈(Beta)';
 
   @override
-  String get audioHapticsDesc => '仅支持已下载音频。使设备随音频特征震动，可能增加耗电';
+  String get audioHapticsDesc => '仅支持已下载音频，且只在应用前台生效。使设备随音频特征震动，可能增加耗电';
 
   @override
   String get audioHapticsIntensity => '强度';
@@ -4370,7 +4370,7 @@ class SZhHant extends SZh {
   String get audioHaptics => '音訊觸感回饋(Beta)';
 
   @override
-  String get audioHapticsDesc => '僅支援已下載音訊。使裝置隨音訊特徵震動，可能增加耗電';
+  String get audioHapticsDesc => '僅支援已下載音訊，且只在應用程式前台生效。使裝置隨音訊特徵震動，可能增加耗電';
 
   @override
   String get audioHapticsIntensity => '強度';

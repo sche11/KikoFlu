@@ -322,7 +322,7 @@
   "keepScreenAwake": "螢幕常亮",
   "keepScreenAwakeDesc": "開啟後，有音訊軌道時保持螢幕常亮，方便查看字幕。",
   "audioHaptics": "音訊觸感回饋(Beta)",
-  "audioHapticsDesc": "僅支援已下載音訊。使裝置隨音訊特徵震動，可能增加耗電",
+  "audioHapticsDesc": "僅支援已下載音訊，且只在應用程式前台生效。使裝置隨音訊特徵震動，可能增加耗電",
   "audioHapticsIntensity": "強度",
   "blockingSettings": "封鎖設定",
   "blockingSettingsSubtitle": "管理封鎖的標籤、聲優和社團",

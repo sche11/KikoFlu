@@ -363,10 +363,14 @@ class AudioPlayerService {
           final fileStat = await localFile.stat();
           _log.captureOutput(
               '[Audio] 本地文件存在: size=${fileStat.size} bytes, modified=${fileStat.modified}');
-          final isolatedPath =
+          final playbackPath =
               await _prepareLocalPlaybackPath(localPath) ?? localPath;
-          await _player.setFilePath(isolatedPath);
-          await _prepareHapticsForDownloadedFile(track, localPath);
+          await _player.setFilePath(playbackPath);
+          await _prepareHapticsForDownloadedFile(
+            track,
+            downloadPath: localPath,
+            analysisPath: playbackPath,
+          );
           _log.captureOutput('[Audio] 使用本地文件播放: ${track.title}');
           loaded = true;
         } else {
@@ -380,7 +384,10 @@ class AudioPlayerService {
 
         if (audioFilePath != null) {
           await _player.setFilePath(audioFilePath);
-          await _prepareHapticsForDownloadedFile(track, audioFilePath);
+          await _prepareHapticsForDownloadedFile(
+            track,
+            downloadPath: audioFilePath,
+          );
           _log.captureOutput('[Audio] 使用缓存文件播放: ${track.title}');
           loaded = true;
         } else {
@@ -834,10 +841,11 @@ class AudioPlayerService {
   }
 
   Future<void> _prepareHapticsForDownloadedFile(
-    AudioTrack track,
-    String path,
-  ) async {
-    if (!await _isInDownloadDirectory(path)) {
+    AudioTrack track, {
+    required String downloadPath,
+    String? analysisPath,
+  }) async {
+    if (!await _isInDownloadDirectory(downloadPath)) {
       _log.captureOutput(
         '[Audio] 跳过触感分析，非下载目录文件: ${track.title}',
       );
@@ -845,8 +853,18 @@ class AudioPlayerService {
       return;
     }
 
+    final resolvedAnalysisPath = analysisPath ?? downloadPath;
+    if (!p.equals(
+      p.normalize(resolvedAnalysisPath),
+      p.normalize(downloadPath),
+    )) {
+      _log.captureOutput(
+        '[Audio] 使用播放副本进行触感分析: $resolvedAnalysisPath',
+      );
+    }
+
     await _hapticsService.prepareForTrack(
-      track.copyWith(sourcePath: path),
+      track.copyWith(sourcePath: resolvedAnalysisPath),
     );
   }
 

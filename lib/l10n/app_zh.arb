@@ -322,7 +322,7 @@
   "keepScreenAwake": "屏幕常亮",
   "keepScreenAwakeDesc": "开启后，有音频轨道时保持屏幕常亮，便于查看字幕。",
   "audioHaptics": "音频触感反馈(Beta)",
-  "audioHapticsDesc": "仅支持已下载音频。使设备随音频特征震动，可能增加耗电",
+  "audioHapticsDesc": "仅支持已下载音频，且只在应用前台生效。使设备随音频特征震动，可能增加耗电",
   "audioHapticsIntensity": "强度",
   "blockingSettings": "屏蔽设置",
   "blockingSettingsSubtitle": "管理屏蔽的标签、声优和社团",
