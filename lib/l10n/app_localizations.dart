@@ -1821,13 +1821,13 @@ abstract class S {
   /// No description provided for @audioHaptics.
   ///
   /// In en, this message translates to:
-  /// **'Audio Haptics'**
+  /// **'Audio Haptics (Beta)'**
   String get audioHaptics;
 
   /// No description provided for @audioHapticsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Analyze the current audio stream and sync vibration with playback. Useful with headphones or silent mode, but may increase battery use.'**
+  /// **'Make the device vibrate with audio features. May increase battery use.'**
   String get audioHapticsDesc;
 
   /// No description provided for @audioHapticsIntensity.

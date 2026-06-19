@@ -918,11 +918,10 @@ class SJa extends S {
       '有効にすると、音声トラックがある間は字幕を見やすくするため画面をオンのままにします。';
 
   @override
-  String get audioHaptics => 'オーディオ触覚フィードバック';
+  String get audioHaptics => 'オーディオ触覚フィードバック(Beta)';
 
   @override
-  String get audioHapticsDesc =>
-      '再生中のオーディオストリームを解析し、再生位置に合わせて振動します。ヘッドホンや消音時に便利ですが、バッテリー消費が増える場合があります。';
+  String get audioHapticsDesc => '音声の特徴に合わせて端末を振動させます。バッテリー消費が増える場合があります。';
 
   @override
   String get audioHapticsIntensity => '強度';
