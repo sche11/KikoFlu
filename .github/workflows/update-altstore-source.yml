@@ -4,6 +4,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub Release tag to publish to AltStore. Leave empty to use the latest published release.
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -21,18 +26,36 @@ jobs:
         id: release_info
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_EVENT_TAG: ${{ github.event.release.tag_name }}
+          WORKFLOW_INPUT_TAG: ${{ github.event.inputs.tag }}
         run: |
-          TAG="${GITHUB_REF_NAME:-$(gh release view --json tagName -q '.tagName')}"
+          set -euo pipefail
+
+          TAG="${RELEASE_EVENT_TAG:-${WORKFLOW_INPUT_TAG:-}}"
+          if [ -z "$TAG" ]; then
+            TAG="$(gh release list --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName // ""')"
+          fi
+
+          if [ -z "$TAG" ]; then
+            echo "::error::No published release tag found. Publish a GitHub Release first, then rerun this workflow."
+            exit 1
+          fi
+
           VERSION="${TAG#v}"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
 
-          # Get IPA download URL and size
-          RELEASE_JSON=$(gh release view "$TAG" --json assets)
-          IPA_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("ios.*\\.ipa$"; "i")) | .url' | head -1)
-          IPA_SIZE=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | test("ios.*\\.ipa$"; "i")) | .size' | head -1)
-          RELEASE_DATE=$(gh release view "$TAG" --json publishedAt -q '.publishedAt' | cut -dT -f1)
-          RELEASE_NOTES=$(gh release view "$TAG" --json body -q '.body' | head -c 500)
+          if ! RELEASE_JSON=$(gh release view "$TAG" --json assets,publishedAt,body 2>/tmp/gh-release-error.log); then
+            echo "::error::Release $TAG was not found. Create the release first, then rerun this workflow with that tag."
+            cat /tmp/gh-release-error.log
+            exit 1
+          fi
+
+          IPA_URL=$(echo "$RELEASE_JSON" | jq -r 'first(.assets[] | select(.name | test("ios.*\\.ipa$"; "i")) | (.browserDownloadUrl // .url // empty)) // empty')
+          IPA_SIZE=$(echo "$RELEASE_JSON" | jq -r 'first(.assets[] | select(.name | test("ios.*\\.ipa$"; "i")) | .size) // empty')
+          RELEASE_DATE=$(echo "$RELEASE_JSON" | jq -r '(.publishedAt // "") | split("T")[0]')
+          RELEASE_NOTES=$(echo "$RELEASE_JSON" | jq -r '.body // ""')
+          RELEASE_NOTES="${RELEASE_NOTES:0:500}"
 
           if [ -z "$IPA_URL" ] || [ "$IPA_URL" = "null" ]; then
             echo "No IPA found in release $TAG"
