@@ -12,6 +12,7 @@ import 'caching_stream_audio_source.dart';
 import 'audio_haptics_service.dart';
 import 'log_service.dart';
 import 'playback_history_service.dart';
+import 'download_path_service.dart';
 import '../utils/image_blur_util.dart';
 import '../utils/local_file_url.dart';
 
@@ -365,10 +366,7 @@ class AudioPlayerService {
           final isolatedPath =
               await _prepareLocalPlaybackPath(localPath) ?? localPath;
           await _player.setFilePath(isolatedPath);
-          unawaited(_hapticsService.startStreamingAnalysis(
-            track: track.copyWith(sourcePath: localPath),
-            source: localPath,
-          ));
+          await _prepareHapticsForDownloadedFile(track, localPath);
           _log.captureOutput('[Audio] 使用本地文件播放: ${track.title}');
           loaded = true;
         } else {
@@ -382,30 +380,18 @@ class AudioPlayerService {
 
         if (audioFilePath != null) {
           await _player.setFilePath(audioFilePath);
-          unawaited(_hapticsService.startStreamingAnalysis(
-            track: track.copyWith(sourcePath: audioFilePath),
-            source: audioFilePath,
-          ));
+          await _prepareHapticsForDownloadedFile(track, audioFilePath);
           _log.captureOutput('[Audio] 使用缓存文件播放: ${track.title}');
           loaded = true;
         } else {
           try {
             await CacheService.resetAudioCachePartial(track.hash!);
-            final tempCachePath =
-                await CacheService.audioCacheTempPath(track.hash!);
-            final finalCachePath =
-                await CacheService.audioCacheFinalPath(track.hash!);
             final source = CachingStreamAudioSource(
               uri: Uri.parse(track.url),
               hash: track.hash!,
             );
             await _player.setAudioSource(source);
-            unawaited(_hapticsService.startStreamingAnalysis(
-              track: track,
-              source: tempCachePath,
-              finalSource: finalCachePath,
-              growingFile: true,
-            ));
+            unawaited(_hapticsService.prepareForTrack(track));
             _log.captureOutput('[Audio] 流式播放并写入缓存: ${track.title}');
             loaded = true;
           } catch (error) {
@@ -845,6 +831,37 @@ class AudioPlayerService {
     await _queueController.close();
     await _currentTrackController.close();
     await _player.dispose();
+  }
+
+  Future<void> _prepareHapticsForDownloadedFile(
+    AudioTrack track,
+    String path,
+  ) async {
+    if (!await _isInDownloadDirectory(path)) {
+      _log.captureOutput(
+        '[Audio] 跳过触感分析，非下载目录文件: ${track.title}',
+      );
+      await _hapticsService.skipForTrack(track);
+      return;
+    }
+
+    await _hapticsService.prepareForTrack(
+      track.copyWith(sourcePath: path),
+    );
+  }
+
+  Future<bool> _isInDownloadDirectory(String filePath) async {
+    try {
+      final downloadDir = await DownloadPathService.getDownloadDirectory();
+      final root = p.normalize(downloadDir.path);
+      final path = p.normalize(filePath);
+
+      if (p.equals(path, root)) return true;
+      return p.isWithin(root, path);
+    } catch (e) {
+      _log.captureOutput('[Audio] 检查下载目录失败: $e');
+      return false;
+    }
   }
 
   Future<void> _cleanupTempPlaybackFile() async {

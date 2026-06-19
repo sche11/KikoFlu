@@ -37,18 +37,10 @@ class AudioHapticsService {
 
   bool _enabled = false;
   double _intensity = 0.85;
-  AudioTrack? _track;
   List<AudioHapticEvent> _events = const [];
   Timer? _timer;
   int _nextEventIndex = 0;
   int _analysisGeneration = 0;
-  StreamingAudioHapticPatternGenerator? _streamingPatternGenerator;
-  String? _activeStreamSource;
-  String? _activeStreamFinalSource;
-  bool _activeStreamSourceIsGrowing = false;
-  bool _loggedFirstStreamingChunk = false;
-  bool _loggedNoEventChunk = false;
-  bool _loggedFirstStreamingEventBatch = false;
   bool _platformPulseFailureLogged = false;
   bool _timerStartLogged = false;
 
@@ -85,31 +77,13 @@ class AudioHapticsService {
 
     if (!_enabled) {
       await stop(clearSource: false);
-      return;
-    }
-
-    final streamSource = _activeStreamSource;
-    final currentTrack = _track;
-    if (currentTrack != null && streamSource != null) {
-      unawaited(startStreamingAnalysis(
-        track: currentTrack,
-        source: streamSource,
-        finalSource: _activeStreamFinalSource,
-        growingFile: _activeStreamSourceIsGrowing,
-        startPosition: _positionProvider?.call() ?? Duration.zero,
-      ));
     }
   }
 
   Future<void> prepareForTrack(AudioTrack track) async {
-    _track = track;
     _events = const [];
     _nextEventIndex = 0;
     _analysisGeneration++;
-    _activeStreamSource = null;
-    _activeStreamFinalSource = null;
-    _activeStreamSourceIsGrowing = false;
-    _streamingPatternGenerator = null;
     _resetDiagnosticsForNewAnalysis();
 
     if (!_enabled) return;
@@ -117,7 +91,7 @@ class AudioHapticsService {
     final path = _localPathFromTrack(track);
     if (path == null) {
       _hapticsLog.captureOutput(
-        '[AudioHaptics] 跳过非本地音频，暂不做实时流分析: ${track.title}',
+        '[AudioHaptics] 跳过触感分析，仅支持已下载音频: ${track.title}',
       );
       return;
     }
@@ -163,62 +137,17 @@ class AudioHapticsService {
     }
   }
 
-  Future<void> startStreamingAnalysis({
-    required AudioTrack track,
-    required String source,
-    String? finalSource,
-    bool growingFile = false,
-    Duration startPosition = Duration.zero,
-  }) async {
-    _track = track;
+  Future<void> skipForTrack(AudioTrack track) async {
     _events = const [];
     _nextEventIndex = 0;
     _analysisGeneration++;
-    _activeStreamSource = source;
-    _activeStreamFinalSource = finalSource;
-    _activeStreamSourceIsGrowing = growingFile;
     _resetDiagnosticsForNewAnalysis();
-    _streamingPatternGenerator = StreamingAudioHapticPatternGenerator(
-      frameMs: AudioHapticPatternGenerator.defaultFrameMs,
-      userIntensity: _intensity,
-      initialFrameIndex: startPosition.inMilliseconds ~/
-          AudioHapticPatternGenerator.defaultFrameMs,
-    );
-
-    if (!_enabled) return;
-
-    final generation = _analysisGeneration;
-    final method =
-        growingFile ? 'startGrowingFileAnalysis' : 'startFileStreamAnalysis';
-    try {
-      _hapticsLog.info(
-        '准备流式分析: title="${track.title}", method=$method, '
-        'source=${_shortPath(source)}, sourceFile=${await _fileState(source)}, '
-        'finalSource=${_shortPath(finalSource)}, '
-        'finalFile=${finalSource == null ? 'none' : await _fileState(finalSource)}, '
-        'start=${startPosition.inMilliseconds}ms',
-        tag: 'AudioHaptics',
+    if (_enabled) {
+      _hapticsLog.captureOutput(
+        '[AudioHaptics] 跳过触感分析，仅支持已下载音频: ${track.title}',
       );
-      await _channel.invokeMethod<void>(method, {
-        'path': source,
-        if (finalSource != null) 'finalPath': finalSource,
-        'frameMs': AudioHapticPatternGenerator.defaultFrameMs,
-        'maxDurationMs': 3 * 60 * 60 * 1000,
-        'startPositionMs': startPosition.inMilliseconds,
-        'analysisToken': generation,
-      });
-      if (generation == _analysisGeneration) {
-        _hapticsLog.info(
-          '已启动流式分析: title="${track.title}", token=$generation',
-          tag: 'AudioHaptics',
-        );
-      }
-    } catch (e) {
-      if (generation != _analysisGeneration) return;
-      _events = const [];
-      _streamingPatternGenerator = null;
-      _hapticsLog.captureOutput('[AudioHaptics] 启动流式分析失败: $e');
     }
+    await _silencePlatformHaptics();
   }
 
   void start() {
@@ -250,29 +179,12 @@ class AudioHapticsService {
     _events = const [];
     _nextEventIndex = 0;
     _analysisGeneration++;
-    _streamingPatternGenerator = null;
     _resetDiagnosticsForNewAnalysis();
-    if (clearSource) {
-      _activeStreamSource = null;
-      _activeStreamFinalSource = null;
-      _activeStreamSourceIsGrowing = false;
-    }
     await _stopPlatformHaptics();
   }
 
   void seek(Duration position) {
     _nextEventIndex = _indexForPosition(position);
-    final currentTrack = _track;
-    final streamSource = _activeStreamSource;
-    if (_enabled && currentTrack != null && streamSource != null) {
-      unawaited(startStreamingAnalysis(
-        track: currentTrack,
-        source: streamSource,
-        finalSource: _activeStreamFinalSource,
-        growingFile: _activeStreamSourceIsGrowing,
-        startPosition: position,
-      ));
-    }
   }
 
   Future<void> _tick() async {
@@ -322,17 +234,10 @@ class AudioHapticsService {
   Future<dynamic> _handlePlatformCall(MethodCall call) async {
     switch (call.method) {
       case 'analysisChunk':
-        _handleAnalysisChunk(call.arguments);
         return null;
       case 'analysisFinished':
-        if (!_isCurrentAnalysisMessage(call.arguments)) return null;
-        _hapticsLog.captureOutput('[AudioHaptics] 流式分析完成');
         return null;
       case 'analysisFailed':
-        if (!_isCurrentAnalysisMessage(call.arguments)) return null;
-        _hapticsLog.captureOutput(
-          '[AudioHaptics] 流式分析失败: ${_analysisMessage(call.arguments)}',
-        );
         return null;
       case 'diagnostic':
         _hapticsLog.info(
@@ -344,62 +249,6 @@ class AudioHapticsService {
         throw MissingPluginException(
             'Unknown audio haptics method: ${call.method}');
     }
-  }
-
-  void _handleAnalysisChunk(dynamic arguments) {
-    if (!_enabled || arguments is! Map) return;
-    if (!_isCurrentAnalysisMessage(arguments)) return;
-
-    final analysis = AudioHapticAnalysis.fromPlatform(arguments);
-    final generator = _streamingPatternGenerator;
-    if (generator == null) return;
-    generator.userIntensity = _intensity;
-
-    if (!_loggedFirstStreamingChunk) {
-      _hapticsLog.info(
-        '收到首个分析块: startFrame=${analysis.startFrame}, '
-        'frameMs=${analysis.frameMs}, energies=${analysis.energies.length}, '
-        'energyRange=${_energyRange(analysis.energies)}',
-        tag: 'AudioHaptics',
-      );
-      _loggedFirstStreamingChunk = true;
-    }
-
-    final newEvents = generator.append(
-      startFrame: analysis.startFrame,
-      energies: analysis.energies,
-    );
-    if (newEvents.isEmpty) {
-      if (!_loggedNoEventChunk) {
-        _hapticsLog.info(
-          '分析块暂未产生触感事件，可能是音量/动态不足: '
-          'startFrame=${analysis.startFrame}, energies=${analysis.energies.length}',
-          tag: 'AudioHaptics',
-        );
-        _loggedNoEventChunk = true;
-      }
-      return;
-    }
-
-    if (!_loggedFirstStreamingEventBatch) {
-      _hapticsLog.info(
-        '生成首批流式触感事件: count=${newEvents.length}, '
-        'first=${newEvents.first.timeMs}ms, last=${newEvents.last.timeMs}ms',
-        tag: 'AudioHaptics',
-      );
-      _loggedFirstStreamingEventBatch = true;
-    }
-
-    _events = [..._events, ...newEvents];
-    if (_playingProvider?.call() ?? false) {
-      start();
-    }
-  }
-
-  bool _isCurrentAnalysisMessage(dynamic arguments) {
-    if (arguments is! Map) return true;
-    final token = (arguments['analysisToken'] as num?)?.toInt();
-    return token == null || token == _analysisGeneration;
   }
 
   String _analysisMessage(dynamic arguments) {
@@ -436,9 +285,6 @@ class AudioHapticsService {
   }
 
   void _resetDiagnosticsForNewAnalysis() {
-    _loggedFirstStreamingChunk = false;
-    _loggedNoEventChunk = false;
-    _loggedFirstStreamingEventBatch = false;
     _platformPulseFailureLogged = false;
     _timerStartLogged = false;
   }
@@ -458,17 +304,6 @@ class AudioHapticsService {
     } catch (e) {
       return 'error:$e';
     }
-  }
-
-  String _energyRange(List<double> energies) {
-    if (energies.isEmpty) return 'empty';
-    var minValue = energies.first;
-    var maxValue = energies.first;
-    for (final energy in energies.skip(1)) {
-      if (energy < minValue) minValue = energy;
-      if (energy > maxValue) maxValue = energy;
-    }
-    return '${minValue.toStringAsFixed(3)}-${maxValue.toStringAsFixed(3)}';
   }
 
   Future<void> _stopPlatformHaptics() async {

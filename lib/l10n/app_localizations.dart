@@ -1827,7 +1827,7 @@ abstract class S {
   /// No description provided for @audioHapticsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Make the device vibrate with audio features. May increase battery use.'**
+  /// **'Downloaded audio only. Make the device vibrate with audio features. May increase battery use.'**
   String get audioHapticsDesc;
 
   /// No description provided for @audioHapticsIntensity.

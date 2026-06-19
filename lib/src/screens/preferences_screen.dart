@@ -519,7 +519,6 @@ class PreferencesScreen extends ConsumerWidget {
                   title: Text(S.of(context).keepScreenAwake),
                   subtitle: Text(
                     S.of(context).keepScreenAwakeDesc,
-                    style: const TextStyle(fontSize: 12),
                   ),
                   value: ref.watch(keepScreenAwakeProvider),
                   onChanged: (value) {
@@ -636,7 +635,6 @@ class _AudioHapticsSettingsTile extends StatelessWidget {
           title: Text(S.of(context).audioHaptics),
           subtitle: Text(
             S.of(context).audioHapticsDesc,
-            style: const TextStyle(fontSize: 12),
           ),
           value: settings.enabled,
           onChanged: notifier.setEnabled,
