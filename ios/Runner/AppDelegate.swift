@@ -47,6 +47,7 @@ class AudioHapticsBridge {
     private var loggedCoreHapticsFailure = false
     private var loggedFallbackPulse = false
     private var loggedReadableAlias = false
+    private var loggedAssetReaderFallback = false
 
     init(controller: FlutterViewController) {
         channel = FlutterMethodChannel(
@@ -174,7 +175,36 @@ class AudioHapticsBridge {
             sendDiagnostic("iOS 分析文件没有可识别扩展名，已创建临时别名: \(readableURL.url.lastPathComponent)")
             loggedReadableAlias = true
         }
-        let url = readableURL.url
+        do {
+            return try analyzeAudioFile(
+                url: readableURL.url,
+                frameMs: frameMs,
+                maxDurationMs: maxDurationMs,
+                startFrame: startFrame,
+                maxEnergyFrames: maxEnergyFrames
+            )
+        } catch {
+            if !loggedAssetReaderFallback {
+                sendDiagnostic("iOS AVAudioFile 分析失败，尝试兼容解码路径: \(error.localizedDescription)")
+                loggedAssetReaderFallback = true
+            }
+            return try analyzeAudioAsset(
+                url: readableURL.url,
+                frameMs: frameMs,
+                maxDurationMs: maxDurationMs,
+                startFrame: startFrame,
+                maxEnergyFrames: maxEnergyFrames
+            )
+        }
+    }
+
+    private func analyzeAudioFile(
+        url: URL,
+        frameMs: Int,
+        maxDurationMs: Int,
+        startFrame: Int,
+        maxEnergyFrames: Int?
+    ) throws -> [String: Any] {
         let file = try AVAudioFile(forReading: url)
         let sourceFormat = file.processingFormat
         let sampleRate = sourceFormat.sampleRate
@@ -244,6 +274,208 @@ class AudioHapticsBridge {
             "durationMs": durationMs,
             "energies": energies,
         ]
+    }
+
+    private func analyzeAudioAsset(
+        url: URL,
+        frameMs: Int,
+        maxDurationMs: Int,
+        startFrame: Int,
+        maxEnergyFrames: Int?
+    ) throws -> [String: Any] {
+        let asset = AVURLAsset(url: url)
+        guard let track = asset.tracks(withMediaType: .audio).first else {
+            throw AudioHapticsAnalysisError.noAudioTrack
+        }
+
+        let trackInfo = audioTrackInfo(track: track)
+        let sampleRate = trackInfo.sampleRate
+        if sampleRate <= 0 {
+            throw AudioHapticsAnalysisError.invalidSampleRate
+        }
+
+        let channels = max(1, trackInfo.channels)
+        let resolvedFrameMs = max(20, min(frameMs, 200))
+        let frameLength = max(256, Int(sampleRate * Double(resolvedFrameMs) / 1000.0))
+        let maxFrames = AVAudioFramePosition(sampleRate * Double(maxDurationMs) / 1000.0)
+        let assetDurationSeconds = validSeconds(asset.duration)
+            ?? validSeconds(track.timeRange.duration)
+            ?? 0
+        let assetFrames = AVAudioFramePosition(assetDurationSeconds * sampleRate)
+        let totalFrames = min(assetFrames, maxFrames)
+        let resolvedStartFrame = max(0, startFrame)
+        let startAudioFrame = AVAudioFramePosition(resolvedStartFrame * frameLength)
+        let durationMs = Int(assetDurationSeconds * 1000.0)
+
+        if startAudioFrame >= totalFrames {
+            return [
+                "frameMs": resolvedFrameMs,
+                "startFrame": resolvedStartFrame,
+                "durationMs": durationMs,
+                "energies": [],
+            ]
+        }
+
+        let reader = try AVAssetReader(asset: asset)
+        let outputSettings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVLinearPCMIsFloatKey: true,
+            AVLinearPCMBitDepthKey: 32,
+            AVLinearPCMIsBigEndianKey: false,
+            AVLinearPCMIsNonInterleaved: false,
+        ]
+        let output = AVAssetReaderTrackOutput(track: track, outputSettings: outputSettings)
+        output.alwaysCopiesSampleData = false
+        guard reader.canAdd(output) else {
+            throw AudioHapticsAnalysisError.readerOutputUnavailable
+        }
+        reader.add(output)
+
+        let timeScale = CMTimeScale(max(1, min(Int(Int32.max), Int(sampleRate.rounded()))))
+        let startTime = CMTime(seconds: Double(startAudioFrame) / sampleRate, preferredTimescale: timeScale)
+        let durationTime = CMTime(seconds: Double(totalFrames - startAudioFrame) / sampleRate, preferredTimescale: timeScale)
+        reader.timeRange = CMTimeRange(start: startTime, duration: durationTime)
+
+        guard reader.startReading() else {
+            throw reader.error ?? AudioHapticsAnalysisError.readerStartFailed
+        }
+
+        var energies: [Double] = []
+        var pendingSumSquares = 0.0
+        var pendingSampleCount = 0
+        var pendingFrameSamples = 0
+
+        while reader.status == .reading &&
+            (maxEnergyFrames == nil || energies.count < maxEnergyFrames!) {
+            guard let sampleBuffer = output.copyNextSampleBuffer() else {
+                break
+            }
+            try appendEnergies(
+                from: sampleBuffer,
+                fallbackChannels: channels,
+                frameLength: frameLength,
+                maxEnergyFrames: maxEnergyFrames,
+                energies: &energies,
+                pendingSumSquares: &pendingSumSquares,
+                pendingSampleCount: &pendingSampleCount,
+                pendingFrameSamples: &pendingFrameSamples
+            )
+        }
+
+        if reader.status == .failed {
+            throw reader.error ?? AudioHapticsAnalysisError.readerFailed
+        }
+
+        if pendingFrameSamples > 0 &&
+            (maxEnergyFrames == nil || energies.count < maxEnergyFrames!) {
+            let rms = pendingSampleCount > 0
+                ? sqrt(pendingSumSquares / Double(pendingSampleCount))
+                : 0
+            energies.append(min(1.0, rms * 2.8))
+        }
+
+        return [
+            "frameMs": resolvedFrameMs,
+            "startFrame": resolvedStartFrame,
+            "durationMs": durationMs,
+            "energies": energies,
+        ]
+    }
+
+    private func appendEnergies(
+        from sampleBuffer: CMSampleBuffer,
+        fallbackChannels: Int,
+        frameLength: Int,
+        maxEnergyFrames: Int?,
+        energies: inout [Double],
+        pendingSumSquares: inout Double,
+        pendingSampleCount: inout Int,
+        pendingFrameSamples: inout Int
+    ) throws {
+        guard let blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) else {
+            return
+        }
+
+        let dataLength = CMBlockBufferGetDataLength(blockBuffer)
+        if dataLength <= 0 { return }
+
+        var data = Data(count: dataLength)
+        let copyStatus = data.withUnsafeMutableBytes { rawBuffer -> OSStatus in
+            guard let baseAddress = rawBuffer.baseAddress else { return noErr }
+            return CMBlockBufferCopyDataBytes(
+                blockBuffer,
+                atOffset: 0,
+                dataLength: dataLength,
+                destination: baseAddress
+            )
+        }
+        if copyStatus != noErr {
+            throw AudioHapticsAnalysisError.blockBufferCopyFailed(copyStatus)
+        }
+
+        let frames = CMSampleBufferGetNumSamples(sampleBuffer)
+        if frames <= 0 { return }
+
+        let channels = max(1, channelCount(from: sampleBuffer) ?? fallbackChannels)
+        let maxFloatSamples = min(dataLength / MemoryLayout<Float>.size, frames * channels)
+        if maxFloatSamples <= 0 { return }
+
+        data.withUnsafeBytes { rawBuffer in
+            let samples = rawBuffer.bindMemory(to: Float.self)
+            let totalFrames = min(frames, maxFloatSamples / channels)
+            for frameIndex in 0..<totalFrames {
+                if let maxEnergyFrames, energies.count >= maxEnergyFrames {
+                    break
+                }
+
+                let sampleOffset = frameIndex * channels
+                for channel in 0..<channels {
+                    let sample = Double(samples[sampleOffset + channel])
+                    pendingSumSquares += sample * sample
+                }
+                pendingSampleCount += channels
+                pendingFrameSamples += 1
+
+                if pendingFrameSamples >= frameLength {
+                    let rms = pendingSampleCount > 0
+                        ? sqrt(pendingSumSquares / Double(pendingSampleCount))
+                        : 0
+                    energies.append(min(1.0, rms * 2.8))
+                    pendingSumSquares = 0
+                    pendingSampleCount = 0
+                    pendingFrameSamples = 0
+                }
+            }
+        }
+    }
+
+    private func audioTrackInfo(track: AVAssetTrack) -> (sampleRate: Double, channels: Int) {
+        for formatDescription in track.formatDescriptions {
+            let audioDescription = formatDescription as! CMAudioFormatDescription
+            guard let streamDescription = CMAudioFormatDescriptionGetStreamBasicDescription(audioDescription) else {
+                continue
+            }
+            let sampleRate = streamDescription.pointee.mSampleRate
+            let channels = Int(streamDescription.pointee.mChannelsPerFrame)
+            if sampleRate > 0 {
+                return (sampleRate, max(1, channels))
+            }
+        }
+        return (44_100, 2)
+    }
+
+    private func channelCount(from sampleBuffer: CMSampleBuffer) -> Int? {
+        guard let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer),
+              let streamDescription = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription) else {
+            return nil
+        }
+        let channels = Int(streamDescription.pointee.mChannelsPerFrame)
+        return channels > 0 ? channels : nil
+    }
+
+    private func validSeconds(_ time: CMTime) -> Double? {
+        let seconds = CMTimeGetSeconds(time)
+        return seconds.isFinite && seconds > 0 ? seconds : nil
     }
 
     private func streamAnalyzeFile(
@@ -510,6 +742,32 @@ class AudioHapticsBridge {
         }
         if clampedIntensity > 0.85 {
             AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+        }
+    }
+}
+
+private enum AudioHapticsAnalysisError: LocalizedError {
+    case noAudioTrack
+    case invalidSampleRate
+    case readerOutputUnavailable
+    case readerStartFailed
+    case readerFailed
+    case blockBufferCopyFailed(OSStatus)
+
+    var errorDescription: String? {
+        switch self {
+        case .noAudioTrack:
+            return "No readable audio track was found"
+        case .invalidSampleRate:
+            return "Invalid audio sample rate"
+        case .readerOutputUnavailable:
+            return "Audio reader output is unavailable"
+        case .readerStartFailed:
+            return "Audio reader failed to start"
+        case .readerFailed:
+            return "Audio reader failed"
+        case .blockBufferCopyFailed(let status):
+            return "Audio sample buffer copy failed: \(status)"
         }
     }
 }
