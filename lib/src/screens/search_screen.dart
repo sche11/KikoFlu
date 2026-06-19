@@ -478,11 +478,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         ),
         const SizedBox(height: 12),
       ],
-      Text(
-        S.of(context).search,
-        style: theme.textTheme.titleSmall,
-      ),
-      const SizedBox(height: 8),
       SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
