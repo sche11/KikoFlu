@@ -939,6 +939,16 @@ class SRu extends S {
       'Если включено, экран не будет гаснуть при наличии аудиодорожки, чтобы было удобнее читать субтитры.';
 
   @override
+  String get audioHaptics => 'Аудиотактильная отдача';
+
+  @override
+  String get audioHapticsDesc =>
+      'Анализирует текущий аудиопоток и синхронизирует вибрацию с воспроизведением. Удобно с наушниками или в беззвучном режиме, но может увеличить расход батареи.';
+
+  @override
+  String get audioHapticsIntensity => 'Интенсивность';
+
+  @override
   String get blockingSettings => 'Блокировки';
 
   @override

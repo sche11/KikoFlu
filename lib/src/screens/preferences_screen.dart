@@ -528,6 +528,11 @@ class PreferencesScreen extends ConsumerWidget {
                         .setEnabled(value);
                   },
                 ),
+                if (Theme.of(context).platform == TargetPlatform.android ||
+                    Theme.of(context).platform == TargetPlatform.iOS) ...[
+                  Divider(color: Theme.of(context).colorScheme.outlineVariant),
+                  _AudioHapticsSettingsTile(ref: ref),
+                ],
                 Divider(color: Theme.of(context).colorScheme.outlineVariant),
                 ListTile(
                   leading: Icon(Icons.block,
@@ -609,6 +614,64 @@ class PreferencesScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AudioHapticsSettingsTile extends StatelessWidget {
+  const _AudioHapticsSettingsTile({required this.ref});
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = ref.watch(audioHapticsSettingsProvider);
+    final notifier = ref.read(audioHapticsSettingsProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        SwitchListTile(
+          secondary: Icon(Icons.vibration, color: colorScheme.primary),
+          title: Text(S.of(context).audioHaptics),
+          subtitle: Text(
+            S.of(context).audioHapticsDesc,
+            style: const TextStyle(fontSize: 12),
+          ),
+          value: settings.enabled,
+          onChanged: notifier.setEnabled,
+        ),
+        if (settings.enabled)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(72, 0, 16, 12),
+            child: Row(
+              children: [
+                Text(
+                  S.of(context).audioHapticsIntensity,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                Expanded(
+                  child: Slider(
+                    value: settings.intensity,
+                    min: AudioHapticsSettings.minIntensity,
+                    max: AudioHapticsSettings.maxIntensity,
+                    divisions: 8,
+                    label: '${(settings.intensity * 100).round()}%',
+                    onChanged: notifier.setIntensity,
+                  ),
+                ),
+                SizedBox(
+                  width: 44,
+                  child: Text(
+                    '${(settings.intensity * 100).round()}%',
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

@@ -1,10 +1,12 @@
 import Flutter
 import UIKit
 import AVKit
+import CoreHaptics
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
   private var floatingLyricManager: FloatingLyricManager?
+  private var audioHapticsBridge: AudioHapticsBridge?
 
   override func application(
     _ application: UIApplication,
@@ -12,6 +14,7 @@ import AVKit
   ) -> Bool {
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     floatingLyricManager = FloatingLyricManager(controller: controller)
+    audioHapticsBridge = AudioHapticsBridge(controller: controller)
 
     let screenAwakeChannel = FlutterMethodChannel(
       name: "com.meteor.kikoeruflutter/screen_awake",
@@ -32,6 +35,366 @@ import AVKit
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+}
+
+class AudioHapticsBridge {
+    private let channel: FlutterMethodChannel
+    private var engine: CHHapticEngine?
+    private var impactGenerator: UIImpactFeedbackGenerator?
+    private var streamAnalysisGeneration = 0
+
+    init(controller: FlutterViewController) {
+        channel = FlutterMethodChannel(
+            name: "com.meteor.kikoeruflutter/audio_haptics",
+            binaryMessenger: controller.binaryMessenger
+        )
+
+        channel.setMethodCallHandler { [weak self] call, result in
+            self?.handle(call, result: result)
+        }
+    }
+
+    private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        switch call.method {
+        case "analyze":
+            guard let args = call.arguments as? [String: Any],
+                  let path = args["path"] as? String else {
+                result(FlutterError(code: "bad_args", message: "Missing audio path", details: nil))
+                return
+            }
+            let frameMs = args["frameMs"] as? Int ?? 50
+            let maxDurationMs = args["maxDurationMs"] as? Int ?? 10_800_000
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    let analysis = try self.analyzeAudio(
+                        path: path,
+                        frameMs: frameMs,
+                        maxDurationMs: maxDurationMs
+                    )
+                    DispatchQueue.main.async {
+                        result(analysis)
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        result(FlutterError(
+                            code: "analysis_failed",
+                            message: error.localizedDescription,
+                            details: nil
+                        ))
+                    }
+                }
+            }
+        case "pulse":
+            let args = call.arguments as? [String: Any]
+            let intensity = args?["intensity"] as? Double ?? 0.5
+            let durationMs = args?["durationMs"] as? Int ?? 40
+            pulse(intensity: intensity, durationMs: durationMs)
+            result(nil)
+        case "silence":
+            result(nil)
+        case "stop":
+            streamAnalysisGeneration += 1
+            result(nil)
+        case "startFileStreamAnalysis":
+            guard let args = call.arguments as? [String: Any],
+                  let path = args["path"] as? String else {
+                result(FlutterError(code: "bad_args", message: "Missing audio path", details: nil))
+                return
+            }
+            let frameMs = args["frameMs"] as? Int ?? 50
+            let maxDurationMs = args["maxDurationMs"] as? Int ?? 10_800_000
+            let startPositionMs = args["startPositionMs"] as? Int ?? 0
+            let finalPath = args["finalPath"] as? String
+            let analysisToken = args["analysisToken"] as? Int ?? 0
+            streamAnalysisGeneration += 1
+            let generation = streamAnalysisGeneration
+            DispatchQueue.global(qos: .utility).async {
+                self.streamAnalyzeFile(
+                    path: path,
+                    finalPath: finalPath,
+                    frameMs: frameMs,
+                    maxDurationMs: maxDurationMs,
+                    startPositionMs: startPositionMs,
+                    generation: generation,
+                    analysisToken: analysisToken,
+                    growingFile: false
+                )
+            }
+            result(nil)
+        case "startGrowingFileAnalysis":
+            guard let args = call.arguments as? [String: Any],
+                  let path = args["path"] as? String else {
+                result(FlutterError(code: "bad_args", message: "Missing audio path", details: nil))
+                return
+            }
+            let frameMs = args["frameMs"] as? Int ?? 50
+            let maxDurationMs = args["maxDurationMs"] as? Int ?? 10_800_000
+            let startPositionMs = args["startPositionMs"] as? Int ?? 0
+            let finalPath = args["finalPath"] as? String
+            let analysisToken = args["analysisToken"] as? Int ?? 0
+            streamAnalysisGeneration += 1
+            let generation = streamAnalysisGeneration
+            DispatchQueue.global(qos: .utility).async {
+                self.streamAnalyzeFile(
+                    path: path,
+                    finalPath: finalPath,
+                    frameMs: frameMs,
+                    maxDurationMs: maxDurationMs,
+                    startPositionMs: startPositionMs,
+                    generation: generation,
+                    analysisToken: analysisToken,
+                    growingFile: true
+                )
+            }
+            result(nil)
+        default:
+            result(FlutterMethodNotImplemented)
+        }
+    }
+
+    private func analyzeAudio(
+        path: String,
+        frameMs: Int,
+        maxDurationMs: Int,
+        startFrame: Int = 0,
+        maxEnergyFrames: Int? = nil
+    ) throws -> [String: Any] {
+        let url = URL(fileURLWithPath: path)
+        let file = try AVAudioFile(forReading: url)
+        let sourceFormat = file.processingFormat
+        let sampleRate = sourceFormat.sampleRate
+        let channels = max(1, Int(sourceFormat.channelCount))
+        let resolvedFrameMs = max(20, min(frameMs, 200))
+        let frameLength = max(256, Int(sampleRate * Double(resolvedFrameMs) / 1000.0))
+        let maxFrames = AVAudioFramePosition(sampleRate * Double(maxDurationMs) / 1000.0)
+        let totalFrames = min(file.length, maxFrames)
+        let resolvedStartFrame = max(0, startFrame)
+        let startAudioFrame = AVAudioFramePosition(resolvedStartFrame * frameLength)
+        let durationMs = Int(Double(file.length) / sampleRate * 1000.0)
+
+        if startAudioFrame >= totalFrames {
+            return [
+                "frameMs": resolvedFrameMs,
+                "startFrame": resolvedStartFrame,
+                "durationMs": durationMs,
+                "energies": [],
+            ]
+        }
+
+        file.framePosition = startAudioFrame
+        let bufferCapacity = AVAudioFrameCount(frameLength)
+        let buffer = AVAudioPCMBuffer(pcmFormat: sourceFormat, frameCapacity: bufferCapacity)!
+        var energies: [Double] = []
+        var framesReadTotal = startAudioFrame
+
+        while framesReadTotal < totalFrames &&
+            (maxEnergyFrames == nil || energies.count < maxEnergyFrames!) {
+            let framesRemaining = totalFrames - framesReadTotal
+            let framesToRead = min(bufferCapacity, AVAudioFrameCount(framesRemaining))
+            try file.read(into: buffer, frameCount: framesToRead)
+            let framesRead = Int(buffer.frameLength)
+            if framesRead <= 0 { break }
+
+            var sumSquares = 0.0
+            var sampleCount = 0
+
+            if let floatData = buffer.floatChannelData {
+                for channel in 0..<channels {
+                    let samples = floatData[channel]
+                    for i in 0..<framesRead {
+                        let sample = Double(samples[i])
+                        sumSquares += sample * sample
+                    }
+                }
+                sampleCount = framesRead * channels
+            } else if let intData = buffer.int16ChannelData {
+                for channel in 0..<channels {
+                    let samples = intData[channel]
+                    for i in 0..<framesRead {
+                        let sample = Double(samples[i]) / Double(Int16.max)
+                        sumSquares += sample * sample
+                    }
+                }
+                sampleCount = framesRead * channels
+            }
+
+            let rms = sampleCount > 0 ? sqrt(sumSquares / Double(sampleCount)) : 0
+            energies.append(min(1.0, rms * 2.8))
+            framesReadTotal += AVAudioFramePosition(framesRead)
+        }
+
+        return [
+            "frameMs": resolvedFrameMs,
+            "startFrame": resolvedStartFrame,
+            "durationMs": durationMs,
+            "energies": energies,
+        ]
+    }
+
+    private func streamAnalyzeFile(
+        path: String,
+        finalPath: String?,
+        frameMs: Int,
+        maxDurationMs: Int,
+        startPositionMs: Int,
+        generation: Int,
+        analysisToken: Int,
+        growingFile: Bool
+    ) {
+        let resolvedFrameMs = max(20, min(frameMs, 200))
+        let chunkFrames = growingFile ? 24 : 240
+        var nextFrame = max(0, startPositionMs / resolvedFrameMs)
+        var retryCount = 0
+
+        while generation == streamAnalysisGeneration {
+            do {
+                let readablePath = readableAnalysisPath(path: path, finalPath: finalPath)
+                let analysis = try analyzeAudio(
+                    path: readablePath,
+                    frameMs: resolvedFrameMs,
+                    maxDurationMs: maxDurationMs,
+                    startFrame: nextFrame,
+                    maxEnergyFrames: chunkFrames
+                )
+                guard generation == streamAnalysisGeneration else { return }
+                guard let energies = analysis["energies"] as? [Double] else { return }
+                let chunkStartFrame = analysis["startFrame"] as? Int ?? nextFrame
+
+                if !energies.isEmpty {
+                    sendAnalysisChunk(
+                        analysisToken: analysisToken,
+                        frameMs: resolvedFrameMs,
+                        startFrame: chunkStartFrame,
+                        energies: energies
+                    )
+                    nextFrame = chunkStartFrame + energies.count
+                    retryCount = 0
+                }
+
+                let finalReady = finalPath != nil &&
+                    FileManager.default.fileExists(atPath: finalPath!)
+                if energies.isEmpty && (!growingFile || finalReady) {
+                    sendAnalysisFinished(analysisToken: analysisToken)
+                    return
+                }
+
+                if Int64(nextFrame * resolvedFrameMs) >= Int64(maxDurationMs) {
+                    sendAnalysisFinished(analysisToken: analysisToken)
+                    return
+                }
+                let sleepInterval: TimeInterval
+                if energies.isEmpty {
+                    sleepInterval = growingFile ? 0.75 : 0.02
+                } else {
+                    sleepInterval = growingFile ? 0.12 : 0.02
+                }
+                Thread.sleep(forTimeInterval: sleepInterval)
+            } catch {
+                guard generation == streamAnalysisGeneration else { return }
+                let finalReady = finalPath != nil &&
+                    FileManager.default.fileExists(atPath: finalPath!)
+                if !growingFile ||
+                    (finalReady && retryCount >= 24) ||
+                    retryCount >= 240 {
+                    sendAnalysisFailed(
+                        analysisToken: analysisToken,
+                        message: error.localizedDescription
+                    )
+                    return
+                }
+                retryCount += 1
+                Thread.sleep(forTimeInterval: 0.5)
+            }
+        }
+    }
+
+    private func readableAnalysisPath(path: String, finalPath: String?) -> String {
+        if FileManager.default.fileExists(atPath: path) {
+            return path
+        }
+        if let finalPath, FileManager.default.fileExists(atPath: finalPath) {
+            return finalPath
+        }
+        return path
+    }
+
+    private func sendAnalysisChunk(
+        analysisToken: Int,
+        frameMs: Int,
+        startFrame: Int,
+        energies: [Double]
+    ) {
+        DispatchQueue.main.async { [weak self] in
+            self?.channel.invokeMethod("analysisChunk", arguments: [
+                "analysisToken": analysisToken,
+                "frameMs": frameMs,
+                "startFrame": startFrame,
+                "energies": energies,
+            ])
+        }
+    }
+
+    private func sendAnalysisFinished(analysisToken: Int) {
+        DispatchQueue.main.async { [weak self] in
+            self?.channel.invokeMethod(
+                "analysisFinished",
+                arguments: ["analysisToken": analysisToken]
+            )
+        }
+    }
+
+    private func sendAnalysisFailed(analysisToken: Int, message: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.channel.invokeMethod(
+                "analysisFailed",
+                arguments: [
+                    "analysisToken": analysisToken,
+                    "message": message,
+                ]
+            )
+        }
+    }
+
+    private func pulse(intensity: Double, durationMs: Int) {
+        let clampedIntensity = max(0.1, min(1.0, intensity))
+
+        if #available(iOS 13.0, *), CHHapticEngine.capabilitiesForHardware().supportsHaptics {
+            do {
+                if engine == nil {
+                    engine = try CHHapticEngine()
+                    engine?.stoppedHandler = { [weak self] _ in self?.engine = nil }
+                    engine?.resetHandler = { [weak self] in
+                        try? self?.engine?.start()
+                    }
+                }
+                try engine?.start()
+                let event = CHHapticEvent(
+                    eventType: .hapticTransient,
+                    parameters: [
+                        CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(clampedIntensity)),
+                        CHHapticEventParameter(parameterID: .hapticSharpness, value: Float(max(0.25, min(1.0, clampedIntensity + 0.15)))),
+                    ],
+                    relativeTime: 0
+                )
+                let pattern = try CHHapticPattern(events: [event], parameters: [])
+                let player = try engine?.makePlayer(with: pattern)
+                try player?.start(atTime: 0)
+                return
+            } catch {
+                // Fall back below.
+            }
+        }
+
+        let style: UIImpactFeedbackGenerator.FeedbackStyle =
+            clampedIntensity > 0.72 ? .heavy : (clampedIntensity > 0.42 ? .medium : .light)
+        impactGenerator = UIImpactFeedbackGenerator(style: style)
+        impactGenerator?.prepare()
+        if #available(iOS 13.0, *) {
+            impactGenerator?.impactOccurred(intensity: CGFloat(clampedIntensity))
+        } else {
+            impactGenerator?.impactOccurred()
+        }
+    }
 }
 
 // MARK: - Network Speed Monitor

@@ -53,6 +53,7 @@ class AudioTrackQueueBuilder {
         duration: _parseDuration(FileTreeUtils.property(file, 'duration')),
         workId: workId,
         hash: hash,
+        sourcePath: _sourcePathFromUrl(url),
       ));
     }
 
@@ -74,5 +75,10 @@ class AudioTrackQueueBuilder {
       return Duration(milliseconds: (durationValue * 1000).round());
     }
     return null;
+  }
+
+  static String? _sourcePathFromUrl(String url) {
+    if (!url.startsWith('file://')) return null;
+    return Uri.decodeFull(url.substring('file://'.length));
   }
 }

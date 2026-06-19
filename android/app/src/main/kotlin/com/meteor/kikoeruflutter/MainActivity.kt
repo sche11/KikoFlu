@@ -7,6 +7,7 @@ import android.view.WindowManager
 
 class MainActivity : AudioServiceActivity() {
     private var floatingLyricPlugin: FloatingLyricPlugin? = null
+    private var audioHapticsBridge: AudioHapticsBridge? = null
     private val screenAwakeChannelName = "com.meteor.kikoeruflutter/screen_awake"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -20,6 +21,10 @@ class MainActivity : AudioServiceActivity() {
         )
         floatingLyricPlugin?.attachChannel(channel)
         channel.setMethodCallHandler(floatingLyricPlugin)
+        audioHapticsBridge = AudioHapticsBridge(
+            context = this,
+            messenger = flutterEngine.dartExecutor.binaryMessenger
+        )
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -45,6 +50,8 @@ class MainActivity : AudioServiceActivity() {
     override fun onDestroy() {
         // 不在 Activity 销毁时清理悬浮窗，以便在后台（如侧滑返回桌面）时保持显示
         // floatingLyricPlugin?.cleanup()
+        audioHapticsBridge?.dispose()
+        audioHapticsBridge = null
         super.onDestroy()
     }
 }

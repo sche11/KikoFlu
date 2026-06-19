@@ -9,6 +9,7 @@ import 'package:smtc_windows/smtc_windows.dart';
 import '../models/audio_track.dart';
 import 'cache_service.dart';
 import 'caching_stream_audio_source.dart';
+import 'audio_haptics_service.dart';
 import 'log_service.dart';
 import 'playback_history_service.dart';
 import '../utils/image_blur_util.dart';
@@ -23,6 +24,7 @@ class AudioPlayerService {
   AudioPlayerService._();
 
   final AudioPlayer _player = AudioPlayer();
+  final AudioHapticsService _hapticsService = AudioHapticsService.instance;
   final List<AudioTrack> _queue = [];
   int _currentIndex = 0;
   AudioHandler? _audioHandler;
@@ -53,6 +55,10 @@ class AudioPlayerService {
   bool _privacyMaskTitle = true;
   String _privacyCustomTitle = '正在播放音频';
 
+  // Audio haptics settings
+  bool _hapticsEnabled = false;
+  double _hapticsIntensity = 0.85;
+
   // Stream controllers
   final StreamController<List<AudioTrack>> _queueController =
       StreamController.broadcast();
@@ -78,6 +84,10 @@ class AudioPlayerService {
 
     // Set initial playback state for all platforms
     _updatePlaybackState();
+    _hapticsService.attachPlaybackState(
+      positionProvider: () => _player.position,
+      playingProvider: () => _player.playing,
+    );
 
     // Initialize Windows SMTC (System Media Transport Controls)
     if (Platform.isWindows) {
@@ -336,6 +346,7 @@ class AudioPlayerService {
         maskTitle: _privacyMaskTitle,
         customTitle: _privacyCustomTitle,
       );
+      await _hapticsService.stop();
 
       String? audioFilePath;
       bool loaded = false;
@@ -355,6 +366,10 @@ class AudioPlayerService {
           final isolatedPath =
               await _prepareLocalPlaybackPath(localPath) ?? localPath;
           await _player.setFilePath(isolatedPath);
+          unawaited(_hapticsService.startStreamingAnalysis(
+            track: track.copyWith(sourcePath: localPath),
+            source: localPath,
+          ));
           _log.captureOutput('[Audio] 使用本地文件播放: ${track.title}');
           loaded = true;
         } else {
@@ -368,16 +383,30 @@ class AudioPlayerService {
 
         if (audioFilePath != null) {
           await _player.setFilePath(audioFilePath);
+          unawaited(_hapticsService.startStreamingAnalysis(
+            track: track.copyWith(sourcePath: audioFilePath),
+            source: audioFilePath,
+          ));
           _log.captureOutput('[Audio] 使用缓存文件播放: ${track.title}');
           loaded = true;
         } else {
           try {
             await CacheService.resetAudioCachePartial(track.hash!);
+            final tempCachePath =
+                await CacheService.audioCacheTempPath(track.hash!);
+            final finalCachePath =
+                await CacheService.audioCacheFinalPath(track.hash!);
             final source = CachingStreamAudioSource(
               uri: Uri.parse(track.url),
               hash: track.hash!,
             );
             await _player.setAudioSource(source);
+            unawaited(_hapticsService.startStreamingAnalysis(
+              track: track,
+              source: tempCachePath,
+              finalSource: finalCachePath,
+              growingFile: true,
+            ));
             _log.captureOutput('[Audio] 流式播放并写入缓存: ${track.title}');
             loaded = true;
           } catch (error) {
@@ -388,6 +417,7 @@ class AudioPlayerService {
 
       if (!loaded) {
         await _player.setUrl(track.url);
+        unawaited(_hapticsService.prepareForTrack(track));
         _log.captureOutput('[Audio] 流式播放: ${track.url}');
       }
     } catch (e) {
@@ -525,6 +555,9 @@ class AudioPlayerService {
 
     await _player.play();
     _updatePlaybackState();
+    if (_hapticsEnabled) {
+      _hapticsService.start();
+    }
 
     // macOS specific: Check if track completed immediately (workaround for immediate completion bug)
     if (Platform.isMacOS &&
@@ -541,11 +574,13 @@ class AudioPlayerService {
   Future<void> pause() async {
     await _player.pause();
     _updatePlaybackState();
+    await _hapticsService.pause();
   }
 
   Future<void> stop() async {
     await _player.stop();
     _updatePlaybackState();
+    await _hapticsService.stop();
   }
 
   Future<void> seek(Duration position) async {
@@ -554,6 +589,7 @@ class AudioPlayerService {
       _completionHandled = false;
     }
     await _player.seek(position);
+    _hapticsService.seek(position);
     _updatePlaybackState();
   }
 
@@ -790,9 +826,22 @@ class AudioPlayerService {
     }
   }
 
+  Future<void> updateHapticsSettings({
+    required bool enabled,
+    required double intensity,
+  }) async {
+    _hapticsEnabled = enabled;
+    _hapticsIntensity = intensity.clamp(0.2, 1.0);
+    await _hapticsService.updateSettings(
+      enabled: _hapticsEnabled,
+      intensity: _hapticsIntensity,
+    );
+  }
+
   // Cleanup
   Future<void> dispose() async {
     _completionCheckTimer?.cancel();
+    await _hapticsService.stop();
     await _cleanupTempPlaybackFile();
     await _queueController.close();
     await _currentTrackController.close();

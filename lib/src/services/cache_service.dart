@@ -66,6 +66,14 @@ class CacheService {
     return tempFile;
   }
 
+  static Future<String> audioCacheTempPath(String hash) async {
+    return (await _audioTempFile(hash)).path;
+  }
+
+  static Future<String> audioCacheFinalPath(String hash) async {
+    return (await _audioFinalFile(hash)).path;
+  }
+
   static Future<void> finalizeAudioCacheFile(String hash,
       {required int expectedSize}) async {
     final tempFile = await _audioTempFile(hash);

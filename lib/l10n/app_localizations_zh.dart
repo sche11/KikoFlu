@@ -916,6 +916,15 @@ class SZh extends S {
   String get keepScreenAwakeDesc => '开启后，有音频轨道时保持屏幕常亮，便于查看字幕。';
 
   @override
+  String get audioHaptics => '音频触感反馈';
+
+  @override
+  String get audioHapticsDesc => '分析当前播放的音频流，并随播放进度同步震动。适合耳机或静音使用，可能增加耗电。';
+
+  @override
+  String get audioHapticsIntensity => '强度';
+
+  @override
   String get blockingSettings => '屏蔽设置';
 
   @override
@@ -4356,6 +4365,15 @@ class SZhHant extends SZh {
 
   @override
   String get keepScreenAwakeDesc => '開啟後，有音訊軌道時保持螢幕常亮，方便查看字幕。';
+
+  @override
+  String get audioHaptics => '音訊觸感回饋';
+
+  @override
+  String get audioHapticsDesc => '分析目前播放的音訊串流，並隨播放進度同步震動。適合耳機或靜音使用，可能增加耗電。';
+
+  @override
+  String get audioHapticsIntensity => '強度';
 
   @override
   String get blockingSettings => '封鎖設定';

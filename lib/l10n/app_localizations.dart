@@ -1818,6 +1818,24 @@ abstract class S {
   /// **'Keep the screen on while an audio track is active for easier subtitle reading.'**
   String get keepScreenAwakeDesc;
 
+  /// No description provided for @audioHaptics.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Haptics'**
+  String get audioHaptics;
+
+  /// No description provided for @audioHapticsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze the current audio stream and sync vibration with playback. Useful with headphones or silent mode, but may increase battery use.'**
+  String get audioHapticsDesc;
+
+  /// No description provided for @audioHapticsIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Intensity'**
+  String get audioHapticsIntensity;
+
   /// No description provided for @blockingSettings.
   ///
   /// In en, this message translates to:

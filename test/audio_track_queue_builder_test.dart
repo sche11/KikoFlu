@@ -44,6 +44,7 @@ void main() {
       expect(result.tracks.first.duration, const Duration(milliseconds: 1500));
       expect(result.tracks.first.workId, 123456);
       expect(result.tracks.first.hash, 'h1');
+      expect(result.tracks.first.sourcePath, 'track01.mp3');
     });
 
     test('falls back to title as id when hash is optional', () async {

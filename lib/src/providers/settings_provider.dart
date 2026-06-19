@@ -541,6 +541,87 @@ final privacyModeSettingsProvider =
   return PrivacyModeSettingsNotifier();
 });
 
+class AudioHapticsSettings {
+  static const double minIntensity = 0.2;
+  static const double maxIntensity = 1.0;
+  static const double defaultIntensity = 0.85;
+
+  final bool enabled;
+  final double intensity;
+
+  const AudioHapticsSettings({
+    this.enabled = false,
+    this.intensity = defaultIntensity,
+  });
+
+  AudioHapticsSettings copyWith({
+    bool? enabled,
+    double? intensity,
+  }) {
+    return AudioHapticsSettings(
+      enabled: enabled ?? this.enabled,
+      intensity: normalizeIntensity(intensity ?? this.intensity),
+    );
+  }
+
+  static double normalizeIntensity(double value) {
+    return value.clamp(minIntensity, maxIntensity).toDouble();
+  }
+}
+
+class AudioHapticsSettingsNotifier
+    extends StateNotifier<AudioHapticsSettings> {
+  static const String _enabledKey = 'audio_haptics_enabled';
+  static const String _intensityKey = 'audio_haptics_intensity';
+
+  AudioHapticsSettingsNotifier() : super(const AudioHapticsSettings()) {
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      state = AudioHapticsSettings(
+        enabled: prefs.getBool(_enabledKey) ?? false,
+        intensity: AudioHapticsSettings.normalizeIntensity(
+          prefs.getDouble(_intensityKey) ??
+              AudioHapticsSettings.defaultIntensity,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      state = const AudioHapticsSettings();
+    }
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    state = state.copyWith(enabled: enabled);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_enabledKey, enabled);
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> setIntensity(double intensity) async {
+    final normalized = AudioHapticsSettings.normalizeIntensity(intensity);
+    state = state.copyWith(intensity: normalized);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble(_intensityKey, normalized);
+    } catch (_) {
+      // ignore
+    }
+  }
+}
+
+final audioHapticsSettingsProvider = StateNotifierProvider<
+    AudioHapticsSettingsNotifier, AudioHapticsSettings>((ref) {
+  return AudioHapticsSettingsNotifier();
+});
+
 /// 分页大小设置
 class PageSizeNotifier extends StateNotifier<int> {
   static const String _preferenceKey = 'page_size_preference';

@@ -936,6 +936,16 @@ class SEn extends S {
       'Keep the screen on while an audio track is active for easier subtitle reading.';
 
   @override
+  String get audioHaptics => 'Audio Haptics';
+
+  @override
+  String get audioHapticsDesc =>
+      'Analyze the current audio stream and sync vibration with playback. Useful with headphones or silent mode, but may increase battery use.';
+
+  @override
+  String get audioHapticsIntensity => 'Intensity';
+
+  @override
   String get blockingSettings => 'Blocking Settings';
 
   @override

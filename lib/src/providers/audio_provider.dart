@@ -132,6 +132,18 @@ class AudioPlayerController extends StateNotifier<AudioPlayerState> {
         }
       },
     );
+
+    _ref.listen<AudioHapticsSettings>(
+      audioHapticsSettingsProvider,
+      (previous, next) {
+        if (previous != next) {
+          _service.updateHapticsSettings(
+            enabled: next.enabled,
+            intensity: next.intensity,
+          );
+        }
+      },
+    );
   }
 
   Future<void> initialize() async {
@@ -147,6 +159,12 @@ class AudioPlayerController extends StateNotifier<AudioPlayerState> {
       blurCover: privacySettings.blurCover,
       maskTitle: privacySettings.maskTitle,
       customTitle: privacySettings.customTitle,
+    );
+
+    final hapticsSettings = _ref.read(audioHapticsSettingsProvider);
+    await _service.updateHapticsSettings(
+      enabled: hapticsSettings.enabled,
+      intensity: hapticsSettings.intensity,
     );
 
     // Listen to player state changes
