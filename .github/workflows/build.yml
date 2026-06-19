@@ -257,9 +257,29 @@ jobs:
             git clone https://github.com/flutter/flutter.git -b stable /opt/flutter --depth 1
             /opt/flutter/bin/flutter --version
           run: |
+            set -e
             export PATH="/opt/flutter/bin:$PATH"
+            export CC=clang
+            export CXX=clang++
+            export CMAKE_BUILD_PARALLEL_LEVEL=1
+            export MAKEFLAGS="-j1"
             flutter pub get
-            flutter build linux --release
+
+            for attempt in 1 2; do
+              echo "Linux ARM64 release build attempt ${attempt}/2"
+              if flutter build linux --release; then
+                break
+              fi
+
+              if [ "$attempt" -eq 2 ]; then
+                exit 1
+              fi
+
+              echo "Build failed in ARM64 emulation; cleaning and retrying once..."
+              flutter clean
+              flutter pub get
+            done
+
             cd build/linux/arm64/release/bundle
             tar -czf "$GITHUB_WORKSPACE/KikoFlu-linux-arm64.tar.gz" .
 
