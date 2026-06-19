@@ -84,11 +84,17 @@ class DownloadService {
 
   Future<String> _getWorkDownloadDirectory(int workId) async {
     final downloadDir = await _getDownloadDirectory();
-    final workDir = Directory('${downloadDir.path}/$workId');
+    final workDir = Directory(p.join(downloadDir.path, workId.toString()));
     if (!await workDir.exists()) {
       await workDir.create(recursive: true);
     }
     return workDir.path;
+  }
+
+  File _workMetadataFile(Directory workDir) {
+    return File(
+      p.join(workDir.path, LocalWorkMetadataService.metadataFileName),
+    );
   }
 
   Directory _workDirectoryForMetadata(
@@ -111,7 +117,7 @@ class DownloadService {
       }
     }
 
-    return Directory('${downloadDir.path}/$workId');
+    return Directory(p.join(downloadDir.path, workId.toString()));
   }
 
   Future<Directory> getWorkDirectory(
@@ -148,7 +154,10 @@ class DownloadService {
     }
 
     final probe = File(
-      '${directory.path}/.kikoflu_write_test_${DateTime.now().microsecondsSinceEpoch}',
+      p.join(
+        directory.path,
+        '.kikoflu_write_test_${DateTime.now().microsecondsSinceEpoch}',
+      ),
     );
     try {
       await probe.writeAsString('ok', flush: true);
@@ -192,25 +201,62 @@ class DownloadService {
     }
   }
 
-  // 保存作品元数据到硬盘（包括下载封面图片）
+  // 保存作品元数据到硬盘。元数据先落盘，封面再后台补齐，避免封面请求影响离线详情。
   Future<void> _saveWorkMetadata(
       int workId, Map<String, dynamic> metadata, String? coverUrl) async {
     try {
-      // 先下载封面图片
-      if (coverUrl != null && coverUrl.isNotEmpty) {
-        final localCoverPath = await _downloadCoverImage(workId, coverUrl);
-        if (localCoverPath != null) {
-          // 在元数据中只保存相对路径，便于迁移
-          metadata['localCoverPath'] = 'cover.jpg';
-        }
+      final workDir = Directory(await _getWorkDownloadDirectory(workId));
+      final metadataToSave = Map<String, dynamic>.from(metadata);
+      if (_metadataIdAsPositiveInt(metadataToSave['id']) == null) {
+        metadataToSave['id'] = workId;
       }
+      metadataToSave[LocalWorkMetadataService.localWorkDirNameKey] =
+          p.basename(workDir.path);
 
-      final workDir = await _getWorkDownloadDirectory(workId);
-      final metadataFile = File('$workDir/work_metadata.json');
-      final jsonStr = jsonEncode(metadata);
-      await metadataFile.writeAsString(jsonStr);
+      final metadataFile = _workMetadataFile(workDir);
+      await metadataFile.writeAsString(jsonEncode(metadataToSave), flush: true);
+      _log.debug(
+        '已保存作品元数据: workId=$workId, path=${metadataFile.path}, '
+        'children=${(metadataToSave['children'] as List?)?.length ?? 0}',
+        tag: 'Download',
+      );
+
+      if (coverUrl != null && coverUrl.isNotEmpty) {
+        unawaited(_saveCoverForMetadata(
+          workId: workId,
+          workDir: workDir,
+          coverUrl: coverUrl,
+          metadata: metadataToSave,
+        ));
+      }
     } catch (e) {
       _log.error('保存作品元数据失败: $e', tag: 'Download');
+    }
+  }
+
+  Future<void> _saveCoverForMetadata({
+    required int workId,
+    required Directory workDir,
+    required String coverUrl,
+    required Map<String, dynamic> metadata,
+  }) async {
+    final localCoverPath = await _downloadCoverImage(
+      workId,
+      coverUrl,
+      workDirPath: workDir.path,
+    );
+    if (localCoverPath == null) return;
+
+    try {
+      final updatedMetadata = Map<String, dynamic>.from(metadata)
+        ..['localCoverPath'] = 'cover.jpg';
+      await _workMetadataFile(workDir).writeAsString(
+        jsonEncode(updatedMetadata),
+        flush: true,
+      );
+      _log.debug('已更新作品封面元数据: workId=$workId', tag: 'Download');
+    } catch (e) {
+      _log.error('更新作品封面元数据失败: $e', tag: 'Download');
     }
   }
 
@@ -226,7 +272,7 @@ class DownloadService {
         return null;
       }
 
-      final metadataFile = File('$workDir/work_metadata.json');
+      final metadataFile = _workMetadataFile(workDir);
 
       if (await metadataFile.exists()) {
         final content = await metadataFile.readAsString();
@@ -372,7 +418,7 @@ class DownloadService {
           final updatedTask = existingTask.copyWith(workMetadata: workMetadata);
           _updateTask(updatedTask, immediate: true);
           // 保存元数据到硬盘
-          unawaited(_saveWorkMetadata(workId, workMetadata, coverUrl));
+          await _saveWorkMetadata(workId, workMetadata, coverUrl);
           return updatedTask;
         }
         return existingTask;
@@ -421,7 +467,7 @@ class DownloadService {
 
         // 保存作品元数据到硬盘
         if (workMetadata != null) {
-          unawaited(_saveWorkMetadata(workId, workMetadata, coverUrl));
+          await _saveWorkMetadata(workId, workMetadata, coverUrl);
         }
 
         return task;
@@ -448,7 +494,7 @@ class DownloadService {
 
     // 保存作品元数据到硬盘
     if (workMetadata != null) {
-      unawaited(_saveWorkMetadata(workId, workMetadata, coverUrl));
+      await _saveWorkMetadata(workId, workMetadata, coverUrl);
     }
 
     // 自动开始下载（通过队列调度）
@@ -878,7 +924,7 @@ class DownloadService {
       final workDir = entry.value;
 
       // 检查是否已有元数据文件
-      final metadataFile = File('${workDir.path}/work_metadata.json');
+      final metadataFile = _workMetadataFile(workDir);
       if (await metadataFile.exists()) {
         continue; // 已有元数据，跳过
       }
@@ -1073,7 +1119,7 @@ class DownloadService {
     if (diskFiles.isEmpty) return;
 
     // 2. 加载现有元数据
-    final metadataFile = File('${workDir.path}/work_metadata.json');
+    final metadataFile = _workMetadataFile(workDir);
     Map<String, dynamic>? metadata;
 
     if (await metadataFile.exists()) {

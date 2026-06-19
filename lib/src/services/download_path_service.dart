@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'local_work_metadata_service.dart';
@@ -31,7 +32,7 @@ class DownloadPathService {
   /// 获取默认下载路径
   static Future<Directory> _getDefaultDownloadDirectory() async {
     final appDir = await getApplicationDocumentsDirectory();
-    final downloadDir = Directory('${appDir.path}/downloads');
+    final downloadDir = Directory(p.join(appDir.path, 'downloads'));
     if (!await downloadDir.exists()) {
       await downloadDir.create(recursive: true);
     }
@@ -218,7 +219,7 @@ class DownloadPathService {
           // 迁移以数字命名的文件夹（作品文件夹）或字幕库文件夹
           if (workId != null || folderName == 'subtitle_library') {
             try {
-              final newWorkDir = Directory('${newDir.path}/$folderName');
+              final newWorkDir = Directory(p.join(newDir.path, folderName));
               await newWorkDir.create(recursive: true);
 
               // 递归复制该作品文件夹的所有内容
@@ -228,7 +229,7 @@ class DownloadPathService {
                 try {
                   final relativePath =
                       fileEntity.path.substring(entity.path.length + 1);
-                  final newPath = '${newWorkDir.path}/$relativePath';
+                  final newPath = p.join(newWorkDir.path, relativePath);
 
                   if (fileEntity is File) {
                     final newFile = File(newPath);

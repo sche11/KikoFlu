@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -128,7 +129,7 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
       final tempDir = await getTemporaryDirectory();
       if (!mounted) return;
       final fileName = 'temp_pdf_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      final filePath = '${tempDir.path}/$fileName';
+      final filePath = path.join(tempDir.path, fileName);
 
       await dio.download(
         widget.pdfUrl,

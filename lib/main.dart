@@ -267,7 +267,7 @@ void main(List<String> args) async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     // For desktop platforms, use application documents directory
     final appDocDir = await getApplicationDocumentsDirectory();
-    await Hive.initFlutter('${appDocDir.path}/KikoFlu');
+    await Hive.initFlutter(p.join(appDocDir.path, 'KikoFlu'));
   } else {
     // For mobile platforms, use default path
     await Hive.initFlutter();

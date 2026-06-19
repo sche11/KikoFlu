@@ -27,13 +27,13 @@ class CacheService {
   static Future<File> _audioFinalFile(String hash) async {
     final safeHash = _safeAudioHash(hash);
     final cacheDir = await _getAudioCacheDirectory();
-    return File('${cacheDir.path}/$safeHash.audio');
+    return File(p.join(cacheDir.path, '$safeHash.audio'));
   }
 
   static Future<File> _audioTempFile(String hash) async {
     final safeHash = _safeAudioHash(hash);
     final cacheDir = await _getAudioCacheDirectory();
-    return File('${cacheDir.path}/$safeHash.audio.part');
+    return File(p.join(cacheDir.path, '$safeHash.audio.part'));
   }
 
   static Future<void> _writeAudioCacheMeta(String hash) async {
@@ -318,7 +318,7 @@ class CacheService {
       // 使用 hash 作为文件名（替换路径分隔符为下划线）
       final safeHash = hash.replaceAll('/', '_');
       final fileName = '${workId}_${safeHash}_$fileType';
-      final filePath = '${cacheDir.path}/$fileName';
+      final filePath = p.join(cacheDir.path, fileName);
 
       // 如果文件已存在，检查是否过期
       final file = File(filePath);
@@ -362,7 +362,7 @@ class CacheService {
       final cacheDir = await _getCacheDirectory();
       final safeHash = hash.replaceAll('/', '_');
       final fileName = '${workId}_${safeHash}_$fileType';
-      final filePath = '${cacheDir.path}/$fileName';
+      final filePath = p.join(cacheDir.path, fileName);
 
       final file = File(filePath);
       if (await file.exists()) {
@@ -400,7 +400,7 @@ class CacheService {
       final cacheDir = await _getCacheDirectory();
       final safeHash = hash.replaceAll('/', '_');
       final fileName = '${workId}_${safeHash}_text.txt';
-      final filePath = '${cacheDir.path}/$fileName';
+      final filePath = p.join(cacheDir.path, fileName);
 
       final file = File(filePath);
       await file.writeAsString(content);
@@ -439,7 +439,7 @@ class CacheService {
       final cacheDir = await _getCacheDirectory();
       final safeHash = hash.replaceAll('/', '_');
       final cacheFileName = '${workId}_${safeHash}_text.txt';
-      final filePath = '${cacheDir.path}/$cacheFileName';
+      final filePath = p.join(cacheDir.path, cacheFileName);
 
       final file = File(filePath);
       if (await file.exists()) {
@@ -525,7 +525,7 @@ class CacheService {
       // 3. 清除 just_audio 的旧缓存（如果存在）
       final appCacheDir = await getApplicationCacheDirectory();
       final justAudioCacheDir =
-          Directory('${appCacheDir.path}/just_audio_cache');
+          Directory(p.join(appCacheDir.path, 'just_audio_cache'));
       if (await justAudioCacheDir.exists()) {
         await justAudioCacheDir.delete(recursive: true);
         _log.captureOutput('[Cache] just_audio 缓存已清除');
@@ -539,7 +539,8 @@ class CacheService {
   static Future<void> clearImageCache() async {
     try {
       final appCacheDir = await getApplicationCacheDirectory();
-      final imageCacheDir = Directory('${appCacheDir.path}/libCachedImageData');
+      final imageCacheDir =
+          Directory(p.join(appCacheDir.path, 'libCachedImageData'));
 
       if (await imageCacheDir.exists()) {
         await imageCacheDir.delete(recursive: true);
@@ -603,7 +604,7 @@ class CacheService {
       // 2. 获取 just_audio 的旧缓存大小（如果存在）
       final appCacheDir = await getApplicationCacheDirectory();
       final justAudioCacheDir =
-          Directory('${appCacheDir.path}/just_audio_cache');
+          Directory(p.join(appCacheDir.path, 'just_audio_cache'));
       if (await justAudioCacheDir.exists()) {
         await for (final entity in justAudioCacheDir.list(recursive: true)) {
           if (entity is File) {
@@ -625,7 +626,8 @@ class CacheService {
       // cached_network_image 使用 flutter_cache_manager 管理缓存
       // 默认缓存目录名为 libCachedImageData
       final appCacheDir = await getApplicationCacheDirectory();
-      final imageCacheDir = Directory('${appCacheDir.path}/libCachedImageData');
+      final imageCacheDir =
+          Directory(p.join(appCacheDir.path, 'libCachedImageData'));
 
       if (!await imageCacheDir.exists()) {
         return 0;
@@ -681,7 +683,7 @@ class CacheService {
   // 获取缓存目录
   static Future<Directory> _getCacheDirectory() async {
     final appCacheDir = await getApplicationCacheDirectory();
-    final cacheDir = Directory('${appCacheDir.path}/kikoeru_cache');
+    final cacheDir = Directory(p.join(appCacheDir.path, 'kikoeru_cache'));
 
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
@@ -693,7 +695,7 @@ class CacheService {
   // 获取音频缓存目录
   static Future<Directory> _getAudioCacheDirectory() async {
     final appCacheDir = await getApplicationCacheDirectory();
-    final cacheDir = Directory('${appCacheDir.path}/kikoeru_audio_cache');
+    final cacheDir = Directory(p.join(appCacheDir.path, 'kikoeru_audio_cache'));
 
     if (!await cacheDir.exists()) {
       await cacheDir.create(recursive: true);
@@ -804,7 +806,8 @@ class CacheService {
 
       // 清理旧的 just_audio 缓存（如果存在）
       final appCacheDir = await getApplicationCacheDirectory();
-      final audioCacheDir = Directory('${appCacheDir.path}/just_audio_cache');
+      final audioCacheDir =
+          Directory(p.join(appCacheDir.path, 'just_audio_cache'));
       if (await audioCacheDir.exists()) {
         await for (final entity in audioCacheDir.list(recursive: true)) {
           if (entity is File) {
@@ -911,7 +914,8 @@ class CacheService {
       }
 
       final appCacheDir = await getApplicationCacheDirectory();
-      final audioCacheDir = Directory('${appCacheDir.path}/just_audio_cache');
+      final audioCacheDir =
+          Directory(p.join(appCacheDir.path, 'just_audio_cache'));
       if (await audioCacheDir.exists()) {
         await for (final entity in audioCacheDir.list(recursive: true)) {
           if (entity is File) {
@@ -922,7 +926,8 @@ class CacheService {
       }
 
       // 3. 收集图片缓存文件
-      final imageCacheDir = Directory('${appCacheDir.path}/libCachedImageData');
+      final imageCacheDir =
+          Directory(p.join(appCacheDir.path, 'libCachedImageData'));
       if (await imageCacheDir.exists()) {
         await for (final entity in imageCacheDir.list(recursive: true)) {
           if (entity is File) {

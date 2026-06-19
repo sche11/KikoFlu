@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 
@@ -16,7 +17,7 @@ class ImageBlurUtil {
       // 生成缓存文件名（基于URL的hash）
       final urlHash = md5.convert(utf8.encode(imageUrl)).toString();
       final tempDir = await getTemporaryDirectory();
-      final blurredFile = File('${tempDir.path}/blurred_$urlHash.png');
+      final blurredFile = File(p.join(tempDir.path, 'blurred_$urlHash.png'));
 
       // 如果已经存在模糊后的文件，直接返回
       if (await blurredFile.exists()) {
@@ -37,7 +38,9 @@ class ImageBlurUtil {
         imageData = await localFile.readAsBytes();
       } else {
         // 网络URL
-        final response = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 30));
+        final response = await http
+            .get(Uri.parse(imageUrl))
+            .timeout(const Duration(seconds: 30));
         if (response.statusCode != 200) {
           debugPrint('下载图片失败: ${response.statusCode}');
           return null;

@@ -184,7 +184,7 @@ class _OfflineWorkDetailScreenState
       if (Platform.isIOS) {
         // iOS: 通过分享面板导出
         final tempDir = await getTemporaryDirectory();
-        final tempFile = File('${tempDir.path}/$fileName');
+        final tempFile = File(path.join(tempDir.path, fileName));
         await tempFile.writeAsBytes(zipBytes);
         if (!mounted) return;
         try {

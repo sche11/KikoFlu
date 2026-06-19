@@ -170,7 +170,7 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
       if (Platform.isIOS) {
         // iOS: 通过分享面板保存
         final tempDir = await getTemporaryDirectory();
-        final tempFile = File('${tempDir.path}/$fileName');
+        final tempFile = File(path.join(tempDir.path, fileName));
         final bytes = _encodeString(contentToSave);
         await tempFile.writeAsBytes(bytes);
         if (!mounted) return;

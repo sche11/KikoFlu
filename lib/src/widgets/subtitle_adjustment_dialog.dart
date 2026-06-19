@@ -131,7 +131,7 @@ class _SubtitleAdjustmentDialogState
           await SubtitleLibraryService.getSubtitleLibraryDirectory();
       if (!mounted) return;
       final savedDir = Directory(
-          '${libraryDir.path}/${SubtitleLibraryService.savedFolderName}');
+          path.join(libraryDir.path, SubtitleLibraryService.savedFolderName));
       if (!await savedDir.exists()) {
         await savedDir.create(recursive: true);
       }

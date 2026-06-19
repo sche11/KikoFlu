@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
 import 'package:gbk_codec/gbk_codec.dart';
+import 'package:path/path.dart' as p;
 import 'download_path_service.dart';
 import 'log_service.dart';
 import 'subtitle_database.dart';
@@ -32,6 +33,25 @@ class SubtitleLibraryService {
 
   static final _cacheUpdateController = StreamController<void>.broadcast();
   static Stream<void> get onCacheUpdated => _cacheUpdateController.stream;
+
+  static String _joinRelativePath(String rootPath, String relativePath) {
+    final segments = relativePath
+        .replaceAll('\\', '/')
+        .split('/')
+        .where((segment) => segment.trim().isNotEmpty)
+        .where((segment) {
+          final trimmed = segment.trim();
+          return trimmed != '.' && trimmed != '..';
+        })
+        .map(
+          (segment) => segment.replaceFirstMapped(
+            RegExp(r'^([a-zA-Z]):'),
+            (match) => '${match.group(1)}_',
+          ),
+        )
+        .toList(growable: false);
+    return segments.isEmpty ? rootPath : p.joinAll([rootPath, ...segments]);
+  }
 
   /// 检查匹配结果
   /// 返回 (是否匹配, 相似度分数)
@@ -71,7 +91,7 @@ class SubtitleLibraryService {
       final libraryDir = await getSubtitleLibraryDirectory();
 
       // 删除旧版 JSON 缓存（如果存在）
-      final cacheFile = File('${libraryDir.path}/$_cacheFileName');
+      final cacheFile = File(p.join(libraryDir.path, _cacheFileName));
       if (await cacheFile.exists()) {
         await cacheFile.delete();
       }
@@ -110,7 +130,7 @@ class SubtitleLibraryService {
 
     if (version == null) {
       // 首次运行：尝试从 JSON 缓存快速迁移
-      final cacheFile = File('${libraryDir.path}/$_cacheFileName');
+      final cacheFile = File(p.join(libraryDir.path, _cacheFileName));
       if (await cacheFile.exists()) {
         try {
           _log.captureOutput('[SubtitleLibrary] 从 JSON 缓存迁移到数据库...');
@@ -403,7 +423,7 @@ class SubtitleLibraryService {
   /// 获取字幕库目录
   static Future<Directory> getSubtitleLibraryDirectory() async {
     final downloadDir = await DownloadPathService.getDownloadDirectory();
-    final libraryDir = Directory('${downloadDir.path}/$_libraryFolderName');
+    final libraryDir = Directory(p.join(downloadDir.path, _libraryFolderName));
 
     // 如果不存在则自动创建
     if (!await libraryDir.exists()) {
@@ -451,7 +471,7 @@ class SubtitleLibraryService {
       final libraryDir = await getSubtitleLibraryDirectory();
 
       // 创建"已保存"文件夹
-      final savedDir = Directory('${libraryDir.path}/$savedFolderName');
+      final savedDir = Directory(p.join(libraryDir.path, savedFolderName));
       if (!await savedDir.exists()) {
         await savedDir.create(recursive: true);
         _log.captureOutput('[SubtitleLibrary] 创建"已保存"文件夹: ${savedDir.path}');
@@ -475,7 +495,7 @@ class SubtitleLibraryService {
         }
 
         try {
-          final destFile = File('${savedDir.path}/$fileName');
+          final destFile = File(p.join(savedDir.path, fileName));
 
           // 如果文件已存在，添加序号
           String finalFileName = fileName;
@@ -487,7 +507,7 @@ class SubtitleLibraryService {
                 fileName.substring(0, fileName.lastIndexOf('.'));
             final ext = fileName.substring(fileName.lastIndexOf('.'));
             finalFileName = '${nameWithoutExt}_$counter$ext';
-            finalDestFile = File('${savedDir.path}/$finalFileName');
+            finalDestFile = File(p.join(savedDir.path, finalFileName));
             counter++;
           }
 
@@ -502,7 +522,7 @@ class SubtitleLibraryService {
       }
 
       // 刷新"已保存"文件夹缓存
-      final savedDirPath = '${libraryDir.path}/$savedFolderName';
+      final savedDirPath = p.join(libraryDir.path, savedFolderName);
       await _refreshDirectoriesAfterChange({savedDirPath});
 
       String message = '成功导入 $successCount 个字幕文件到"已保存"文件夹';
@@ -571,7 +591,7 @@ class SubtitleLibraryService {
         final folderName = _normalizeFolderName(rootFolderName);
         const targetCategory = parsedFolderName;
         final targetDir =
-            Directory('${libraryDir.path}/$targetCategory/$folderName');
+            Directory(p.join(libraryDir.path, targetCategory, folderName));
 
         // 检查目标路径长度
         if (targetDir.path.length > _maxPathLength) {
@@ -647,8 +667,8 @@ class SubtitleLibraryService {
             onProgress: onProgress);
       } else {
         // 如果没有收集到具体路径（异常情况），回退到刷新整个分类
-        final parsedDirPath = '${libraryDir.path}/$parsedFolderName';
-        final unknownDirPath = '${libraryDir.path}/$unknownFolderName';
+        final parsedDirPath = p.join(libraryDir.path, parsedFolderName);
+        final unknownDirPath = p.join(libraryDir.path, unknownFolderName);
         onProgress?.call('正在刷新缓存...');
         await _refreshDirectoriesAfterChange({parsedDirPath, unknownDirPath},
             onProgress: onProgress);
@@ -729,7 +749,11 @@ class SubtitleLibraryService {
 
       // 创建临时目录用于解压
       final tempDir = Directory(
-          '${libraryDir.path}/.temp_${DateTime.now().millisecondsSinceEpoch}');
+        p.join(
+          libraryDir.path,
+          '.temp_${DateTime.now().millisecondsSinceEpoch}',
+        ),
+      );
       await tempDir.create(recursive: true);
 
       // 创建导入统计器
@@ -842,8 +866,8 @@ class SubtitleLibraryService {
             onProgress: onProgress);
       } else {
         // 如果没有收集到具体路径（异常情况），回退到刷新整个分类
-        final parsedDirPath = '${libraryDir.path}/$parsedFolderName';
-        final unknownDirPath = '${libraryDir.path}/$unknownFolderName';
+        final parsedDirPath = p.join(libraryDir.path, parsedFolderName);
+        final unknownDirPath = p.join(libraryDir.path, unknownFolderName);
         onProgress?.call('正在刷新缓存...');
         await _refreshDirectoriesAfterChange({parsedDirPath, unknownDirPath},
             onProgress: onProgress);
@@ -1015,7 +1039,8 @@ class SubtitleLibraryService {
         try {
           final fullRelativePath =
               relativePath.isEmpty ? decodedName : '$relativePath/$decodedName';
-          var targetFilePath = '$targetBasePath/$fullRelativePath';
+          var targetFilePath =
+              _joinRelativePath(targetBasePath, fullRelativePath);
 
           // 检查路径长度，如果过长则缩短
           if (targetFilePath.length > _maxPathLength) {
@@ -1143,9 +1168,8 @@ class SubtitleLibraryService {
   static Future<bool> rename(String oldPath, String newName) async {
     try {
       final entity = FileSystemEntity.typeSync(oldPath);
-      final parentPath =
-          oldPath.substring(0, oldPath.lastIndexOf(Platform.pathSeparator));
-      final newPath = '$parentPath${Platform.pathSeparator}$newName';
+      final parentPath = p.dirname(oldPath);
+      final newPath = p.join(parentPath, newName);
 
       if (entity == FileSystemEntityType.file) {
         await File(oldPath).rename(newPath);
@@ -1168,8 +1192,8 @@ class SubtitleLibraryService {
   static Future<bool> move(String sourcePath, String targetFolderPath) async {
     try {
       final entity = FileSystemEntity.typeSync(sourcePath);
-      final fileName = sourcePath.split(Platform.pathSeparator).last;
-      final newPath = '$targetFolderPath${Platform.pathSeparator}$fileName';
+      final fileName = p.basename(sourcePath);
+      final newPath = p.join(targetFolderPath, fileName);
 
       // 检查目标路径是否与源路径相同
       if (sourcePath == newPath) {
@@ -1194,7 +1218,7 @@ class SubtitleLibraryService {
 
           do {
             finalPath =
-                '$targetFolderPath${Platform.pathSeparator}${nameWithoutExt}_$counter$ext';
+                p.join(targetFolderPath, '${nameWithoutExt}_$counter$ext');
             counter++;
           } while (await File(finalPath).exists());
 
@@ -1248,7 +1272,7 @@ class SubtitleLibraryService {
     // 遍历源文件夹中的所有内容
     await for (final entity in sourceDir.list()) {
       final fileName = entity.path.split(Platform.pathSeparator).last;
-      final targetPath = '${targetDir.path}${Platform.pathSeparator}$fileName';
+      final targetPath = p.join(targetDir.path, fileName);
 
       if (entity is File) {
         // 处理文件：直接替换
@@ -1302,7 +1326,8 @@ class SubtitleLibraryService {
           try {
             final relativePath =
                 entity.path.substring(sourceDir.path.length + 1);
-            var targetFilePath = '${targetDir.path}/$relativePath';
+            var targetFilePath =
+                _joinRelativePath(targetDir.path, relativePath);
 
             // 检查路径长度，如果过长则缩短
             if (targetFilePath.length > _maxPathLength) {
@@ -1529,7 +1554,7 @@ class SubtitleLibraryService {
           // 匹配规则：整个子目录移动到"已解析"
           const targetCategory = parsedFolderName;
           final targetDir =
-              Directory('${libraryDir.path}/$targetCategory/$folderName');
+              Directory(p.join(libraryDir.path, targetCategory, folderName));
 
           // 检查目标路径长度
           if (targetDir.path.length > _maxPathLength) {
@@ -1590,8 +1615,8 @@ class SubtitleLibraryService {
             if (hasSubtitles) {
               final folderName = originalFolderName; // 未知作品不需要标准化
               const targetCategory = unknownFolderName;
-              final targetDir =
-                  Directory('${libraryDir.path}/$targetCategory/$folderName');
+              final targetDir = Directory(
+                  p.join(libraryDir.path, targetCategory, folderName));
 
               // 检查目标路径长度
               if (targetDir.path.length > _maxPathLength) {
@@ -1643,10 +1668,11 @@ class SubtitleLibraryService {
           if (FileIconUtils.isLyricFile(fileName)) {
             try {
               const targetCategory = unknownFolderName;
-              final targetDir = Directory('${libraryDir.path}/$targetCategory');
+              final targetDir =
+                  Directory(p.join(libraryDir.path, targetCategory));
               await targetDir.create(recursive: true);
 
-              var targetFilePath = '${targetDir.path}/$fileName';
+              var targetFilePath = p.join(targetDir.path, fileName);
 
               // 检查路径长度
               if (targetFilePath.length > _maxPathLength) {
@@ -1730,7 +1756,8 @@ class SubtitleLibraryService {
           try {
             final relativePath =
                 entity.path.substring(sourceDir.path.length + 1);
-            var targetFilePath = '${targetDir.path}/$relativePath';
+            var targetFilePath =
+                _joinRelativePath(targetDir.path, relativePath);
 
             // 检查路径长度，如果过长则缩短
             if (targetFilePath.length > _maxPathLength) {
@@ -1787,7 +1814,7 @@ class SubtitleLibraryService {
   /// 纯文件系统操作，不依赖数据库
   static Future<void> _migrateOldFormatFolders(Directory libraryDir) async {
     try {
-      final parsedFolderPath = '${libraryDir.path}/$parsedFolderName';
+      final parsedFolderPath = p.join(libraryDir.path, parsedFolderName);
       final parsedFolder = Directory(parsedFolderPath);
 
       // 确保"已解析"文件夹存在
@@ -1814,7 +1841,7 @@ class SubtitleLibraryService {
           if (_matchFolderPattern(folderName)) {
             // 标准化文件夹名
             final normalizedName = _normalizeFolderName(folderName);
-            final targetPath = '$parsedFolderPath/$normalizedName';
+            final targetPath = p.join(parsedFolderPath, normalizedName);
 
             _log.captureOutput(
                 '[SubtitleLibrary] 迁移旧格式文件夹: $folderName -> 已解析/$normalizedName');

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:saver_gallery/saver_gallery.dart';
 import 'package:file_picker/file_picker.dart';
@@ -216,7 +217,7 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
     if (Platform.isIOS) {
       try {
         final tempDir = await getTemporaryDirectory();
-        final tempFile = File('${tempDir.path}/$fileName');
+        final tempFile = File(path.join(tempDir.path, fileName));
         await tempFile.writeAsBytes(imageBytes);
         if (!mounted) {
           if (await tempFile.exists()) {
