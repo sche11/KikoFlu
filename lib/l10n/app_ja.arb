@@ -699,10 +699,12 @@
 
   "noSubtitlesAvailable": "字幕がありません",
   "translateLyrics": "歌詞を翻訳",
+  "fullscreenLyrics": "全画面歌詞",
   "showOriginalLyrics": "原文を表示",
   "showTranslatedLyrics": "翻訳を表示",
   "translatingLyrics": "翻訳中...",
   "lyricTranslationFailed": "歌詞の翻訳に失敗しました",
+  "lyricTranslationConfirmMessage": "現在の翻訳設定で再生中の歌詞を翻訳します。完了後はすぐに翻訳文を表示し、字幕ライブラリの「保存済み」フォルダーへ同名の .lrc として上書き保存します。翻訳中に曲を切り替えると、この結果は破棄されます。",
   "unlock": "ロック解除",
   "backToCover": "カバーに戻る",
   "lyricHintTapCover": "カバーまたはタイトルをタップして字幕画面に入る",

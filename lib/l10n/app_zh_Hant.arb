@@ -699,10 +699,12 @@
 
   "noSubtitlesAvailable": "暫無字幕",
   "translateLyrics": "翻譯歌詞",
+  "fullscreenLyrics": "全螢幕歌詞",
   "showOriginalLyrics": "顯示原文",
   "showTranslatedLyrics": "顯示翻譯",
   "translatingLyrics": "翻譯中...",
   "lyricTranslationFailed": "歌詞翻譯失敗",
+  "lyricTranslationConfirmMessage": "將使用目前翻譯設定翻譯正在播放的歌詞。完成後會立即顯示譯文，並以同名 .lrc 覆蓋儲存到字幕庫的「已儲存」目錄，之後可自動匹配讀取。翻譯過程中切歌會放棄本次結果。",
   "unlock": "解鎖",
   "backToCover": "返回封面",
   "lyricHintTapCover": "點擊封面或標題可以進入字幕介面",

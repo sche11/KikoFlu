@@ -2053,6 +2053,9 @@ class SRu extends S {
   String get translateLyrics => 'Перевести текст';
 
   @override
+  String get fullscreenLyrics => 'Текст на весь экран';
+
+  @override
   String get showOriginalLyrics => 'Показать оригинал';
 
   @override
@@ -2063,6 +2066,10 @@ class SRu extends S {
 
   @override
   String get lyricTranslationFailed => 'Не удалось перевести текст';
+
+  @override
+  String get lyricTranslationConfirmMessage =>
+      'KikoFlu переведет текст текущего трека с текущими настройками перевода. После завершения перевод сразу отобразится и будет сохранен в папку «Сохраненные» библиотеки субтитров как одноименный файл .lrc с заменой существующего файла. Если переключить трек во время перевода, этот результат будет отброшен.';
 
   @override
   String get unlock => 'Разблокировать';

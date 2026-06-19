@@ -1999,6 +1999,9 @@ class SJa extends S {
   String get translateLyrics => '歌詞を翻訳';
 
   @override
+  String get fullscreenLyrics => '全画面歌詞';
+
+  @override
   String get showOriginalLyrics => '原文を表示';
 
   @override
@@ -2009,6 +2012,10 @@ class SJa extends S {
 
   @override
   String get lyricTranslationFailed => '歌詞の翻訳に失敗しました';
+
+  @override
+  String get lyricTranslationConfirmMessage =>
+      '現在の翻訳設定で再生中の歌詞を翻訳します。完了後はすぐに翻訳文を表示し、字幕ライブラリの「保存済み」フォルダーへ同名の .lrc として上書き保存します。翻訳中に曲を切り替えると、この結果は破棄されます。';
 
   @override
   String get unlock => 'ロック解除';

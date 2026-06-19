@@ -1991,6 +1991,9 @@ class SZh extends S {
   String get translateLyrics => '翻译歌词';
 
   @override
+  String get fullscreenLyrics => '全屏歌词';
+
+  @override
   String get showOriginalLyrics => '显示原文';
 
   @override
@@ -2001,6 +2004,10 @@ class SZh extends S {
 
   @override
   String get lyricTranslationFailed => '歌词翻译失败';
+
+  @override
+  String get lyricTranslationConfirmMessage =>
+      '将使用当前翻译设置翻译正在播放的歌词。完成后会立即显示译文，并以同名 .lrc 覆盖保存到字幕库的“已保存”目录，之后可自动匹配读取。翻译过程中切歌会放弃本次结果。';
 
   @override
   String get unlock => '解锁';
@@ -5442,6 +5449,9 @@ class SZhHant extends SZh {
   String get translateLyrics => '翻譯歌詞';
 
   @override
+  String get fullscreenLyrics => '全螢幕歌詞';
+
+  @override
   String get showOriginalLyrics => '顯示原文';
 
   @override
@@ -5452,6 +5462,10 @@ class SZhHant extends SZh {
 
   @override
   String get lyricTranslationFailed => '歌詞翻譯失敗';
+
+  @override
+  String get lyricTranslationConfirmMessage =>
+      '將使用目前翻譯設定翻譯正在播放的歌詞。完成後會立即顯示譯文，並以同名 .lrc 覆蓋儲存到字幕庫的「已儲存」目錄，之後可自動匹配讀取。翻譯過程中切歌會放棄本次結果。';
 
   @override
   String get unlock => '解鎖';

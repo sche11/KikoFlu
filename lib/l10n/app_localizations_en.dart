@@ -2048,6 +2048,9 @@ class SEn extends S {
   String get translateLyrics => 'Translate lyrics';
 
   @override
+  String get fullscreenLyrics => 'Fullscreen lyrics';
+
+  @override
   String get showOriginalLyrics => 'Show original';
 
   @override
@@ -2058,6 +2061,10 @@ class SEn extends S {
 
   @override
   String get lyricTranslationFailed => 'Lyric translation failed';
+
+  @override
+  String get lyricTranslationConfirmMessage =>
+      'KikoFlu will translate the currently playing lyrics with your current translation settings. When finished, the translation is shown immediately and saved as a same-name .lrc file in the Saved subtitle library folder, overwriting any existing file. Switching tracks during translation discards this result.';
 
   @override
   String get unlock => 'Unlock';

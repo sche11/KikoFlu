@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/work.dart';
 import '../providers/audio_provider.dart';
 import '../providers/auth_provider.dart';
-import '../providers/locale_provider.dart';
 import '../providers/lyric_provider.dart';
 import '../utils/local_file_url.dart';
 import '../utils/system_ui_style.dart';
@@ -27,6 +26,8 @@ class AudioPlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
+  static const _lyricTranslationConfirmKey = 'lyric_translation_confirmed_once';
+
   bool _isSeekingManually = false;
   double _seekValue = 0.0;
   bool _showLyricHint = false;
@@ -184,6 +185,38 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
     });
   }
 
+  Future<bool> _confirmLyricTranslationIfNeeded(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_lyricTranslationConfirmKey) ?? false) {
+      return true;
+    }
+    if (!context.mounted) return false;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(S.of(dialogContext).translateLyrics),
+        content: Text(S.of(dialogContext).lyricTranslationConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(S.of(dialogContext).cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(S.of(dialogContext).confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await prefs.setBool(_lyricTranslationConfirmKey, true);
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentTrack = ref.watch(currentTrackProvider);
@@ -248,6 +281,26 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         ),
       ),
       actions: [
+        Consumer(
+          builder: (context, ref, child) {
+            final lyricState = ref.watch(lyricControllerProvider);
+            if (lyricState.lyrics.isEmpty || lyricState.isLoading) {
+              return const SizedBox.shrink();
+            }
+
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.fullscreen),
+                  onPressed: _enterLyricFullscreen,
+                  tooltip: S.of(context).fullscreenLyrics,
+                ),
+                _buildLyricTranslateAppBarButton(context),
+              ],
+            );
+          },
+        ),
         Padding(
           padding: const EdgeInsets.only(right: 8.0),
           child: IconButton(
@@ -618,11 +671,6 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                       FullLyricDisplay(
                         seekingPosition: _seekingPosition,
                       ),
-                      Positioned(
-                        right: 16,
-                        bottom: 16,
-                        child: _buildTranslateButton(context),
-                      ),
                     ],
                   );
                 },
@@ -724,11 +772,6 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
           onLongPress: _enterLyricFullscreen,
         ),
         Positioned(
-          left: 16,
-          bottom: 16,
-          child: _buildTranslateButton(context),
-        ),
-        Positioned(
           right: 16,
           bottom: 16,
           child: FloatingActionButton(
@@ -745,55 +788,66 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
     );
   }
 
-  /// 构建翻译按钮
-  Widget _buildTranslateButton(BuildContext context) {
+  Widget _buildLyricTranslateAppBarButton(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
         final lyricState = ref.watch(lyricControllerProvider);
 
-        // 没有歌词时不显示
-        if (lyricState.lyrics.isEmpty) return const SizedBox.shrink();
-
-        // 获取应用 locale
-        final appLocale =
-            ref.watch(localeProvider) ?? Localizations.localeOf(context);
-
-        // 歌词大部分已经是当前语言，不显示翻译按钮
-        if (!lyricState.needsTranslation(appLocale) &&
-            !lyricState.isTranslated) {
+        if (lyricState.lyrics.isEmpty || lyricState.isLoading) {
           return const SizedBox.shrink();
         }
 
         final isTranslating = lyricState.isTranslating;
         final isTranslated = lyricState.isTranslated;
         final showTranslated = lyricState.showTranslated;
+        final total = lyricState.translationTotal;
+        final progressValue = total > 0
+            ? lyricState.translatedCount.clamp(0, total) / total
+            : null;
 
-        // 确定按钮图标和提示
-        final IconData icon;
         final String tooltip;
         if (isTranslating) {
-          icon = Icons.translate;
-          tooltip = S.of(context).translatingLyrics;
+          tooltip = total > 0
+              ? S.of(context).translatingProgress(
+                    lyricState.translatedCount.clamp(0, total).toInt(),
+                    total,
+                  )
+              : S.of(context).translatingLyrics;
         } else if (isTranslated && showTranslated) {
-          icon = Icons.translate;
           tooltip = S.of(context).showOriginalLyrics;
         } else if (isTranslated && !showTranslated) {
-          icon = Icons.translate;
           tooltip = S.of(context).showTranslatedLyrics;
         } else {
-          icon = Icons.translate;
           tooltip = S.of(context).translateLyrics;
         }
 
-        return FloatingActionButton.small(
-          heroTag: 'translate_lyrics',
+        return IconButton(
           onPressed: isTranslating
               ? null
               : () async {
                   try {
-                    await ref
-                        .read(lyricControllerProvider.notifier)
-                        .toggleTranslation();
+                    final controller =
+                        ref.read(lyricControllerProvider.notifier);
+
+                    if (isTranslated) {
+                      await controller.toggleTranslation();
+                      return;
+                    }
+
+                    final confirmed =
+                        await _confirmLyricTranslationIfNeeded(context);
+                    if (!confirmed) return;
+
+                    final savedPath =
+                        await controller.translateAndSaveCurrentLyrics();
+                    if (context.mounted && savedPath != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(S.of(context).savedToSubtitleLibrary),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -806,16 +860,17 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
                   }
                 },
           tooltip: tooltip,
-          child: isTranslating
-              ? const SizedBox(
+          icon: isTranslating
+              ? SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
+                    value: progressValue?.toDouble(),
                   ),
                 )
               : Icon(
-                  icon,
+                  Icons.translate,
                   color: (isTranslated && showTranslated)
                       ? Theme.of(context).colorScheme.primary
                       : null,

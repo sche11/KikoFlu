@@ -895,10 +895,12 @@
 
   "noSubtitlesAvailable": "No subtitles available",
   "translateLyrics": "Translate lyrics",
+  "fullscreenLyrics": "Fullscreen lyrics",
   "showOriginalLyrics": "Show original",
   "showTranslatedLyrics": "Show translation",
   "translatingLyrics": "Translating...",
   "lyricTranslationFailed": "Lyric translation failed",
+  "lyricTranslationConfirmMessage": "KikoFlu will translate the currently playing lyrics with your current translation settings. When finished, the translation is shown immediately and saved as a same-name .lrc file in the Saved subtitle library folder, overwriting any existing file. Switching tracks during translation discards this result.",
   "unlock": "Unlock",
   "backToCover": "Back to cover",
   "lyricHintTapCover": "Tap cover or title to enter subtitle view",

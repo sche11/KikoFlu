@@ -3774,6 +3774,12 @@ abstract class S {
   /// **'Translate lyrics'**
   String get translateLyrics;
 
+  /// No description provided for @fullscreenLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen lyrics'**
+  String get fullscreenLyrics;
+
   /// No description provided for @showOriginalLyrics.
   ///
   /// In en, this message translates to:
@@ -3797,6 +3803,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Lyric translation failed'**
   String get lyricTranslationFailed;
+
+  /// No description provided for @lyricTranslationConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'KikoFlu will translate the currently playing lyrics with your current translation settings. When finished, the translation is shown immediately and saved as a same-name .lrc file in the Saved subtitle library folder, overwriting any existing file. Switching tracks during translation discards this result.'**
+  String get lyricTranslationConfirmMessage;
 
   /// No description provided for @unlock.
   ///
