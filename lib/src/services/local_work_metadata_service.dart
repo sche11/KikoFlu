@@ -135,30 +135,63 @@ class LocalWorkMetadataService {
     }
 
     final candidates = <_CoverCandidate>[];
-    await for (final entity in workDir.list(followLinks: false)) {
+    await _collectCoverCandidates(
+      directory: workDir,
+      parentRelativePath: '',
+      candidates: candidates,
+    );
+
+    if (candidates.isEmpty) return null;
+    candidates.sort((a, b) {
+      final depthCompare = a.depth.compareTo(b.depth);
+      if (depthCompare != 0) return depthCompare;
+
+      final priorityCompare = a.priority.compareTo(b.priority);
+      if (priorityCompare != 0) return priorityCompare;
+
+      return a.relativePath.compareTo(b.relativePath);
+    });
+    return candidates.first.relativePath;
+  }
+
+  Future<void> _collectCoverCandidates({
+    required Directory directory,
+    required String parentRelativePath,
+    required List<_CoverCandidate> candidates,
+  }) async {
+    await for (final entity in directory.list(followLinks: false)) {
+      final title = p.basename(entity.path);
+      if (title.startsWith('.') || title.endsWith('.downloading')) continue;
+
+      final relativePath =
+          parentRelativePath.isEmpty ? title : '$parentRelativePath/$title';
+
+      if (entity is Directory) {
+        await _collectCoverCandidates(
+          directory: entity,
+          parentRelativePath: relativePath,
+          candidates: candidates,
+        );
+        continue;
+      }
+
       if (entity is! File) continue;
 
-      final fileName = p.basename(entity.path);
-      final extension = p.extension(fileName).toLowerCase();
+      final extension = p.extension(title).toLowerCase();
       if (!_coverExtensions.contains(extension)) continue;
 
-      final baseName = p.basenameWithoutExtension(fileName).toLowerCase();
+      final baseName = p.basenameWithoutExtension(title).toLowerCase();
       final priority = _coverBaseNames.indexOf(baseName);
       if (priority == -1) continue;
 
       candidates.add(_CoverCandidate(
-        relativePath: fileName,
+        relativePath: relativePath,
         priority: priority,
+        depth: parentRelativePath.isEmpty
+            ? 0
+            : parentRelativePath.split('/').length,
       ));
     }
-
-    if (candidates.isEmpty) return null;
-    candidates.sort(
-      (a, b) => a.priority != b.priority
-          ? a.priority.compareTo(b.priority)
-          : a.relativePath.compareTo(b.relativePath),
-    );
-    return candidates.first.relativePath;
   }
 
   Future<List<dynamic>> _buildDirectoryChildren({
@@ -291,8 +324,10 @@ class _CoverCandidate {
   const _CoverCandidate({
     required this.relativePath,
     required this.priority,
+    required this.depth,
   });
 
   final String relativePath;
   final int priority;
+  final int depth;
 }

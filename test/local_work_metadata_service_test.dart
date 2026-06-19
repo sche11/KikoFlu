@@ -117,5 +117,36 @@ void main() {
         },
       ]);
     });
+
+    test('detects nested local cover when root has no cover candidate',
+        () async {
+      final tempDir = await Directory.systemTemp.createTemp('kikoflu_local_');
+      addTearDown(() => tempDir.delete(recursive: true));
+
+      final workDir = Directory('${tempDir.path}/RJ123456');
+      await workDir.create(recursive: true);
+      await File('${workDir.path}/Scans/folder.png').create(recursive: true);
+      await File('${workDir.path}/Scans/cover.webp').writeAsBytes([1]);
+      await File('${workDir.path}/Disc 1/track.mp3').create(recursive: true);
+
+      final metadata =
+          await const LocalWorkMetadataService().buildFallbackMetadata(
+        workId: 123456,
+        workDir: workDir,
+        directoryName: 'RJ123456',
+      );
+
+      expect(metadata['localCoverPath'], 'Scans/cover.webp');
+
+      final children = metadata['children'] as List<dynamic>;
+      final scanFolder = children.cast<Map<String, dynamic>>().singleWhere(
+            (item) => item['title'] == 'Scans',
+          );
+      final scanTitles = (scanFolder['children'] as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map((item) => item['title']);
+
+      expect(scanTitles, ['cover.webp', 'folder.png']);
+    });
   });
 }

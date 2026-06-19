@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import 'download_file_path_service.dart';
+import 'local_work_metadata_service.dart';
 import '../utils/file_icon_utils.dart';
 import '../utils/file_tree_utils.dart';
 
@@ -273,11 +274,10 @@ class OfflineLocalFileScanner {
   }
 
   bool _shouldSkipDiscoveredEntity(String title, String relativePath) {
-    if (title.startsWith('.')) return true;
-    if (title.endsWith('.downloading')) return true;
-    if (relativePath == 'work_metadata.json') return true;
-    if (relativePath == 'cover.jpg') return true;
-    return false;
+    return LocalWorkMetadataService.shouldSkipMetadataFile(
+      title,
+      isRoot: !relativePath.contains('/'),
+    );
   }
 
   String _normalizeRelativePath(String relativePath) {

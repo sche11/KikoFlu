@@ -295,6 +295,8 @@ void main() {
       await File(p.join(workDir.path, 'work_metadata.json'))
           .writeAsString('{}');
       await File(p.join(workDir.path, 'cover.jpg')).writeAsString('cover');
+      await File(p.join(workDir.path, 'folder.webp')).writeAsString('cover');
+      await File(p.join(workDir.path, 'poster.png')).writeAsString('cover');
       await File(p.join(workDir.path, '.DS_Store')).writeAsString('hidden');
       await File(p.join(workDir.path, 'track.mp3.downloading'))
           .writeAsString('partial');
