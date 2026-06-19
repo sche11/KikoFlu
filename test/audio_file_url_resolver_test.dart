@@ -171,8 +171,7 @@ void main() {
       expect(target.requireTarget.selectedTitle, 'track?.mp3');
     });
 
-    test('offline playback target reports missing hash and missing file',
-        () async {
+    test('offline playback target reports missing local file', () async {
       final resolver = AudioFileUrlResolver(
         resolveDownloadedPath: (_, __) async => null,
         downloadRootPath: () async => '/downloads',
@@ -180,7 +179,7 @@ void main() {
         fileExists: (_) async => false,
       );
 
-      final missingHash = await resolver.resolveOfflinePlaybackTarget(
+      final missingHashlessFile = await resolver.resolveOfflinePlaybackTarget(
         file: audioFile(hash: null),
         workId: 123,
         parentPath: 'Disc 1',
@@ -193,10 +192,42 @@ void main() {
         unknownTitle: 'unknown',
       );
 
-      expect(missingHash.status, OfflineAudioPlaybackTargetStatus.missingId);
-      expect(missingHash.selectedTitle, 'track01.mp3');
+      expect(
+        missingHashlessFile.status,
+        OfflineAudioPlaybackTargetStatus.missingFile,
+      );
+      expect(missingHashlessFile.selectedTitle, 'track01.mp3');
       expect(missingFile.status, OfflineAudioPlaybackTargetStatus.missingFile);
       expect(missingFile.selectedTitle, 'track01.mp3');
+    });
+
+    test('offline resolver prefers explicit localPath from disk scanner',
+        () async {
+      final resolver = AudioFileUrlResolver(
+        resolveDownloadedPath: (_, __) async => null,
+        downloadRootPath: () async => '/downloads',
+        resolveCachedAudioPath: (_) async => null,
+        fileExists: (path) async => path == '/real/downloads/track.mp3',
+      );
+
+      final file = audioFile(title: 'track.mp3', hash: null)
+        ..['localPath'] = '/real/downloads/track.mp3';
+
+      final url = await resolver.resolveOffline(
+        file: file,
+        workDir: '/downloads/123',
+        parentPath: 'wrong parent',
+      );
+      final target = await resolver.resolveOfflinePlaybackTarget(
+        file: file,
+        workId: 123,
+        parentPath: 'wrong parent',
+        unknownTitle: 'unknown',
+      );
+
+      expect(url, 'file:///real/downloads/track.mp3');
+      expect(target.status, OfflineAudioPlaybackTargetStatus.ready);
+      expect(target.requireTarget.localPath, '/real/downloads/track.mp3');
     });
 
     test('offline playback target includes paths and local artwork', () async {

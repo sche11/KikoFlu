@@ -463,10 +463,12 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
 
     try {
       final metadata = _sanitizeMetadata(loadedMetadata);
+      final rawChildren = metadata['children'];
       _log.captureOutput(
         '[LocalDownloads] 已获得离线元数据: workId=$workId, '
         'metadataId=${metadata['id']}, sourceId=${metadata['source_id']}, '
-        'localDir=${metadata['localWorkDirName']}',
+        'localDir=${metadata['localWorkDirName']}, '
+        'children=${rawChildren is List ? rawChildren.length : 0}',
       );
       final work = Work.fromJson(metadata);
 
@@ -487,6 +489,8 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
               localCoverPath: localCoverPath,
               localCoverRelativePath: metadata['localCoverPath'] as String?,
               localWorkDirPath: workDir.path,
+              fileTree:
+                  rawChildren is List ? List<dynamic>.from(rawChildren) : null,
             ),
           ),
         );

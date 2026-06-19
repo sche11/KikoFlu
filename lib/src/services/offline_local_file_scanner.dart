@@ -127,9 +127,6 @@ class OfflineLocalFileScanner {
     Map<String, bool> existingFiles,
     Set<String> knownRelativePaths,
   ) async {
-    final hash = FileTreeUtils.property(item, 'hash')?.toString();
-    if (hash == null) return null;
-
     final title = FileTreeUtils.titleOf(item, defaultValue: 'unknown');
     final relativePath =
         DownloadFilePathService.localRelativePathForItem(item, parentPath);
@@ -142,19 +139,27 @@ class OfflineLocalFileScanner {
     final isDownloading = await fileExists('$filePath.downloading');
     if (!exists || isDownloading) return null;
 
-    knownRelativePaths.add(_normalizeRelativePath(relativePath));
+    final normalizedRelativePath = _normalizeRelativePath(relativePath);
+    final hash = FileTreeUtils.property(item, 'hash')?.toString() ??
+        'local:$normalizedRelativePath';
+
+    knownRelativePaths.add(normalizedRelativePath);
     existingFiles[hash] = true;
     final fileType = _normalizedType(item, title);
 
     if (item is Map<String, dynamic>) {
-      if (item['type'] == fileType && item['localPath'] == filePath) {
+      if (item['type'] == fileType &&
+          item['hash'] == hash &&
+          item['localPath'] == filePath &&
+          item['relativePath'] == normalizedRelativePath) {
         return item;
       }
 
       return Map<String, dynamic>.from(item)
         ..['type'] = fileType
+        ..['hash'] = hash
         ..['localPath'] = filePath
-        ..['relativePath'] = _normalizeRelativePath(relativePath);
+        ..['relativePath'] = normalizedRelativePath;
     }
 
     return <String, dynamic>{
@@ -162,7 +167,7 @@ class OfflineLocalFileScanner {
       'title': title,
       'hash': hash,
       'localPath': filePath,
-      'relativePath': _normalizeRelativePath(relativePath),
+      'relativePath': normalizedRelativePath,
       'duration': FileTreeUtils.property(item, 'duration'),
       'size': FileTreeUtils.property(item, 'size'),
     };

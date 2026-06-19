@@ -36,6 +36,7 @@ class OfflineWorkDetailScreen extends ConsumerStatefulWidget {
   final String? localCoverPath; // 本地封面图片路径
   final String? localCoverRelativePath; // 本地封面相对作品目录路径
   final String? localWorkDirPath; // 本地作品目录路径
+  final List<dynamic>? fileTree; // 原始文件树，保留 localRelativePath 等本地字段
 
   const OfflineWorkDetailScreen({
     super.key,
@@ -44,6 +45,7 @@ class OfflineWorkDetailScreen extends ConsumerStatefulWidget {
     this.localCoverPath,
     this.localCoverRelativePath,
     this.localWorkDirPath,
+    this.fileTree,
   });
 
   @override
@@ -407,13 +409,14 @@ class _OfflineWorkDetailScreenState
             work: work,
             localWorkDirPath: widget.localWorkDirPath,
             localCoverRelativePath: widget.localCoverRelativePath,
-            fileTree: work.children?.map((e) {
-              if (e is Map<String, dynamic>) {
-                return e;
-              }
-              // 如果是 AudioFile 对象，转换为 Map
-              return e.toJson();
-            }).toList(),
+            fileTree: widget.fileTree ??
+                work.children?.map((e) {
+                  if (e is Map<String, dynamic>) {
+                    return e;
+                  }
+                  // 如果是 AudioFile 对象，转换为 Map
+                  return e.toJson();
+                }).toList(),
           ),
         ],
       ),

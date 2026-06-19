@@ -141,6 +141,13 @@ class AudioFileUrlResolver {
     required String workDir,
     required String parentPath,
   }) async {
+    final localPath = FileTreeUtils.property(file, 'localPath')?.toString();
+    if (localPath != null &&
+        localPath.trim().isNotEmpty &&
+        await fileExists(localPath)) {
+      return 'file://$localPath';
+    }
+
     final filePath = DownloadFilePathService.localPathForRelativePath(
       rootPath: workDir,
       relativePath: DownloadFilePathService.localRelativePathForItem(
@@ -166,27 +173,23 @@ class AudioFileUrlResolver {
       file,
       defaultValue: unknownTitle,
     );
-    final hash = FileTreeUtils.property(file, 'hash');
-
-    if (hash == null) {
-      return OfflineAudioPlaybackTargetResult.failure(
-        OfflineAudioPlaybackTargetStatus.missingId,
-        selectedTitle: selectedTitle,
-      );
-    }
 
     final workDir = workDirPath ??
         DownloadFilePathService.localPathForRelativePath(
           rootPath: await downloadRootPath(),
           relativePath: workId.toString(),
         );
-    final localPath = DownloadFilePathService.localPathForRelativePath(
-      rootPath: workDir,
-      relativePath: DownloadFilePathService.localRelativePathForItem(
-        file,
-        parentPath,
-      ),
-    );
+    final explicitLocalPath =
+        FileTreeUtils.property(file, 'localPath')?.toString().trim();
+    final localPath = explicitLocalPath != null && explicitLocalPath.isNotEmpty
+        ? explicitLocalPath
+        : DownloadFilePathService.localPathForRelativePath(
+            rootPath: workDir,
+            relativePath: DownloadFilePathService.localRelativePathForItem(
+              file,
+              parentPath,
+            ),
+          );
 
     if (!await fileExists(localPath)) {
       return OfflineAudioPlaybackTargetResult.failure(

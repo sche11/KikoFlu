@@ -51,6 +51,7 @@ void main() {
         () async {
       final existingPaths = {
         '/downloads/123/Disc 1/track01.mp3',
+        '/downloads/123/Disc 1/hashless.mp3',
         '/downloads/123/Disc 1/cover.jpg',
         '/downloads/123/Disc 1/cover.jpg.downloading',
       };
@@ -75,23 +76,35 @@ void main() {
         workDirPath: '/downloads/123',
       );
 
-      expect(result.fileExists, {'track': true});
+      expect(result.fileExists, {
+        'track': true,
+        'local:Disc 1/hashless.mp3': true,
+      });
       expect(result.files, hasLength(1));
 
       final folder = result.files.single as Map<String, dynamic>;
       expect(folder['title'], 'Disc 1');
 
       final children = folder['children'] as List<dynamic>;
-      expect(children, hasLength(1));
-      expect(children.single, containsPair('type', 'audio'));
-      expect(children.single, containsPair('title', 'track01.mp3'));
-      expect(children.single, containsPair('hash', 'track'));
+      expect(children, hasLength(2));
+      final trackChild = children
+          .cast<Map<String, dynamic>>()
+          .singleWhere((item) => item['title'] == 'track01.mp3');
+      expect(trackChild, containsPair('hash', 'track'));
       expect(
-        children.single,
+        trackChild,
         containsPair('localPath', '/downloads/123/Disc 1/track01.mp3'),
       );
+
+      final hashlessChild = children
+          .cast<Map<String, dynamic>>()
+          .singleWhere((item) => item['title'] == 'hashless.mp3');
+      expect(hashlessChild, containsPair('type', 'audio'));
       expect(
-          children.single, containsPair('relativePath', 'Disc 1/track01.mp3'));
+        hashlessChild,
+        containsPair('hash', 'local:Disc 1/hashless.mp3'),
+      );
+      expect(trackChild, containsPair('relativePath', 'Disc 1/track01.mp3'));
       expect(track['type'], 'file');
     });
 
