@@ -191,6 +191,36 @@ void main() {
       expect((children.single as Map<String, dynamic>)['title'], 'track.mp3');
     });
 
+    test('forces imported metadata id to the parsed work id', () async {
+      final tempDir = await Directory.systemTemp.createTemp('kikoflu_local_');
+      addTearDown(() => tempDir.delete(recursive: true));
+
+      final workDir = Directory('${tempDir.path}/RJ222222');
+      await workDir.create(recursive: true);
+      await File('${workDir.path}/metadata.json').writeAsString('''
+{
+  "id": 999999,
+  "title": "Imported title"
+}
+''');
+      await File('${workDir.path}/track.mp3').writeAsBytes([1]);
+
+      const service = LocalWorkMetadataService();
+      final imported = await service.loadImportedMetadata(
+        workDir: workDir,
+        workId: 222222,
+      );
+      final metadata = await service.buildFallbackMetadata(
+        workId: 222222,
+        workDir: workDir,
+        directoryName: 'RJ222222',
+        existingMetadata: imported,
+      );
+
+      expect(metadata['id'], 222222);
+      expect(metadata['title'], 'Imported title');
+    });
+
     test('keeps nested generic json files in the imported file tree', () async {
       final tempDir = await Directory.systemTemp.createTemp('kikoflu_local_');
       addTearDown(() => tempDir.delete(recursive: true));

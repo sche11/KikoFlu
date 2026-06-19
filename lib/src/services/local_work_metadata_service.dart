@@ -103,7 +103,7 @@ class LocalWorkMetadataService {
         ? <String, dynamic>{}
         : Map<String, dynamic>.from(existingMetadata);
 
-    metadata['id'] = _asPositiveInt(metadata['id']) ?? workId;
+    metadata['id'] = workId;
     metadata['title'] = _cleanString(metadata['title']) ??
         _titleFromDirectoryName(directoryName, workId);
     metadata['source_id'] =
@@ -487,12 +487,6 @@ class LocalWorkMetadataService {
     if (value == null) return null;
     final text = value.toString().trim();
     return text.isEmpty ? null : text;
-  }
-
-  static int? _asPositiveInt(dynamic value) {
-    final parsed = value is int ? value : int.tryParse(value?.toString() ?? '');
-    if (parsed == null || parsed <= 0) return null;
-    return parsed;
   }
 
   static Future<int?> _defaultFileLength(File file) async {
