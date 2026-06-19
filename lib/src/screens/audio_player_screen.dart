@@ -801,15 +801,16 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         final isTranslated = lyricState.isTranslated;
         final showTranslated = lyricState.showTranslated;
         final total = lyricState.translationTotal;
-        final progressValue = total > 0
-            ? lyricState.translatedCount.clamp(0, total) / total
-            : null;
+        final completed =
+            total > 0 ? lyricState.translatedCount.clamp(0, total).toInt() : 0;
+        final progressValue = total > 0 ? completed / total : null;
+        final progressLabel = total > 0 ? '$completed/$total' : null;
 
         final String tooltip;
         if (isTranslating) {
           tooltip = total > 0
               ? S.of(context).translatingProgress(
-                    lyricState.translatedCount.clamp(0, total).toInt(),
+                    completed,
                     total,
                   )
               : S.of(context).translatingLyrics;
@@ -862,11 +863,37 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
           tooltip: tooltip,
           icon: isTranslating
               ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    value: progressValue?.toDouble(),
+                  width: 32,
+                  height: 32,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          value: progressValue?.toDouble(),
+                        ),
+                      ),
+                      if (progressLabel != null)
+                        SizedBox(
+                          width: 24,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              progressLabel,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 )
               : Icon(

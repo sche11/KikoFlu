@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
@@ -36,6 +37,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
   LibraryStats? _stats;
   bool _isSelectionMode = false;
   final Set<String> _selectedPaths = {}; // 选中的文件/文件夹路径
+  StreamSubscription<void>? _cacheUpdateSubscription;
 
   // 搜索相关
   bool _isSearching = false;
@@ -48,6 +50,12 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
   @override
   void initState() {
     super.initState();
+    _cacheUpdateSubscription =
+        SubtitleLibraryService.onCacheUpdated.listen((_) {
+      if (mounted) {
+        _loadFiles();
+      }
+    });
     _initRootPath();
   }
 
@@ -63,6 +71,7 @@ class _SubtitleLibraryScreenState extends ConsumerState<SubtitleLibraryScreen> {
 
   @override
   void dispose() {
+    _cacheUpdateSubscription?.cancel();
     _searchController.dispose();
     super.dispose();
   }
