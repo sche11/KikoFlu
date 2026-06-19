@@ -24,14 +24,18 @@
 - Background playback with automatic caching
 - Playback speed control
 - Loop (single / list) and shuffle modes
+- Audio haptics (Beta): mobile devices vibrate based on audio characteristics
 - Multi-format support: audio, video, text, images, PDF, etc.
 - Full or selective download with concurrent download management
 - Offline download search and sorting
+- Local imported work metadata recognition
 
 ### 📝 Subtitle System
 - Automatic subtitle loading
 - Subtitle import, editing, and timing adjustment
 - Real-time subtitle / lyric translation during playback
+- Translate subtitles for the current playback directly in the player, with immediate display and saving when complete
+- Fullscreen lyrics / subtitle display
 - Subtitle library (SQLite indexed, fast search)
 - Custom save directory with cross-drive copy support
 
@@ -53,12 +57,14 @@
 
 ### 🌐 Internationalization
 - 简体中文 / 繁體中文 / English / 日本語 / Русский
+- Multi-format, multilingual translation support
 
 ### ⚙️ Settings
 - Multi-account support
 - Custom server address ([Guide](https://github.com/pa-jesusf/KikoFlu/wiki/%E4%BD%BF%E7%94%A8%E8%87%AA%E5%BB%BA%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E5%99%A8)) with connection latency testing
 - Cache size limit and cleanup strategy
 - Theme and color scheme customization
+- Separate translation target language setting, with custom target languages in LLM mode
 - Extensive UI customization options
 - In-app log system (with export)
 - Update checker
