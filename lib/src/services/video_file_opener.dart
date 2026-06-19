@@ -1,6 +1,8 @@
 import 'package:open_filex/open_filex.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../utils/local_file_url.dart';
+
 typedef OpenLocalVideoFile = Future<OpenResult> Function(String path);
 typedef CanLaunchVideoUri = Future<bool> Function(Uri uri);
 typedef LaunchVideoUri = Future<bool> Function(
@@ -84,8 +86,9 @@ class VideoFileOpener {
   final LaunchVideoUri _launch;
 
   Future<VideoOpenResult> open(String source) {
-    if (source.startsWith('file://')) {
-      return openLocalPath(source.substring('file://'.length));
+    final localPath = LocalFileUrl.pathFromUrl(source);
+    if (localPath != null) {
+      return openLocalPath(localPath);
     }
 
     return openRemoteUri(Uri.parse(source));

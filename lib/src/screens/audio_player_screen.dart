@@ -8,6 +8,7 @@ import '../providers/audio_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/locale_provider.dart';
 import '../providers/lyric_provider.dart';
+import '../utils/local_file_url.dart';
 import '../utils/system_ui_style.dart';
 import '../widgets/player/player_cover_widget.dart';
 import '../widgets/player/player_controls_widget.dart';
@@ -125,7 +126,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
 
   String? _buildWorkCoverUrl(int? workId, String? artworkUrl) {
     // 优先使用 track.artworkUrl（可能是本地文件 file://）
-    if (artworkUrl != null && artworkUrl.startsWith('file://')) {
+    if (LocalFileUrl.isLocalFileUrl(artworkUrl)) {
       return artworkUrl;
     }
 

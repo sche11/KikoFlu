@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
 import '../services/cache_service.dart';
+import '../utils/local_file_url.dart';
 import '../../l10n/app_localizations.dart';
 
 /// 支持缓存的网络图片组件
@@ -36,8 +37,8 @@ class _CachedImageWidgetState extends State<CachedImageWidget> {
 
   Future<void> _loadImage() async {
     // 优先检查是否是本地文件（file:// 协议）
-    if (widget.imageUrl.startsWith('file://')) {
-      final localPath = widget.imageUrl.substring(7); // 移除 'file://' 前缀
+    final localPath = LocalFileUrl.pathFromUrl(widget.imageUrl);
+    if (localPath != null) {
       final localFile = File(localPath);
 
       if (await localFile.exists()) {

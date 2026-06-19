@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'download_file_path_service.dart';
 import '../utils/file_tree_utils.dart';
+import '../utils/local_file_url.dart';
 
 typedef PreviewDownloadRootProvider = Future<String> Function();
 typedef PreviewFileExists = Future<bool> Function(String path);
@@ -152,7 +153,8 @@ class PreviewVideoTarget {
   final String source;
   final String? localPath;
 
-  bool get isLocalFile => localPath != null || source.startsWith('file://');
+  bool get isLocalFile =>
+      localPath != null || LocalFileUrl.isLocalFileUrl(source);
 }
 
 class PreviewVideoTargetResult {
@@ -193,7 +195,7 @@ class LocalPreviewFile {
   final String path;
   final bool exists;
 
-  String get url => 'file://$path';
+  String get url => LocalFileUrl.fromPath(path);
 }
 
 class FilePreviewResolver {
@@ -317,9 +319,7 @@ class FilePreviewResolver {
     return PreviewVideoTargetResult.ready(
       PreviewVideoTarget(
         source: source,
-        localPath: source.startsWith('file://')
-            ? source.substring('file://'.length)
-            : null,
+        localPath: LocalFileUrl.pathFromUrl(source),
       ),
     );
   }
@@ -611,7 +611,7 @@ class FilePreviewResolver {
         relativePath: relativePath,
       );
       if (await fileExists(localPath)) {
-        return 'file://$localPath';
+        return LocalFileUrl.fromPath(localPath);
       }
     } catch (_) {
       return null;

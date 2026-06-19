@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'download_file_path_service.dart';
 import '../utils/file_tree_utils.dart';
+import '../utils/local_file_url.dart';
 
 typedef AudioDownloadedPathResolver = Future<String?> Function(
   int workId,
@@ -97,7 +98,7 @@ class AudioFileUrlResolver {
     if (fileHash != null) {
       final downloadedPath = await resolveDownloadedPath(workId, fileHash);
       if (downloadedPath != null) {
-        return 'file://$downloadedPath';
+        return LocalFileUrl.fromPath(downloadedPath);
       }
 
       final copiedPath = await _resolveCopiedLocalPath(
@@ -107,12 +108,12 @@ class AudioFileUrlResolver {
         fileRelativePaths: fileRelativePaths,
       );
       if (copiedPath != null) {
-        return 'file://$copiedPath';
+        return LocalFileUrl.fromPath(copiedPath);
       }
 
       final cachedPath = await resolveCachedAudioPath(fileHash);
       if (cachedPath != null) {
-        return 'file://$cachedPath';
+        return LocalFileUrl.fromPath(cachedPath);
       }
     }
 
@@ -145,7 +146,7 @@ class AudioFileUrlResolver {
     if (localPath != null &&
         localPath.trim().isNotEmpty &&
         await fileExists(localPath)) {
-      return 'file://$localPath';
+      return LocalFileUrl.fromPath(localPath);
     }
 
     final filePath = DownloadFilePathService.localPathForRelativePath(
@@ -156,7 +157,7 @@ class AudioFileUrlResolver {
       ),
     );
     if (await fileExists(filePath)) {
-      return 'file://$filePath';
+      return LocalFileUrl.fromPath(filePath);
     }
     return null;
   }
@@ -202,7 +203,8 @@ class AudioFileUrlResolver {
       rootPath: workDir,
       relativePath: coverRelativePath ?? 'cover.jpg',
     );
-    final artworkUrl = await fileExists(coverPath) ? 'file://$coverPath' : null;
+    final artworkUrl =
+        await fileExists(coverPath) ? LocalFileUrl.fromPath(coverPath) : null;
 
     return OfflineAudioPlaybackTargetResult.ready(
       OfflineAudioPlaybackTarget(

@@ -1,4 +1,5 @@
 import '../models/audio_track.dart';
+import '../utils/local_file_url.dart';
 import '../utils/file_tree_utils.dart';
 
 typedef AudioUrlResolver = Future<String?> Function(dynamic file);
@@ -78,7 +79,6 @@ class AudioTrackQueueBuilder {
   }
 
   static String? _sourcePathFromUrl(String url) {
-    if (!url.startsWith('file://')) return null;
-    return Uri.decodeFull(url.substring('file://'.length));
+    return LocalFileUrl.pathFromUrl(url);
   }
 }

@@ -13,6 +13,7 @@ import '../services/subtitle_library_service.dart';
 import '../services/storage_service.dart';
 import '../utils/snackbar_util.dart';
 import '../utils/encoding_utils.dart';
+import '../utils/local_file_url.dart';
 import '../utils/scroll_optimization.dart';
 import '../../l10n/app_localizations.dart';
 import 'scrollable_appbar.dart';
@@ -304,8 +305,8 @@ class _TextPreviewScreenState extends State<TextPreviewScreen> {
 
     try {
       // 优先检查是否是本地文件（file:// 协议）
-      if (widget.textUrl.startsWith('file://')) {
-        final localPath = widget.textUrl.substring(7); // 移除 'file://' 前缀
+      final localPath = LocalFileUrl.pathFromUrl(widget.textUrl);
+      if (localPath != null) {
         final localFile = File(localPath);
 
         if (await localFile.exists()) {

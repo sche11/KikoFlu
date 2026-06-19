@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../utils/snackbar_util.dart';
+import '../utils/local_file_url.dart';
 import '../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'cached_image_widget.dart';
@@ -113,8 +114,8 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
       List<int> imageBytes;
 
       // 检查是否是本地文件
-      if (imageUrl.startsWith('file://')) {
-        final localPath = imageUrl.substring(7); // 移除 'file://' 前缀
+      final localPath = LocalFileUrl.pathFromUrl(imageUrl);
+      if (localPath != null) {
         final localFile = File(localPath);
         imageBytes = await localFile.readAsBytes();
       } else {

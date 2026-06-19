@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../services/cache_service.dart';
 import '../services/storage_service.dart';
+import '../utils/local_file_url.dart';
 import '../../l10n/app_localizations.dart';
 import 'scrollable_appbar.dart';
 
@@ -59,8 +60,8 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
 
     try {
       // 优先检查是否是本地文件（file:// 协议）
-      if (widget.pdfUrl.startsWith('file://')) {
-        final localPath = widget.pdfUrl.substring(7); // 移除 'file://' 前缀
+      final localPath = LocalFileUrl.pathFromUrl(widget.pdfUrl);
+      if (localPath != null) {
         final localFile = File(localPath);
 
         if (await localFile.exists()) {

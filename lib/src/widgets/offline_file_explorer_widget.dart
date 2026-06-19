@@ -245,92 +245,99 @@ class _OfflineFileExplorerWidgetState
   Future<void> _playAudioFile(dynamic audioFile, String parentPath) async {
     final l10n = S.of(context);
     final title = FileTreeUtils.titleOf(audioFile, defaultValue: l10n.unknown);
-    _log.captureOutput(
-      '[OfflineFileExplorer] 点击播放: workId=${widget.work.id}, '
-      'title="$title", parentPath="$parentPath", '
-      'localRelativePath=${FileTreeUtils.property(audioFile, 'localRelativePath')}, '
-      'relativePath=${FileTreeUtils.property(audioFile, 'relativePath')}, '
-      'localPath=${FileTreeUtils.property(audioFile, 'localPath')}, '
-      'hash=${FileTreeUtils.property(audioFile, 'hash')}',
-    );
+    try {
+      _log.captureOutput(
+        '[OfflineFileExplorer] 点击播放: workId=${widget.work.id}, '
+        'title="$title", parentPath="$parentPath", '
+        'localRelativePath=${FileTreeUtils.property(audioFile, 'localRelativePath')}, '
+        'relativePath=${FileTreeUtils.property(audioFile, 'relativePath')}, '
+        'localPath=${FileTreeUtils.property(audioFile, 'localPath')}, '
+        'hash=${FileTreeUtils.property(audioFile, 'hash')}',
+      );
 
-    final targetResult = await _audioUrlResolver.resolveOfflinePlaybackTarget(
-      file: audioFile,
-      workId: widget.work.id,
-      parentPath: parentPath,
-      unknownTitle: l10n.unknown,
-      workDirPath: _workDirPath,
-      coverRelativePath: widget.localCoverRelativePath,
-    );
-
-    if (!mounted) return;
-
-    switch (targetResult.status) {
-      case OfflineAudioPlaybackTargetStatus.missingId:
-        _log.captureOutput(
-          '[OfflineFileExplorer] 播放失败: 缺少文件标识 title="$title"',
-        );
-        SnackBarUtil.showError(context, l10n.cannotPlayAudioMissingId);
-        return;
-      case OfflineAudioPlaybackTargetStatus.missingFile:
-        _log.captureOutput(
-          '[OfflineFileExplorer] 播放失败: 本地文件不存在 title="$title"',
-        );
-        SnackBarUtil.showError(context, l10n.audioFileNotExist);
-        return;
-      case OfflineAudioPlaybackTargetStatus.ready:
-        break;
-    }
-
-    final target = targetResult.requireTarget;
-    _log.captureOutput(
-      '[OfflineFileExplorer] 播放目标: title="$title", '
-      'workDir=${target.workDir}, localPath=${target.localPath}',
-    );
-    final plan = await _audioPlaybackPlanBuilder.build(
-      fileTree: _localFiles,
-      parentPath: parentPath,
-      selectedFile: audioFile,
-      resolveUrl: (file) => _audioUrlResolver.resolveOffline(
-        file: file,
-        workDir: target.workDir,
+      final targetResult = await _audioUrlResolver.resolveOfflinePlaybackTarget(
+        file: audioFile,
+        workId: widget.work.id,
         parentPath: parentPath,
-      ),
-      work: widget.work,
-      unknownTitle: l10n.unknown,
-      artworkUrl: target.artworkUrl,
-    );
+        unknownTitle: l10n.unknown,
+        workDirPath: _workDirPath,
+        coverRelativePath: widget.localCoverRelativePath,
+      );
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    switch (plan.status) {
-      case AudioPlaybackPlanStatus.selectedFileMissing:
-        _log.captureOutput(
-          '[OfflineFileExplorer] 播放失败: 队列中找不到选中文件 title="${plan.selectedTitle}"',
-        );
-        SnackBarUtil.showError(
-          context,
-          l10n.cannotFindAudioFile(plan.selectedTitle),
-        );
-        return;
-      case AudioPlaybackPlanStatus.emptyQueue:
-        _log.captureOutput(
-          '[OfflineFileExplorer] 播放失败: 可播放队列为空 title="${plan.selectedTitle}"',
-        );
-        SnackBarUtil.showError(context, l10n.noPlayableAudioFiles);
-        return;
-      case AudioPlaybackPlanStatus.ready:
-        final queue = plan.queue!;
-        _log.captureOutput(
-          '[OfflineFileExplorer] 开始播放队列: count=${queue.tracks.length}, '
-          'startIndex=${queue.startIndex}, '
-          'startTitle="${queue.tracks[queue.startIndex].title}"',
-        );
-        ref.read(audioPlayerControllerProvider.notifier).playTracks(
-              queue.tracks,
-              startIndex: queue.startIndex,
-              work: widget.work,
-            );
+      switch (targetResult.status) {
+        case OfflineAudioPlaybackTargetStatus.missingId:
+          _log.captureOutput(
+            '[OfflineFileExplorer] 播放失败: 缺少文件标识 title="$title"',
+          );
+          SnackBarUtil.showError(context, l10n.cannotPlayAudioMissingId);
+          return;
+        case OfflineAudioPlaybackTargetStatus.missingFile:
+          _log.captureOutput(
+            '[OfflineFileExplorer] 播放失败: 本地文件不存在 title="$title"',
+          );
+          SnackBarUtil.showError(context, l10n.audioFileNotExist);
+          return;
+        case OfflineAudioPlaybackTargetStatus.ready:
+          break;
+      }
+
+      final target = targetResult.requireTarget;
+      _log.captureOutput(
+        '[OfflineFileExplorer] 播放目标: title="$title", '
+        'workDir=${target.workDir}, localPath=${target.localPath}',
+      );
+      final plan = await _audioPlaybackPlanBuilder.build(
+        fileTree: _localFiles,
+        parentPath: parentPath,
+        selectedFile: audioFile,
+        resolveUrl: (file) => _audioUrlResolver.resolveOffline(
+          file: file,
+          workDir: target.workDir,
+          parentPath: parentPath,
+        ),
+        work: widget.work,
+        unknownTitle: l10n.unknown,
+        artworkUrl: target.artworkUrl,
+      );
+
+      if (!mounted) return;
+
+      switch (plan.status) {
+        case AudioPlaybackPlanStatus.selectedFileMissing:
+          _log.captureOutput(
+            '[OfflineFileExplorer] 播放失败: 队列中找不到选中文件 title="${plan.selectedTitle}"',
+          );
+          SnackBarUtil.showError(
+            context,
+            l10n.cannotFindAudioFile(plan.selectedTitle),
+          );
+          return;
+        case AudioPlaybackPlanStatus.emptyQueue:
+          _log.captureOutput(
+            '[OfflineFileExplorer] 播放失败: 可播放队列为空 title="${plan.selectedTitle}"',
+          );
+          SnackBarUtil.showError(context, l10n.noPlayableAudioFiles);
+          return;
+        case AudioPlaybackPlanStatus.ready:
+          final queue = plan.queue!;
+          _log.captureOutput(
+            '[OfflineFileExplorer] 开始播放队列: count=${queue.tracks.length}, '
+            'startIndex=${queue.startIndex}, '
+            'startTitle="${queue.tracks[queue.startIndex].title}"',
+          );
+          await ref.read(audioPlayerControllerProvider.notifier).playTracks(
+                queue.tracks,
+                startIndex: queue.startIndex,
+                work: widget.work,
+              );
+      }
+    } catch (e, st) {
+      _log.captureOutput('[OfflineFileExplorer] 播放异常: title="$title", $e');
+      _log.captureOutput(st.toString());
+      if (!mounted) return;
+      SnackBarUtil.showError(context, l10n.playbackFailed(e.toString()));
     }
   }
 

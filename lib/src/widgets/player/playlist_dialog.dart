@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../providers/audio_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/local_file_url.dart';
 import '../privacy_blur_cover.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -121,8 +122,7 @@ class PlaylistDialog extends ConsumerWidget {
                         // Build work cover URL（优先使用本地文件）
                         String? workCoverUrl;
                         // 优先使用 track.artworkUrl（可能是本地文件 file://）
-                        if (track.artworkUrl != null &&
-                            track.artworkUrl!.startsWith('file://')) {
+                        if (LocalFileUrl.isLocalFileUrl(track.artworkUrl)) {
                           workCoverUrl = track.artworkUrl;
                         } else if (track.workId != null) {
                           final host = authState.host ?? '';
@@ -227,12 +227,13 @@ class PlaylistDialog extends ConsumerWidget {
                                               child: ClipRRect(
                                                 borderRadius:
                                                     BorderRadius.circular(6),
-                                                child: resolvedCover
-                                                        .startsWith('file://')
+                                                child: LocalFileUrl
+                                                        .isLocalFileUrl(
+                                                            resolvedCover)
                                                     ? Image.file(
-                                                        File(resolvedCover
-                                                            .replaceFirst(
-                                                                'file://', '')),
+                                                        File(LocalFileUrl
+                                                            .pathFromUrl(
+                                                                resolvedCover)!),
                                                         fit: BoxFit.cover,
                                                         errorBuilder: (context,
                                                             error, stackTrace) {

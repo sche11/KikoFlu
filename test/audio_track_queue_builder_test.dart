@@ -63,6 +63,23 @@ void main() {
       expect(result.startIndex, 0);
     });
 
+    test('keeps raw local source path when file URL is not percent-encoded',
+        () async {
+      final files = [audioItem('100% pure.mp3')];
+
+      final result = await const AudioTrackQueueBuilder().build(
+        audioFiles: files,
+        selectedFile: files.first,
+        resolveUrl: (_) async => 'file:///downloads/100% pure.mp3',
+        workId: 1,
+        albumTitle: 'Album',
+        unknownTitle: 'Unknown',
+      );
+
+      expect(result.tracks.single.sourcePath, '/downloads/100% pure.mp3');
+      expect(result.startIndex, 0);
+    });
+
     test('skips files without hash when requireHash is true', () async {
       final files = [
         audioItem('missing_hash.mp3'),

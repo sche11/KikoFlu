@@ -10,6 +10,7 @@ import '../providers/auth_provider.dart';
 import '../providers/lyric_provider.dart';
 import '../providers/player_lyric_style_provider.dart';
 import '../screens/audio_player_screen.dart';
+import '../utils/local_file_url.dart';
 import 'privacy_blur_cover.dart';
 import 'volume_control.dart';
 
@@ -80,8 +81,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
         // Build work cover URL（优先使用本地文件）
         String? workCoverUrl;
         // 优先使用 track.artworkUrl（可能是本地文件 file://）
-        if (track.artworkUrl != null &&
-            track.artworkUrl!.startsWith('file://')) {
+        if (LocalFileUrl.isLocalFileUrl(track.artworkUrl)) {
           workCoverUrl = track.artworkUrl;
         } else if (track.workId != null) {
           final host = authState.host ?? '';
@@ -493,29 +493,28 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer> {
               borderRadius: BorderRadius.circular(8),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child:
-                    (workCoverUrl ?? track.artworkUrl)?.startsWith('file://') ??
-                            false
-                        ? Image.file(
-                            File((workCoverUrl ?? track.artworkUrl)!
-                                .replaceFirst('file://', '')),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.album, size: 32);
-                            },
-                          )
-                        : CachedNetworkImage(
-                            imageUrl: (workCoverUrl ?? track.artworkUrl)!,
-                            cacheKey: track.workId != null
-                                ? 'work_cover_${track.workId}'
-                                : null,
-                            fit: BoxFit.cover,
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.album, size: 32),
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
+                child: LocalFileUrl.isLocalFileUrl(
+                        workCoverUrl ?? track.artworkUrl)
+                    ? Image.file(
+                        File(LocalFileUrl.pathFromUrl(
+                            workCoverUrl ?? track.artworkUrl)!),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.album, size: 32);
+                        },
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: (workCoverUrl ?? track.artworkUrl)!,
+                        cacheKey: track.workId != null
+                            ? 'work_cover_${track.workId}'
+                            : null,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.album, size: 32),
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
               ),
             )
           : const Icon(

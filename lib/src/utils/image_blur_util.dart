@@ -8,6 +8,8 @@ import 'package:path/path.dart' as p;
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 
+import 'local_file_url.dart';
+
 /// 图片模糊处理工具类
 class ImageBlurUtil {
   /// 对网络图片或本地图片应用高强度高斯模糊并保存到临时文件
@@ -21,15 +23,15 @@ class ImageBlurUtil {
 
       // 如果已经存在模糊后的文件，直接返回
       if (await blurredFile.exists()) {
-        return 'file://${blurredFile.path}';
+        return LocalFileUrl.fromPath(blurredFile.path);
       }
 
       Uint8List imageData;
 
       // 判断是本地文件还是网络URL
-      if (imageUrl.startsWith('file://')) {
+      final localPath = LocalFileUrl.pathFromUrl(imageUrl);
+      if (localPath != null) {
         // 本地文件
-        final localPath = Uri.parse(imageUrl).toFilePath();
         final localFile = File(localPath);
         if (!await localFile.exists()) {
           debugPrint('本地图片文件不存在: $localPath');
@@ -88,7 +90,7 @@ class ImageBlurUtil {
         // 保存到临时文件
         await blurredFile.writeAsBytes(pngBytes);
 
-        return 'file://${blurredFile.path}';
+        return LocalFileUrl.fromPath(blurredFile.path);
       } finally {
         image.dispose();
         picture?.dispose();

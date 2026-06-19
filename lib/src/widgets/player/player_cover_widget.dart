@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../models/audio_track.dart';
+import '../../utils/local_file_url.dart';
 import '../privacy_blur_cover.dart';
 
 /// 播放器封面组件
@@ -22,13 +23,12 @@ class PlayerCoverWidget extends StatelessWidget {
 
   // 判断是否为本地文件路径
   bool _isLocalFile(String? url) {
-    if (url == null) return false;
-    return url.startsWith('file://');
+    return LocalFileUrl.isLocalFileUrl(url);
   }
 
   // 从 file:// URL 获取本地文件路径
   String _getLocalPath(String fileUrl) {
-    return fileUrl.replaceFirst('file://', '');
+    return LocalFileUrl.pathFromUrl(fileUrl) ?? fileUrl;
   }
 
   @override

@@ -13,6 +13,7 @@ import 'audio_haptics_service.dart';
 import 'log_service.dart';
 import 'playback_history_service.dart';
 import '../utils/image_blur_util.dart';
+import '../utils/local_file_url.dart';
 
 final _log = LogService.instance;
 
@@ -352,10 +353,8 @@ class AudioPlayerService {
       bool loaded = false;
 
       // 优先检查是否是本地文件（file:// 协议）
-      if (track.url.startsWith('file://')) {
-        // 移除 'file://' 前缀，并规范化路径分隔符
-        final rawPath = track.url.substring(7);
-        final localPath = p.normalize(rawPath);
+      final localPath = LocalFileUrl.pathFromUrl(track.url);
+      if (localPath != null) {
         final localFile = File(localPath);
         _log.captureOutput('[Audio] 检查本地文件: $localPath');
 

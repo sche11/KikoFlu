@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 import '../models/audio_track.dart';
+import '../utils/local_file_url.dart';
 import 'audio_haptic_pattern.dart';
 import 'log_service.dart';
 
@@ -425,9 +426,8 @@ class AudioHapticsService {
   }
 
   String? _localPathFromTrack(AudioTrack track) {
-    if (track.url.startsWith('file://')) {
-      return Uri.decodeFull(track.url.substring('file://'.length));
-    }
+    final localPath = LocalFileUrl.pathFromUrl(track.url);
+    if (localPath != null) return localPath;
 
     final sourcePath = track.sourcePath;
     if (sourcePath != null && sourcePath.isNotEmpty) return sourcePath;
