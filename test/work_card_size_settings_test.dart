@@ -78,6 +78,37 @@ void main() {
     );
   });
 
+  testWidgets('small grid keeps a distinct layout with extra large cards',
+      (tester) async {
+    await tester.pumpWidget(
+      _testApp(
+        const MediaQuery(
+          data: MediaQueryData(size: Size(400, 800)),
+          child: WorksGridView(
+            works: [_work],
+            layoutType: LayoutType.smallGrid,
+          ),
+        ),
+      ),
+    );
+    await _pumpAsyncPreferenceLoad(tester);
+
+    final container =
+        ProviderScope.containerOf(tester.element(find.byType(WorksGridView)));
+    await container
+        .read(workCardDisplayProvider.notifier)
+        .updateCardSize(WorkCardSize.extraLarge);
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<SliverMasonryGrid>(find.byType(SliverMasonryGrid))
+          .gridDelegate,
+      isA<SliverSimpleGridDelegateWithFixedCrossAxisCount>()
+          .having((delegate) => delegate.crossAxisCount, 'crossAxisCount', 2),
+    );
+  });
+
   testWidgets('settings screen updates card text size segmented control',
       (tester) async {
     await tester.pumpWidget(_testApp(const WorkCardDisplaySettingsScreen()));

@@ -11,8 +11,14 @@ enum WorkCardSize {
   final String value;
   final int columnReduction;
 
-  int applyToCrossAxisCount(int crossAxisCount) {
-    return (crossAxisCount - columnReduction).clamp(1, crossAxisCount).toInt();
+  int applyToCrossAxisCount(
+    int crossAxisCount, {
+    int minCrossAxisCount = 1,
+  }) {
+    final minCount = minCrossAxisCount.clamp(1, crossAxisCount).toInt();
+    return (crossAxisCount - columnReduction)
+        .clamp(minCount, crossAxisCount)
+        .toInt();
   }
 
   static WorkCardSize fromValue(String? value) {
@@ -91,8 +97,14 @@ class WorkCardDisplaySettings {
     );
   }
 
-  int applyCardSize(int crossAxisCount) {
-    return cardSize.applyToCrossAxisCount(crossAxisCount);
+  int applyCardSize(
+    int crossAxisCount, {
+    int minCrossAxisCount = 1,
+  }) {
+    return cardSize.applyToCrossAxisCount(
+      crossAxisCount,
+      minCrossAxisCount: minCrossAxisCount,
+    );
   }
 
   double scaleFontSize(double fontSize) {
@@ -113,6 +125,8 @@ class WorkCardDisplayNotifier extends StateNotifier<WorkCardDisplaySettings> {
   static const String keyCardSize = '${_keyPrefix}card_size';
   static const String keyFontScale = '${_keyPrefix}font_scale';
 
+  final Set<String> _dirtyKeys = {};
+
   WorkCardDisplayNotifier() : super(const WorkCardDisplaySettings()) {
     _loadSettings();
   }
@@ -121,7 +135,8 @@ class WorkCardDisplayNotifier extends StateNotifier<WorkCardDisplaySettings> {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (!mounted) return;
-      state = WorkCardDisplaySettings(
+
+      final loadedSettings = WorkCardDisplaySettings(
         showRating: prefs.getBool(_keyRating) ?? true,
         showPrice: prefs.getBool(_keyPrice) ?? true,
         showSales: prefs.getBool(_keySales) ?? true,
@@ -132,53 +147,100 @@ class WorkCardDisplayNotifier extends StateNotifier<WorkCardDisplaySettings> {
         cardSize: WorkCardSize.fromValue(prefs.getString(keyCardSize)),
         fontScale: WorkCardFontScale.fromValue(prefs.getString(keyFontScale)),
       );
+
+      if (_dirtyKeys.isEmpty) {
+        state = loadedSettings;
+        return;
+      }
+
+      state = loadedSettings.copyWith(
+        showRating: _dirtyKeys.contains(_keyRating) ? state.showRating : null,
+        showPrice: _dirtyKeys.contains(_keyPrice) ? state.showPrice : null,
+        showSales: _dirtyKeys.contains(_keySales) ? state.showSales : null,
+        showReleaseDate:
+            _dirtyKeys.contains(_keyReleaseDate) ? state.showReleaseDate : null,
+        showCircle: _dirtyKeys.contains(_keyCircle) ? state.showCircle : null,
+        showDuration:
+            _dirtyKeys.contains(_keyDuration) ? state.showDuration : null,
+        showSubtitleTag:
+            _dirtyKeys.contains(_keySubtitleTag) ? state.showSubtitleTag : null,
+        cardSize: _dirtyKeys.contains(keyCardSize) ? state.cardSize : null,
+        fontScale: _dirtyKeys.contains(keyFontScale) ? state.fontScale : null,
+      );
+      _dirtyKeys.clear();
     } catch (e) {
       // 加载失败，使用默认值
     }
   }
 
+  void _applyLocalChange(WorkCardDisplaySettings nextState, String key) {
+    _dirtyKeys.add(key);
+    state = nextState;
+  }
+
   Future<void> toggleRating() async {
-    state = state.copyWith(showRating: !state.showRating);
+    _applyLocalChange(
+      state.copyWith(showRating: !state.showRating),
+      _keyRating,
+    );
     await _saveSettings();
   }
 
   Future<void> togglePrice() async {
-    state = state.copyWith(showPrice: !state.showPrice);
+    _applyLocalChange(
+      state.copyWith(showPrice: !state.showPrice),
+      _keyPrice,
+    );
     await _saveSettings();
   }
 
   Future<void> toggleSales() async {
-    state = state.copyWith(showSales: !state.showSales);
+    _applyLocalChange(
+      state.copyWith(showSales: !state.showSales),
+      _keySales,
+    );
     await _saveSettings();
   }
 
   Future<void> toggleReleaseDate() async {
-    state = state.copyWith(showReleaseDate: !state.showReleaseDate);
+    _applyLocalChange(
+      state.copyWith(showReleaseDate: !state.showReleaseDate),
+      _keyReleaseDate,
+    );
     await _saveSettings();
   }
 
   Future<void> toggleCircle() async {
-    state = state.copyWith(showCircle: !state.showCircle);
+    _applyLocalChange(
+      state.copyWith(showCircle: !state.showCircle),
+      _keyCircle,
+    );
     await _saveSettings();
   }
 
   Future<void> toggleDuration() async {
-    state = state.copyWith(showDuration: !state.showDuration);
+    _applyLocalChange(
+      state.copyWith(showDuration: !state.showDuration),
+      _keyDuration,
+    );
     await _saveSettings();
   }
 
   Future<void> toggleSubtitleTag() async {
-    state = state.copyWith(showSubtitleTag: !state.showSubtitleTag);
+    _applyLocalChange(
+      state.copyWith(showSubtitleTag: !state.showSubtitleTag),
+      _keySubtitleTag,
+    );
     await _saveSettings();
   }
 
   Future<void> updateCardSize(WorkCardSize cardSize) async {
-    state = state.copyWith(cardSize: cardSize);
+    _applyLocalChange(state.copyWith(cardSize: cardSize), keyCardSize);
     await _saveSettings();
   }
 
   Future<void> updateFontScale(WorkCardFontScale fontScale) async {
-    state = state.copyWith(fontScale: fontScale);
+    _applyLocalChange(state.copyWith(fontScale: fontScale), keyFontScale);
     await _saveSettings();
   }
 

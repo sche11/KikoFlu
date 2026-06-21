@@ -36,6 +36,7 @@ class WorksGridView extends ConsumerWidget {
       case LayoutType.bigGrid:
         return _buildGridView(
           context,
+          layoutType: layoutType,
           crossAxisCount: displaySettings.applyCardSize(
             ResponsiveGridHelper.getBigGridCrossAxisCount(context),
           ),
@@ -43,8 +44,10 @@ class WorksGridView extends ConsumerWidget {
       case LayoutType.smallGrid:
         return _buildGridView(
           context,
+          layoutType: layoutType,
           crossAxisCount: displaySettings.applyCardSize(
             ResponsiveGridHelper.getSmallGridCrossAxisCount(context),
+            minCrossAxisCount: 2,
           ),
         );
       case LayoutType.list:
@@ -52,7 +55,11 @@ class WorksGridView extends ConsumerWidget {
     }
   }
 
-  Widget _buildGridView(BuildContext context, {required int crossAxisCount}) {
+  Widget _buildGridView(
+    BuildContext context, {
+    required LayoutType layoutType,
+    required int crossAxisCount,
+  }) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
 
@@ -71,6 +78,7 @@ class WorksGridView extends ConsumerWidget {
         SliverPadding(
           padding: EdgeInsets.all(padding),
           sliver: SliverMasonryGrid.count(
+            key: ValueKey('works-grid-${layoutType.name}-$crossAxisCount'),
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: spacing,
             mainAxisSpacing: spacing,

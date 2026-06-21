@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../providers/works_provider.dart';
+import '../providers/work_card_display_provider.dart';
 import '../widgets/enhanced_work_card.dart';
 import '../widgets/sort_dialog.dart';
 import '../widgets/pagination_bar.dart';
@@ -558,18 +559,23 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
   }
 
   Widget _buildLayoutView(WorksState worksState) {
+    final displaySettings = ref.watch(workCardDisplayProvider);
+
     switch (worksState.layoutType) {
       case LayoutType.bigGrid:
         return _buildGridView(
           worksState,
-          crossAxisCount:
-              ResponsiveGridHelper.getBigGridCrossAxisCount(context),
+          crossAxisCount: displaySettings.applyCardSize(
+            ResponsiveGridHelper.getBigGridCrossAxisCount(context),
+          ),
         );
       case LayoutType.smallGrid:
         return _buildGridView(
           worksState,
-          crossAxisCount:
-              ResponsiveGridHelper.getSmallGridCrossAxisCount(context),
+          crossAxisCount: displaySettings.applyCardSize(
+            ResponsiveGridHelper.getSmallGridCrossAxisCount(context),
+            minCrossAxisCount: 2,
+          ),
         );
       case LayoutType.list:
         return _buildListView(worksState);
@@ -593,6 +599,9 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
         SliverPadding(
           padding: EdgeInsets.all(padding),
           sliver: SliverMasonryGrid.count(
+            key: ValueKey(
+              'home-grid-${worksState.layoutType.name}-$crossAxisCount',
+            ),
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: spacing,
             mainAxisSpacing: spacing,

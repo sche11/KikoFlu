@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../providers/my_reviews_provider.dart';
 import '../providers/my_tabs_display_provider.dart';
+import '../providers/work_card_display_provider.dart';
 import '../utils/scroll_optimization.dart';
 import '../providers/auth_provider.dart';
 import '../utils/server_utils.dart';
@@ -485,18 +486,23 @@ class _MyScreenState extends ConsumerState<MyScreen>
       return const Center(child: CircularProgressIndicator());
     }
 
+    final displaySettings = ref.watch(workCardDisplayProvider);
+
     switch (state.layoutType) {
       case MyReviewLayoutType.bigGrid:
         return _buildGridView(
           state,
-          crossAxisCount:
-              ResponsiveGridHelper.getBigGridCrossAxisCount(context),
+          crossAxisCount: displaySettings.applyCardSize(
+            ResponsiveGridHelper.getBigGridCrossAxisCount(context),
+          ),
         );
       case MyReviewLayoutType.smallGrid:
         return _buildGridView(
           state,
-          crossAxisCount:
-              ResponsiveGridHelper.getSmallGridCrossAxisCount(context),
+          crossAxisCount: displaySettings.applyCardSize(
+            ResponsiveGridHelper.getSmallGridCrossAxisCount(context),
+            minCrossAxisCount: 2,
+          ),
         );
       case MyReviewLayoutType.list:
         return _buildListView(state);
@@ -531,6 +537,9 @@ class _MyScreenState extends ConsumerState<MyScreen>
             SliverPadding(
               padding: EdgeInsets.fromLTRB(padding, 8, padding, padding),
               sliver: SliverMasonryGrid.count(
+                key: ValueKey(
+                  'my-grid-${state.layoutType.name}-$crossAxisCount',
+                ),
                 crossAxisCount: crossAxisCount,
                 mainAxisSpacing: spacing,
                 crossAxisSpacing: spacing,

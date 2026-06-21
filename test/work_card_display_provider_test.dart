@@ -65,4 +65,32 @@ void main() {
     expect(prefs.getString(WorkCardDisplayNotifier.keyFontScale),
         WorkCardFontScale.large.value);
   });
+
+  test('card size can move back from default to large sizes repeatedly',
+      () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await _pumpAsyncPreferenceLoad();
+
+    final notifier = container.read(workCardDisplayProvider.notifier);
+
+    await notifier.updateCardSize(WorkCardSize.large);
+    expect(
+        container.read(workCardDisplayProvider).cardSize, WorkCardSize.large);
+    expect(container.read(workCardDisplayProvider).applyCardSize(2), 1);
+
+    await notifier.updateCardSize(WorkCardSize.normal);
+    expect(
+        container.read(workCardDisplayProvider).cardSize, WorkCardSize.normal);
+    expect(container.read(workCardDisplayProvider).applyCardSize(2), 2);
+
+    await notifier.updateCardSize(WorkCardSize.extraLarge);
+    expect(container.read(workCardDisplayProvider).cardSize,
+        WorkCardSize.extraLarge);
+    expect(container.read(workCardDisplayProvider).applyCardSize(3), 1);
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(WorkCardDisplayNotifier.keyCardSize),
+        WorkCardSize.extraLarge.value);
+  });
 }
