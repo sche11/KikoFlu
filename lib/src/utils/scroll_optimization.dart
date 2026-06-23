@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 
 /// 通用滚动优化工具类
 ///
-/// 统一管理滚动物理属性、缓存范围和防抖/节流逻辑，
-/// 提升 120Hz 高刷新率设备上的列表滚动流畅度。
+/// 统一管理滚动物理属性、缓存范围和少量滚动副作用节流逻辑。
 ///
 /// 使用方法：
 /// ```dart
@@ -18,12 +17,12 @@ import 'package:flutter/material.dart';
 class ScrollOptimization {
   ScrollOptimization._();
 
-  /// 推荐的缓存范围（像素）
+  /// 推荐的缓存范围（像素）。
   ///
-  /// 120Hz 设备需要更大的预加载缓存以减少快速滑动时的空白区域。
-  /// 800px ≈ 普通设备约 2~3 个 item 的预渲染距离，
-  /// 对 120fps 设备可以有效减少"白屏一闪"现象。
-  static const double cacheExtent = 800;
+  /// 信息流主要瓶颈通常是图片解码和卡片布局，过大的预构建范围会让
+  /// 主线程在滚动时提前做太多工作。保持接近 Flutter 默认值，只略微
+  /// 增加预载距离，减少瀑布流快速滚动时的瞬时负担。
+  static const double cacheExtent = 360;
 
   /// 平台自适应的滚动物理属性
   ///

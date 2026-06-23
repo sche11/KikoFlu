@@ -32,9 +32,6 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
     with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
 
-  // 防抖相关（仅用于热门/推荐模式的自动加载）
-  final ScrollThrottler _scrollThrottler =
-      ScrollThrottler(positionThreshold: 10);
   bool _isLoadingMore = false;
   int _slideDirection = 0;
   final Map<DisplayMode, double> _scrollPositions = {
@@ -47,7 +44,6 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     // 只在首次加载时获取数据，如果已有数据则不重新加载
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final worksState = ref.read(worksProvider);
@@ -59,50 +55,8 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
 
   @override
   void dispose() {
-    _scrollThrottler.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    _scrollThrottler.throttle(() {
-      if (!_scrollController.hasClients) return;
-
-      final currentPosition = _scrollController.position.pixels;
-      final maxScrollExtent = _scrollController.position.maxScrollExtent;
-
-      final worksState = ref.read(worksProvider);
-      _scrollPositions[worksState.displayMode] = currentPosition;
-      final isNearBottom = currentPosition >= maxScrollExtent - 50;
-
-      // 热门/推荐模式:自动加载更多（全部模式不需要处理，因为分页控件始终显示）
-      if (worksState.displayMode != DisplayMode.all) {
-        if (isNearBottom &&
-            !worksState.isLoading &&
-            worksState.hasMore &&
-            !_isLoadingMore) {
-          logOutput(
-              '[WorksScreen] Triggering load more - currentPage: ${worksState.currentPage}');
-          _isLoadingMore = true;
-
-          ref.read(worksProvider.notifier).loadWorks().then((_) {
-            if (mounted) {
-              setState(() {
-                _isLoadingMore = false;
-              });
-              logOutput('[WorksScreen] Load more completed');
-            }
-          }).catchError((error) {
-            if (mounted) {
-              setState(() {
-                _isLoadingMore = false;
-              });
-              logOutput('[WorksScreen] Load more error: $error');
-            }
-          });
-        }
-      }
-    }, controller: _scrollController);
   }
 
   void _showSortDialog(BuildContext context) {
@@ -192,6 +146,31 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
       final clamped = targetOffset.clamp(0.0, safeMax).toDouble();
       _scrollController.jumpTo(clamped);
     });
+  }
+
+  Future<void> _loadMoreForMode(DisplayMode expectedMode) async {
+    if (_isLoadingMore || !mounted) return;
+
+    final latestState = ref.read(worksProvider);
+    if (latestState.displayMode != expectedMode ||
+        latestState.displayMode == DisplayMode.all ||
+        latestState.isLoading ||
+        !latestState.hasMore) {
+      return;
+    }
+
+    _isLoadingMore = true;
+    logOutput(
+        '[WorksScreen] Triggering load more from footer - currentPage: ${latestState.currentPage}');
+
+    try {
+      await ref.read(worksProvider.notifier).loadWorks();
+      logOutput('[WorksScreen] Load more completed');
+    } catch (error) {
+      logOutput('[WorksScreen] Load more error: $error');
+    } finally {
+      _isLoadingMore = false;
+    }
   }
 
   void _handleSwipe(DragEndDetails details) {
@@ -610,9 +589,15 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
             itemBuilder: (context, index) {
               // 热门/推荐模式:在底部显示加载指示器
               if (!isAllMode && index == worksState.works.length) {
-                return const SizedBox(
-                  height: 100, // 统一加载指示器高度
-                  child: Center(child: CircularProgressIndicator()),
+                return _LoadMoreFooter(
+                  generation:
+                      '${worksState.displayMode.name}-${worksState.currentPage}-${worksState.works.length}',
+                  enabled: !worksState.isLoading && worksState.hasMore,
+                  onVisible: () => _loadMoreForMode(worksState.displayMode),
+                  child: const SizedBox(
+                    height: 100, // 统一加载指示器高度
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
                 );
               }
 
@@ -747,10 +732,16 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
                 if (!isAllMode &&
                     index == worksState.works.length &&
                     worksState.hasMore) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
+                  return _LoadMoreFooter(
+                    generation:
+                        '${worksState.displayMode.name}-${worksState.currentPage}-${worksState.works.length}',
+                    enabled: !worksState.isLoading && worksState.hasMore,
+                    onVisible: () => _loadMoreForMode(worksState.displayMode),
+                    child: const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
                   );
                 }
@@ -857,4 +848,52 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
       );
     }
   }
+}
+
+class _LoadMoreFooter extends StatefulWidget {
+  final Object generation;
+  final bool enabled;
+  final VoidCallback onVisible;
+  final Widget child;
+
+  const _LoadMoreFooter({
+    required this.generation,
+    required this.enabled,
+    required this.onVisible,
+    required this.child,
+  });
+
+  @override
+  State<_LoadMoreFooter> createState() => _LoadMoreFooterState();
+}
+
+class _LoadMoreFooterState extends State<_LoadMoreFooter> {
+  Object? _lastTriggeredGeneration;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant _LoadMoreFooter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scheduleIfNeeded();
+  }
+
+  void _scheduleIfNeeded() {
+    if (!widget.enabled || _lastTriggeredGeneration == widget.generation) {
+      return;
+    }
+
+    _lastTriggeredGeneration = widget.generation;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !widget.enabled) return;
+      widget.onVisible();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

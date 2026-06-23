@@ -601,21 +601,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     }
 
     final url = widget.work.getCoverImageUrl(host, token: token);
-    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-    // 依据不同布局控制图片缓存尺寸，避免加载超大原图导致卡顿
-    int targetWidth;
-    switch (widget.crossAxisCount) {
-      case 3:
-        targetWidth =
-            (MediaQuery.sizeOf(context).width / 3 * devicePixelRatio).round();
-        break;
-      case 2:
-        targetWidth =
-            (MediaQuery.sizeOf(context).width / 2 * devicePixelRatio).round();
-        break;
-      default:
-        targetWidth = (80 * devicePixelRatio).round(); // 列表模式封面固定宽度
-    }
+    final targetWidth = _resolveCoverCacheWidth(context);
 
     final httpHeaders = StorageService.serverCookieHeaders;
 
@@ -647,6 +633,26 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
         ),
       ),
     );
+  }
+
+  int _resolveCoverCacheWidth(BuildContext context) {
+    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+
+    // 列表样式的封面是固定 80dp，避免按整屏宽度解码。
+    if (widget.crossAxisCount <= 1) {
+      return (80 * devicePixelRatio).round().clamp(160, 512);
+    }
+
+    final columns = widget.crossAxisCount.clamp(2, 6);
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final spacing = isLandscape ? 24.0 : 8.0;
+    final padding = isLandscape ? 24.0 : 8.0;
+    final availableWidth = screenWidth - padding * 2 - spacing * (columns - 1);
+    final logicalWidth = (availableWidth / columns).clamp(80.0, screenWidth);
+
+    return (logicalWidth * devicePixelRatio).round().clamp(160, 1024);
   }
 
   Widget _buildPlaceholder(BuildContext context) {
