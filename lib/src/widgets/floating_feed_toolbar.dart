@@ -9,7 +9,6 @@ class FloatingFeedModeAction {
   const FloatingFeedModeAction({
     this.id,
     this.sfSymbol,
-    this.selectedSfSymbol,
     required this.icon,
     required this.label,
     required this.isSelected,
@@ -18,7 +17,6 @@ class FloatingFeedModeAction {
 
   final String? id;
   final String? sfSymbol;
-  final String? selectedSfSymbol;
   final IconData icon;
   final String label;
   final bool isSelected;
@@ -155,11 +153,7 @@ class FloatingFeedToolbar extends StatelessWidget {
     return FloatingToolbarGlassGroup(child: toolbar);
   }
 
-  static double _modeActionWidth(
-    BuildContext context,
-    String label, {
-    bool hasIcon = true,
-  }) {
+  static double _modeActionWidth(BuildContext context, String label) {
     final painter = TextPainter(
       text: TextSpan(
         text: label,
@@ -171,7 +165,7 @@ class FloatingFeedToolbar extends StatelessWidget {
       textScaler: MediaQuery.textScalerOf(context),
       maxLines: 1,
     )..layout();
-    final width = 24 + (hasIcon ? 24 : 0) + painter.width;
+    final width = 24 + 18 + 6 + painter.width;
     painter.dispose();
     return width;
   }
@@ -185,16 +179,10 @@ class FloatingToolbarSegmentedControl extends ConsumerWidget {
     super.key,
     required this.actions,
     required this.fallback,
-    this.onReselected,
-    this.selectedColor,
-    this.selectedBackgroundColor,
   });
 
   final List<FloatingFeedModeAction> actions;
   final Widget fallback;
-  final ValueChanged<int>? onReselected;
-  final Color? selectedColor;
-  final Color? selectedBackgroundColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -209,11 +197,7 @@ class FloatingToolbarSegmentedControl extends ConsumerWidget {
     final theme = Theme.of(context);
     final widths = [
       for (final action in actions)
-        FloatingFeedToolbar._modeActionWidth(
-          context,
-          action.label,
-          hasIcon: action.sfSymbol != null || action.selectedSfSymbol != null,
-        ),
+        FloatingFeedToolbar._modeActionWidth(context, action.label),
     ];
     final preferredWidth =
         8 + widths.fold<double>(0, (sum, width) => sum + width);
@@ -222,31 +206,23 @@ class FloatingToolbarSegmentedControl extends ConsumerWidget {
       builder: (context, constraints) => SizedBox(
         width: preferredWidth.clamp(0, constraints.maxWidth).toDouble(),
         height: 48,
-        child: FloatingToolbarSurface(
-          padding: EdgeInsets.zero,
-          clipContent: false,
-          child: NativeGlassSegmentedControl(
-            items: [
-              for (final action in actions)
-                LiquidGlassSegment(
-                  id: action.id ?? action.label,
-                  label: action.label,
-                  sfSymbol: action.sfSymbol,
-                  selectedSfSymbol: action.selectedSfSymbol,
-                ),
-            ],
-            currentIndex: selectedIndex < 0 ? 0 : selectedIndex,
-            onChanged: (index) => actions[index].onPressed(),
-            onReselected: onReselected,
-            segmentWidths: widths,
-            fontSize: MediaQuery.textScalerOf(
-              context,
-            ).scale(theme.textTheme.labelLarge?.fontSize ?? 14),
-            selectedColor: selectedColor ?? theme.colorScheme.primary,
-            selectedBackgroundColor:
-                selectedBackgroundColor ?? theme.colorScheme.primaryContainer,
-            foregroundColor: theme.colorScheme.onSurfaceVariant,
-          ),
+        child: NativeGlassSegmentedControl(
+          items: [
+            for (final action in actions)
+              LiquidGlassSegment(
+                id: action.id ?? action.label,
+                label: action.label,
+                sfSymbol: action.sfSymbol,
+              ),
+          ],
+          currentIndex: selectedIndex < 0 ? 0 : selectedIndex,
+          onChanged: (index) => actions[index].onPressed(),
+          segmentWidths: widths,
+          fontSize: MediaQuery.textScalerOf(
+            context,
+          ).scale(theme.textTheme.labelLarge?.fontSize ?? 14),
+          selectedColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );
@@ -492,14 +468,10 @@ class FloatingToolbarSurface extends ConsumerWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(4),
-    this.clipContent = true,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
-
-  /// Native controls draw their pressed lens beyond the resting capsule.
-  final bool clipContent;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -518,7 +490,7 @@ class FloatingToolbarSurface extends ConsumerWidget {
         shape: const LiquidGlassShape.capsule(),
         style: LiquidGlassStyle.regular,
         fallbackIntensity: fallbackGlassTransparency,
-        child: LiquidGlass.isNativePlatform && clipContent
+        child: LiquidGlass.isNativePlatform
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(_radius),
                 child: content,

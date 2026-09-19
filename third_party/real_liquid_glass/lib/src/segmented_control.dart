@@ -11,13 +11,11 @@ class LiquidGlassSegment {
     required this.id,
     required this.label,
     this.sfSymbol,
-    this.selectedSfSymbol,
   });
 
   final String id;
   final String label;
   final String? sfSymbol;
-  final String? selectedSfSymbol;
 }
 
 /// A complete UIKit segmented control, including its touch-driven selection
@@ -36,8 +34,6 @@ class NativeGlassSegmentedControl extends StatefulWidget {
     required this.fontSize,
     required this.selectedColor,
     required this.foregroundColor,
-    required this.selectedBackgroundColor,
-    this.onReselected,
   }) : assert(items.length >= 2),
        assert(currentIndex >= 0 && currentIndex < items.length),
        assert(segmentWidths.length == items.length);
@@ -49,8 +45,6 @@ class NativeGlassSegmentedControl extends StatefulWidget {
   final double fontSize;
   final Color selectedColor;
   final Color foregroundColor;
-  final Color selectedBackgroundColor;
-  final ValueChanged<int>? onReselected;
 
   @override
   State<NativeGlassSegmentedControl> createState() =>
@@ -60,25 +54,17 @@ class NativeGlassSegmentedControl extends StatefulWidget {
 class _NativeGlassSegmentedControlState
     extends State<NativeGlassSegmentedControl> {
   MethodChannel? _channel;
-  String? _selectedId;
 
   Map<String, Object?> get _params => {
     'items': [
       for (final item in widget.items)
-        {
-          'id': item.id,
-          'label': item.label,
-          'symbol': item.sfSymbol,
-          'selectedSymbol': item.selectedSfSymbol,
-        },
+        {'id': item.id, 'label': item.label, 'symbol': item.sfSymbol},
     ],
     'selectedId': widget.items[widget.currentIndex].id,
     'widths': widget.segmentWidths,
     'fontSize': widget.fontSize,
     'selectedColor': widget.selectedColor.toARGB32(),
     'foregroundColor': widget.foregroundColor.toARGB32(),
-    'selectedBackgroundColor': widget.selectedBackgroundColor.toARGB32(),
-    'allowReselect': widget.onReselected != null,
     'dark': CupertinoTheme.brightnessOf(context) == Brightness.dark,
     'rtl': Directionality.of(context) == TextDirection.rtl,
   };
@@ -95,32 +81,21 @@ class _NativeGlassSegmentedControlState
     _update();
   }
 
-  void _update() {
-    _selectedId = widget.items[widget.currentIndex].id;
-    _channel?.invokeMethod<void>('update', _params);
-  }
+  void _update() => _channel?.invokeMethod<void>('update', _params);
 
   void _onCreated(int id) {
     if (!mounted) return;
     final channel = MethodChannel('real_liquid_glass/segmented_control_$id');
     _channel = channel;
     channel.setMethodCallHandler((call) async {
-      if (call.arguments is! Map) return;
+      if (call.method != 'selected' || call.arguments is! Map) return;
       final id = (call.arguments as Map)['id'];
       final index = widget.items.indexWhere((item) => item.id == id);
       // Ignore delayed callbacks for tabs removed while the platform view was
       // tracking a touch. UIKit already filters repeated selections; comparing
       // with widget.currentIndex here would drop a return selection received
       // before Flutter has rebuilt after the previous native selection.
-      if (index < 0) return;
-      if (call.method == 'selected') {
-        // A second tap may arrive before the parent's next Flutter frame.
-        _selectedId = widget.items[index].id;
-        widget.onChanged(index);
-      }
-      if (call.method == 'reselected' && id == _selectedId) {
-        widget.onReselected?.call(index);
-      }
+      if (index >= 0) widget.onChanged(index);
     });
     // Selection/settings may have changed while UIKit was creating the view.
     _update();

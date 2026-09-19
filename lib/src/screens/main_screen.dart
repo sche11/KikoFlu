@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:real_liquid_glass/real_liquid_glass.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../providers/audio_provider.dart';
 import '../providers/update_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/main_bottom_navigation_bar.dart';
-import '../widgets/main_navigation_rail.dart';
 import '../widgets/mini_player.dart';
 import '../widgets/liquid_glass_layout.dart';
 import 'works_screen.dart';
@@ -114,19 +114,38 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               children: [
                 // 侧边导航栏
                 SafeArea(
-                  child: Padding(
-                    padding: useLiquidGlass
-                        ? const EdgeInsets.all(8)
-                        : EdgeInsets.zero,
-                    child: MainNavigationRail(
-                      selectedIndex: _currentIndex,
-                      onDestinationSelected: _handleDestinationSelected,
-                      destinations: destinations,
-                      liquidGlass: useLiquidGlass,
-                      fallbackGlassTransparency: ref.watch(
-                        fallbackGlassTransparencyProvider,
+                  child: SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height -
+                            MediaQuery.of(context).padding.top -
+                            MediaQuery.of(context).padding.bottom,
                       ),
-                      showUpdateBadge: showUpdateBadge,
+                      child: IntrinsicHeight(
+                        child: Padding(
+                          padding: useLiquidGlass
+                              ? const EdgeInsets.all(8)
+                              : EdgeInsets.zero,
+                          child: useLiquidGlass
+                              ? Consumer(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(28),
+                                    child: _buildNavigationRail(destinations),
+                                  ),
+                                  builder: (context, ref, child) {
+                                    return LiquidGlassContainer(
+                                      shape: const LiquidGlassShape
+                                          .roundedRectangle(28),
+                                      fallbackIntensity: ref.watch(
+                                        fallbackGlassTransparencyProvider,
+                                      ),
+                                      child: child,
+                                    );
+                                  },
+                                )
+                              : _buildNavigationRail(destinations),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -426,5 +445,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             child: portraitScaffold,
           )
         : portraitScaffold;
+  }
+
+  Widget _buildNavigationRail(List<NavigationDestination> destinations) {
+    return NavigationRail(
+      selectedIndex: _currentIndex,
+      onDestinationSelected: _handleDestinationSelected,
+      labelType: NavigationRailLabelType.selected,
+      destinations: destinations
+          .map((dest) => NavigationRailDestination(
+                icon: dest.icon,
+                selectedIcon: dest.selectedIcon,
+                label: Text(dest.label),
+              ))
+          .toList(),
+    );
   }
 }
