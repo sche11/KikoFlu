@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../services/download_service.dart';
 import '../models/download_task.dart';
@@ -12,7 +11,7 @@ class DownloadFab extends StatelessWidget {
 
   void _navigateToDownloads(BuildContext context) {
     Navigator.of(context).push(
-      AppPageRoute(
+      MaterialPageRoute(
         builder: (context) => const DownloadsScreen(),
       ),
     );

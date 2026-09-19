@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import 'audio_format_settings_screen.dart';
 import 'blocked_items_screen.dart';
@@ -168,7 +167,7 @@ class PreferencesScreen extends ConsumerWidget {
                 final navigator = Navigator.of(dialogContext);
                 navigator.pop();
                 await navigator.push(
-                  AppPageRoute(
+                  MaterialPageRoute(
                     builder: (context) => const LLMSettingsScreen(),
                   ),
                 );
@@ -446,7 +445,7 @@ class PreferencesScreen extends ConsumerWidget {
                   subtitle: S.of(context).llmSettingsSubtitle,
                   onTap: () {
                     Navigator.of(context).push(
-                      AppPageRoute(
+                      MaterialPageRoute(
                         builder: (context) => const LLMSettingsScreen(),
                       ),
                     );
@@ -505,7 +504,7 @@ class PreferencesScreen extends ConsumerWidget {
                 subtitle: S.of(context).audioFormatSubtitle,
                 onTap: () {
                   Navigator.of(context).push(
-                    AppPageRoute(
+                    MaterialPageRoute(
                       builder: (context) => const AudioFormatSettingsScreen(),
                     ),
                   );

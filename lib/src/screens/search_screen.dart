@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../models/search_type.dart';
 import '../providers/auth_provider.dart';
@@ -280,7 +279,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     if (mounted) {
       Navigator.push(
         context,
-        AppPageRoute(
+        MaterialPageRoute(
           builder: (context) => SearchResultScreen(
             keyword: searchKeyword,
             searchTypeLabel: null, // 不使用单一标签
@@ -295,7 +294,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   void _searchFromHistory(SearchHistoryItem historyItem) {
     Navigator.push(
       context,
-      AppPageRoute(
+      MaterialPageRoute(
         builder: (context) => SearchResultScreen(
           keyword: historyItem.keyword,
           searchTypeLabel: null,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../utils/app_page_route.dart';
 import '../providers/playlist_detail_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/playlist_display_provider.dart';
@@ -557,7 +556,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
-          AppPageRoute(
+          MaterialPageRoute(
             builder: (context) => WorkDetailScreen(
               work: work,
               initialCoverImageProvider: initialCoverImageProvider,

@@ -17,9 +17,6 @@ public class LiquidGlassContainerPlugin: NSObject, FlutterPlugin {
     registrar.register(
       NativeTabBarViewFactory(messenger: registrar.messenger()),
       withId: "real_liquid_glass/tab_bar")
-    registrar.register(
-      NativeSegmentedControlViewFactory(messenger: registrar.messenger()),
-      withId: "real_liquid_glass/segmented_control")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

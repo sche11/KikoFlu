@@ -5,7 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 
-import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../models/download_task.dart';
 import '../models/sort_options.dart';
@@ -471,7 +470,7 @@ class _LocalDownloadsScreenState extends ConsumerState<LocalDownloadsScreen>
 
       if (mounted) {
         Navigator.of(context).push(
-          AppPageRoute(
+          MaterialPageRoute(
             builder: (context) => OfflineWorkDetailScreen(
               work: work,
               isOffline: true,

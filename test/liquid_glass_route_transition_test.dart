@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kikoeru_flutter/src/utils/app_page_route.dart';
 import 'package:real_liquid_glass/real_liquid_glass.dart';
 
 void main() {
@@ -31,12 +30,10 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(find.byType(nativeViewType), findsOneWidget);
-          final originalNativeView = tester.element(
-            find.byType(nativeViewType),
-          );
+          final originalNativeView = tester.element(find.byType(nativeViewType));
 
           navigatorKey.currentState!.push(
-            AppPageRoute<void>(builder: (_) => glassPage()),
+            MaterialPageRoute<void>(builder: (_) => glassPage()),
           );
           await tester.pump();
           expect(find.byType(nativeViewType), findsWidgets);
@@ -45,30 +42,10 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byType(nativeViewType), findsOneWidget);
 
-          final detailNativeView = tester.element(find.byType(nativeViewType));
-          final gesture = await tester.startGesture(const Offset(240, 150));
-          await gesture.moveBy(const Offset(30, 0));
-          await gesture.moveBy(const Offset(140, 0));
-          await tester.pump();
-          expect(originalNativeView.mounted, isTrue);
-          expect(detailNativeView.mounted, isTrue);
-          await gesture.cancel();
-          await tester.pumpAndSettle();
-          expect(tester.element(find.byType(nativeViewType)), detailNativeView);
-
-          await tester.timedDragFrom(
-            const Offset(240, 150),
-            const Offset(520, 0),
-            const Duration(seconds: 1),
-          );
+          navigatorKey.currentState!.pop();
           await tester.pump();
           expect(find.byType(nativeViewType), findsWidgets);
           expect(originalNativeView.mounted, isTrue);
-          await tester.pumpAndSettle();
-          expect(
-            tester.element(find.byType(nativeViewType)),
-            originalNativeView,
-          );
         } finally {
           debugDefaultTargetPlatformOverride = null;
         }

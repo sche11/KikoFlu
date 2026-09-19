@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../utils/app_page_route.dart';
 import '../utils/snackbar_util.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -599,7 +598,7 @@ class _WorkDetailScreenState extends ConsumerState<WorkDetailScreen> {
             editions: work.otherLanguageEditions,
             onEditionSelected: (edition) {
               Navigator.of(context).push(
-                AppPageRoute(
+                MaterialPageRoute(
                   builder: (context) => WorkDetailScreen(
                     work: Work(
                       id: edition.id,

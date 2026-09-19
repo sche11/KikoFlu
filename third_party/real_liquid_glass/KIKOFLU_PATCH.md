@@ -10,11 +10,6 @@ KikoFlu includes these local adjustments:
   corners.
 - Calibrate the non-Apple Flutter fallback with a wider transparency range,
   clearer fill, and restrained blur. Native iOS/macOS materials are unchanged.
-- Add an iOS `UISegmentedControl` bridge for floating mode/tab selectors. UIKit
-  owns the pressed selection lens and drag tracking; icon/label content and
-  accessibility stay native. Stable item IDs synchronize selection with Flutter,
-  and a native scroll view accommodates narrow layouts. Other platforms and
-  older iOS versions keep the app's existing controls.
 
 The local mirror can be removed after an upstream release includes equivalent
 behavior.

@@ -272,24 +272,18 @@ class _WorksScreenState extends ConsumerState<WorksScreen>
   ) {
     return [
       FloatingFeedModeAction(
-        id: DisplayMode.all.name,
-        sfSymbol: 'square.grid.2x2',
         icon: Icons.grid_view,
         label: S.of(context).displayModeAll,
         isSelected: worksState.displayMode == DisplayMode.all,
         onPressed: () => _changeDisplayMode(DisplayMode.all),
       ),
       FloatingFeedModeAction(
-        id: DisplayMode.popular.name,
-        sfSymbol: 'flame',
         icon: Icons.local_fire_department,
         label: S.of(context).displayModePopular,
         isSelected: worksState.displayMode == DisplayMode.popular,
         onPressed: () => _changeDisplayMode(DisplayMode.popular),
       ),
       FloatingFeedModeAction(
-        id: DisplayMode.recommended.name,
-        sfSymbol: 'sparkles',
         icon: Icons.auto_awesome,
         label: S.of(context).displayModeRecommended,
         isSelected: worksState.displayMode == DisplayMode.recommended,

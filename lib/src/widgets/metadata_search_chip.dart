@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../utils/app_page_route.dart';
 import '../screens/search_result_screen.dart';
 
 enum MetadataChipTone {
@@ -166,7 +165,7 @@ class MetadataSearchChip extends StatelessWidget {
 
     Navigator.push(
       context,
-      AppPageRoute(
+      MaterialPageRoute(
         builder: (context) => SearchResultScreen(
           keyword: searchKeyword,
           searchTypeLabel: searchTypeLabel,

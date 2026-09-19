@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import 'player_buttons_settings_screen.dart';
 import 'player_lyric_style_screen.dart';
@@ -54,7 +53,7 @@ class UiSettingsScreen extends ConsumerWidget {
                 subtitle: S.of(context).playerButtonSettingsSubtitle,
                 onTap: () {
                   Navigator.of(context).push(
-                    AppPageRoute(
+                    MaterialPageRoute(
                       builder: (context) => const PlayerButtonsSettingsScreen(),
                     ),
                   );
@@ -66,7 +65,7 @@ class UiSettingsScreen extends ConsumerWidget {
                 subtitle: S.of(context).playerLyricStyleSubtitle,
                 onTap: () {
                   Navigator.of(context).push(
-                    AppPageRoute(
+                    MaterialPageRoute(
                       builder: (context) => const PlayerLyricStyleScreen(),
                     ),
                   );
@@ -83,7 +82,7 @@ class UiSettingsScreen extends ConsumerWidget {
                 subtitle: S.of(context).workDetailDisplaySubtitle,
                 onTap: () {
                   Navigator.of(context).push(
-                    AppPageRoute(
+                    MaterialPageRoute(
                       builder: (context) =>
                           const WorkDetailDisplaySettingsScreen(),
                     ),
@@ -96,7 +95,7 @@ class UiSettingsScreen extends ConsumerWidget {
                 subtitle: S.of(context).workCardDisplaySubtitle,
                 onTap: () {
                   Navigator.of(context).push(
-                    AppPageRoute(
+                    MaterialPageRoute(
                       builder: (context) =>
                           const WorkCardDisplaySettingsScreen(),
                     ),
@@ -109,7 +108,7 @@ class UiSettingsScreen extends ConsumerWidget {
                 subtitle: S.of(context).myTabsDisplaySubtitle,
                 onTap: () {
                   Navigator.of(context).push(
-                    AppPageRoute(
+                    MaterialPageRoute(
                       builder: (context) => const MyTabsDisplaySettingsScreen(),
                     ),
                   );

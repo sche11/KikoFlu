@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../../utils/app_page_route.dart';
 import '../../models/work.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/recommendation_provider.dart';
@@ -187,7 +186,7 @@ class _RecommendationCard extends ConsumerWidget {
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).push(
-            AppPageRoute(
+            MaterialPageRoute(
               builder: (context) => WorkDetailScreen(
                 work: work,
                 heroTag: 'rec_work_cover_${work.id}',
