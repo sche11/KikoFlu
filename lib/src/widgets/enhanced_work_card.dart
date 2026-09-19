@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../utils/app_page_route.dart';
 import '../models/work.dart';
 import '../providers/auth_provider.dart';
 import '../providers/work_card_display_provider.dart';
@@ -130,7 +131,7 @@ class _EnhancedWorkCardState extends ConsumerState<EnhancedWorkCard> {
     final cardOnTap = widget.onTap ??
         () {
           Navigator.of(context).push(
-            MaterialPageRoute(
+            AppPageRoute(
               builder: (context) => WorkDetailScreen(
                 work: widget.work,
                 initialCoverImageProvider: initialCoverImageProvider,

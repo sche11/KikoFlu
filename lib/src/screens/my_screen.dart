@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/app_page_route.dart';
 import '../providers/my_reviews_provider.dart';
 import '../providers/my_tabs_display_provider.dart';
 import '../providers/works_provider.dart' show LayoutType;
@@ -56,6 +57,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     if (settings.showOnlineMarks) {
       tabs.add(_TabInfo(
+        id: 'online-marks',
+        sfSymbol: 'bookmark',
         title: S.of(context).onlineMarks,
         icon: Icons.bookmark,
         index: 0,
@@ -70,6 +73,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     // 历史记录
     tabs.add(_TabInfo(
+      id: 'history',
+      sfSymbol: 'clock.arrow.circlepath',
       title: S.of(context).historyRecord,
       icon: Icons.history,
       index: tabs.length,
@@ -78,6 +83,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     if (settings.showPlaylists && isOfficialServer) {
       tabs.add(_TabInfo(
+        id: 'playlists',
+        sfSymbol: 'music.note.list',
         title: S.of(context).playlists,
         icon: Icons.playlist_play,
         index: 1,
@@ -87,6 +94,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     // 已下载始终显示
     tabs.add(_TabInfo(
+      id: 'downloads',
+      sfSymbol: 'arrow.down.circle',
       title: S.of(context).downloaded,
       icon: Icons.download_done,
       index: 2,
@@ -115,6 +124,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
     if (settings.showSubtitleLibrary) {
       tabs.add(_TabInfo(
+        id: 'subtitles',
+        sfSymbol: 'captions.bubble',
         title: S.of(context).subtitleLibrary,
         icon: Icons.subtitles,
         index: 3,
@@ -157,7 +168,7 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
   void _navigateToDownloads() {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      AppPageRoute(
         builder: (context) => const DownloadsScreen(),
       ),
     );
@@ -249,6 +260,15 @@ class _MyScreenState extends ConsumerState<MyScreen>
         return Icons.schedule;
     }
   }
+
+  String _getFilterSymbol(MyReviewFilter filter) => switch (filter) {
+        MyReviewFilter.all => 'infinity',
+        MyReviewFilter.marked => 'bookmark',
+        MyReviewFilter.listening => 'headphones',
+        MyReviewFilter.listened => 'checkmark.circle',
+        MyReviewFilter.replay => 'arrow.counterclockwise',
+        MyReviewFilter.postponed => 'clock',
+      };
 
   void _showSortDialog() {
     final state = ref.read(myReviewsProvider);
@@ -358,37 +378,55 @@ class _MyScreenState extends ConsumerState<MyScreen>
                       ),
                     ),
                   ),
-                  child: FloatingToolbarSurface(
-                    child: SizedBox(
-                      height: 40,
-                      child: TabBar(
-                        controller: _tabController,
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.start,
-                        dividerColor: Colors.transparent,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        indicator: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        labelColor: Theme.of(context).colorScheme.primary,
-                        unselectedLabelColor:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                        splashBorderRadius: BorderRadius.circular(20),
-                        tabs: tabs
-                            .map(
-                              (tab) => Tab(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(tab.icon, size: 18),
-                                    const SizedBox(width: 6),
-                                    Text(tab.title),
-                                  ],
+                  child: AnimatedBuilder(
+                    animation: _tabController,
+                    builder: (context, fallback) =>
+                        FloatingToolbarSegmentedControl(
+                      actions: [
+                        for (var index = 0; index < tabs.length; index++)
+                          FloatingFeedModeAction(
+                            id: tabs[index].id,
+                            sfSymbol: tabs[index].sfSymbol,
+                            icon: tabs[index].icon,
+                            label: tabs[index].title,
+                            isSelected: _tabController.index == index,
+                            onPressed: () => _tabController.animateTo(index),
+                          ),
+                      ],
+                      fallback: fallback!,
+                    ),
+                    child: FloatingToolbarSurface(
+                      child: SizedBox(
+                        height: 40,
+                        child: TabBar(
+                          controller: _tabController,
+                          isScrollable: true,
+                          tabAlignment: TabAlignment.start,
+                          dividerColor: Colors.transparent,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicator: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          labelColor: Theme.of(context).colorScheme.primary,
+                          unselectedLabelColor:
+                              Theme.of(context).colorScheme.onSurfaceVariant,
+                          splashBorderRadius: BorderRadius.circular(20),
+                          tabs: tabs
+                              .map(
+                                (tab) => Tab(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(tab.icon, size: 18),
+                                      const SizedBox(width: 6),
+                                      Text(tab.title),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                            .toList(),
+                              )
+                              .toList(),
+                        ),
                       ),
                     ),
                   ),
@@ -421,6 +459,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
             modeActions: [
               for (final filter in MyReviewFilter.values)
                 FloatingFeedModeAction(
+                  id: filter.name,
+                  sfSymbol: _getFilterSymbol(filter),
                   icon: _getFilterIcon(filter),
                   label: filter.localizedLabel(context),
                   isSelected: state.filter == filter,
@@ -542,6 +582,8 @@ class _MyScreenState extends ConsumerState<MyScreen>
 
 // Helper class to organize tab information
 class _TabInfo {
+  final String id;
+  final String sfSymbol;
   final String title;
   final IconData icon;
   final int index;
@@ -550,6 +592,8 @@ class _TabInfo {
   final Widget? fabWidget;
 
   const _TabInfo({
+    required this.id,
+    required this.sfSymbol,
     required this.title,
     required this.icon,
     required this.index,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../models/account.dart';
 import '../services/account_database.dart';
@@ -86,7 +87,7 @@ class _AccountManagementScreenState
     // Navigate to login screen in "add account" mode
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
+      AppPageRoute(
         builder: (context) => const LoginScreen(isAddingAccount: true),
       ),
     );

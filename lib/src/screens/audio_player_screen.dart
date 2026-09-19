@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/app_page_route.dart';
 import '../models/work.dart';
 import '../providers/audio_provider.dart';
 import '../providers/auth_provider.dart';
@@ -1071,7 +1072,7 @@ class _AudioPlayerScreenState extends ConsumerState<AudioPlayerScreen> {
         Navigator.of(context).pop();
 
         Navigator.of(context).push(
-          MaterialPageRoute(
+          AppPageRoute(
             builder: (context) => WorkDetailScreen(work: work),
           ),
         );

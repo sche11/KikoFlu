@@ -7,12 +7,16 @@ import '../providers/settings_provider.dart';
 
 class FloatingFeedModeAction {
   const FloatingFeedModeAction({
+    this.id,
+    this.sfSymbol,
     required this.icon,
     required this.label,
     required this.isSelected,
     required this.onPressed,
   });
 
+  final String? id;
+  final String? sfSymbol;
   final IconData icon;
   final String label;
   final bool isSelected;
@@ -110,12 +114,19 @@ class FloatingFeedToolbar extends StatelessWidget {
                   ),
                 )
               : modeRow;
-          final modeSurface = FloatingToolbarSurface(
-            key: const ValueKey('feed-mode-capsule'),
-            child: useDropdown
-                ? _ModeDropdown(actions: modeActions, maxWidth: dropdownWidth)
-                : modeContent,
-          );
+          final modeSurface = useDropdown
+              ? FloatingToolbarSurface(
+                  key: const ValueKey('feed-mode-capsule'),
+                  child: _ModeDropdown(
+                    actions: modeActions,
+                    maxWidth: dropdownWidth,
+                  ),
+                )
+              : FloatingToolbarSegmentedControl(
+                  key: const ValueKey('feed-mode-capsule'),
+                  actions: modeActions,
+                  fallback: FloatingToolbarSurface(child: modeContent),
+                );
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,7 +153,7 @@ class FloatingFeedToolbar extends StatelessWidget {
     return FloatingToolbarGlassGroup(child: toolbar);
   }
 
-  double _modeActionWidth(BuildContext context, String label) {
+  static double _modeActionWidth(BuildContext context, String label) {
     final painter = TextPainter(
       text: TextSpan(
         text: label,
@@ -154,7 +165,67 @@ class FloatingFeedToolbar extends StatelessWidget {
       textScaler: MediaQuery.textScalerOf(context),
       maxLines: 1,
     )..layout();
-    return 24 + 18 + 6 + painter.width;
+    final width = 24 + 18 + 6 + painter.width;
+    painter.dispose();
+    return width;
+  }
+}
+
+/// A complete native segmented control where iOS supports Liquid Glass.
+/// Keep the existing Flutter control (including its opacity preference) for
+/// legacy iOS, macOS, other platforms, and when glass navigation is disabled.
+class FloatingToolbarSegmentedControl extends ConsumerWidget {
+  const FloatingToolbarSegmentedControl({
+    super.key,
+    required this.actions,
+    required this.fallback,
+  });
+
+  final List<FloatingFeedModeAction> actions;
+  final Widget fallback;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final useLiquidGlass = ref.watch(liquidGlassNavigationProvider);
+    if (!useLiquidGlass ||
+        kIsWeb ||
+        defaultTargetPlatform != TargetPlatform.iOS ||
+        LiquidGlass.cachedCapabilities?.nativeGlass != true ||
+        actions.length < 2) {
+      return fallback;
+    }
+    final theme = Theme.of(context);
+    final widths = [
+      for (final action in actions)
+        FloatingFeedToolbar._modeActionWidth(context, action.label),
+    ];
+    final preferredWidth =
+        8 + widths.fold<double>(0, (sum, width) => sum + width);
+    final selectedIndex = actions.indexWhere((action) => action.isSelected);
+    return LayoutBuilder(
+      builder: (context, constraints) => SizedBox(
+        width: preferredWidth.clamp(0, constraints.maxWidth).toDouble(),
+        height: 48,
+        child: NativeGlassSegmentedControl(
+          items: [
+            for (final action in actions)
+              LiquidGlassSegment(
+                id: action.id ?? action.label,
+                label: action.label,
+                sfSymbol: action.sfSymbol,
+              ),
+          ],
+          currentIndex: selectedIndex < 0 ? 0 : selectedIndex,
+          onChanged: (index) => actions[index].onPressed(),
+          segmentWidths: widths,
+          fontSize: MediaQuery.textScalerOf(
+            context,
+          ).scale(theme.textTheme.labelLarge?.fontSize ?? 14),
+          selectedColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
   }
 }
 

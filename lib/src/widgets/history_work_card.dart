@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../utils/app_page_route.dart';
 import '../models/history_record.dart';
 import '../models/download_task.dart';
 import '../providers/auth_provider.dart';
@@ -63,7 +64,7 @@ class HistoryWorkCard extends ConsumerWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            AppPageRoute(
               builder: (context) => WorkDetailScreen(
                 work: work,
                 initialCoverImageProvider: initialCoverImageProvider,

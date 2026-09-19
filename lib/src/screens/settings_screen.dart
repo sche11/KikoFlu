@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import 'dart:io';
 
@@ -193,7 +194,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           subtitle: S.of(context).accountManagementSubtitle,
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
+              AppPageRoute(
                 builder: (context) => const AccountManagementScreen(),
               ),
             );
@@ -207,7 +208,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               : S.of(context).privacyModeDisabled,
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
+              AppPageRoute(
                 builder: (context) => const PrivacyModeSettingsScreen(),
               ),
             );
@@ -229,7 +230,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: S.of(context).permissionManagementSubtitle,
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
+                AppPageRoute(
                   builder: (context) => const PermissionsScreen(),
                 ),
               );
@@ -279,7 +280,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
+                AppPageRoute(
                   builder: (context) => const FloatingLyricStyleScreen(),
                 ),
               );
@@ -375,7 +376,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           subtitle: S.of(context).downloadPathSubtitle,
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
+              AppPageRoute(
                 builder: (context) => const DownloadPathSettingsScreen(),
               ),
             );
@@ -437,7 +438,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           subtitle: S.of(context).themeSettingsSubtitle,
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
+              AppPageRoute(
                 builder: (context) => const ThemeSettingsScreen(),
               ),
             );
@@ -474,7 +475,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           subtitle: S.of(context).uiSettingsSubtitle,
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const UiSettingsScreen()),
+              AppPageRoute(builder: (context) => const UiSettingsScreen()),
             );
           },
         ),
@@ -484,7 +485,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           subtitle: S.of(context).preferenceSettingsSubtitle,
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
+              AppPageRoute(
                 builder: (context) => const PreferencesScreen(),
               ),
             );
@@ -497,7 +498,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () {
             Navigator.of(
               context,
-            ).push(MaterialPageRoute(builder: (context) => const LogScreen()));
+            ).push(AppPageRoute(builder: (context) => const LogScreen()));
           },
         ),
         Consumer(
@@ -584,7 +585,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const AboutScreen()),
+                  AppPageRoute(builder: (context) => const AboutScreen()),
                 );
               },
             );

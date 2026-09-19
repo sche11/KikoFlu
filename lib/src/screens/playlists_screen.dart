@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/playlists_provider.dart';
 import '../providers/auth_provider.dart';
@@ -573,7 +574,7 @@ class _PlaylistsScreenState extends ConsumerState<PlaylistsScreen>
         playlist: playlist,
         onTap: () async {
           final deleted = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(
+            AppPageRoute(
               builder: (context) => PlaylistDetailScreen(
                 playlistId: playlist.id,
                 playlistName: playlist.displayName,

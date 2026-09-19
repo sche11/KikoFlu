@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../utils/app_page_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../models/user.dart';
 import '../providers/auth_provider.dart';
@@ -80,7 +81,7 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
                 onPressed: () {
                   Navigator.of(context)
                       .push(
-                        MaterialPageRoute(
+                        AppPageRoute(
                           builder: (context) => const LoginScreen(),
                         ),
                       )
@@ -122,7 +123,7 @@ class _UserSwitchScreenState extends ConsumerState<UserSwitchScreen> {
                       onPressed: () {
                         Navigator.of(context)
                             .push(
-                              MaterialPageRoute(
+                              AppPageRoute(
                                 builder: (context) => const LoginScreen(),
                               ),
                             )
