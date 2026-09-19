@@ -20,6 +20,9 @@ public class LiquidGlassContainerPlugin: NSObject, FlutterPlugin {
     registrar.register(
       NativeSegmentedControlViewFactory(messenger: registrar.messenger()),
       withId: "real_liquid_glass/segmented_control")
+    registrar.register(
+      NativeNavigationRailViewFactory(messenger: registrar.messenger()),
+      withId: "real_liquid_glass/navigation_rail")
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

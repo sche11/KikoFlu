@@ -66,8 +66,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   final _conditionsScrollController = ScrollController(); // 用于搜索条件横向滚动
   final List<SearchCondition> _searchConditions = [];
   Key _autocompleteKey = UniqueKey(); // 用于强制刷新 Autocomplete
-  FocusNode _searchFocusNode =
-      FocusNode(); // 用于控制焦点（非 final，因为会在 Autocomplete 中重新赋值）
 
   SearchType _currentSearchType = SearchType.keyword;
   bool _isExcludeMode = false; // 是否处于反选（排除）模式
@@ -95,7 +93,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   void dispose() {
     _conditionsScrollController.dispose();
     _searchController.dispose();
-    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -499,17 +496,39 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         ),
         const SizedBox(height: 12),
       ],
-      FloatingToolbarSurface(
-        padding: const EdgeInsets.all(4),
-        child: SizedBox(
-          height: 48,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: SearchType.values
-                  .map((type) => _buildSearchTypeButton(type, theme))
-                  .toList(),
+      FloatingToolbarSegmentedControl(
+        actions: [
+          for (final type in SearchType.values)
+            FloatingFeedModeAction(
+              id: type.name,
+              icon: _getSearchTypeIcon(type),
+              selectedSfSymbol: _isExcludeMode && type == _currentSearchType
+                  ? 'minus.circle'
+                  : 'checkmark',
+              label: type.localizedLabel(context),
+              isSelected: type == _currentSearchType,
+              onPressed: () => _selectSearchType(type),
+            ),
+        ],
+        onReselected: (index) => _selectSearchType(SearchType.values[index]),
+        selectedColor: _isExcludeMode
+            ? theme.colorScheme.onErrorContainer
+            : null,
+        selectedBackgroundColor: _isExcludeMode
+            ? theme.colorScheme.errorContainer
+            : null,
+        fallback: FloatingToolbarSurface(
+          padding: const EdgeInsets.all(4),
+          child: SizedBox(
+            height: 48,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: SearchType.values
+                    .map((type) => _buildSearchTypeButton(type, theme))
+                    .toList(),
+              ),
             ),
           ),
         ),
@@ -671,7 +690,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                       },
                       fieldViewBuilder:
                           (context, controller, focusNode, onSubmitted) {
-                            _searchFocusNode = focusNode;
                             controller.text = _searchController.text;
                             controller.addListener(() {
                               _searchController.text = controller.text;
@@ -860,6 +878,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     }
   }
 
+  void _selectSearchType(SearchType type) {
+    final supportsExclude =
+        type == SearchType.tag ||
+        type == SearchType.va ||
+        type == SearchType.circle;
+    setState(() {
+      if (_currentSearchType == type && supportsExclude) {
+        _isExcludeMode = !_isExcludeMode;
+      } else {
+        _currentSearchType = type;
+        _isExcludeMode = false;
+        _searchController.clear();
+        _autocompleteKey = UniqueKey();
+        if (supportsExclude) _loadSuggestions();
+      }
+    });
+  }
+
   Widget _buildSearchTypeButton(SearchType type, ThemeData theme) {
     final supportsExclude =
         type == SearchType.tag ||
@@ -878,21 +914,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(UiRadii.capsule),
-            onTap: () {
-              setState(() {
-                if (isCurrentType && supportsExclude) {
-                  _isExcludeMode = !_isExcludeMode;
-                } else {
-                  _currentSearchType = type;
-                  _isExcludeMode = false;
-                  _searchController.clear();
-                  _autocompleteKey = UniqueKey();
-                  if (supportsExclude) {
-                    _loadSuggestions();
-                  }
-                }
-              });
-            },
+            onTap: () => _selectSearchType(type),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               curve: Curves.easeOut,

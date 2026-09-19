@@ -33,6 +33,9 @@ private final class NativeSegmentedControlPlatformView: NSObject, FlutterPlatfor
     host.onSelection = { [weak self] id in
       self?.channel.invokeMethod("selected", arguments: ["id": id])
     }
+    host.onReselection = { [weak self] id in
+      self?.channel.invokeMethod("reselected", arguments: ["id": id])
+    }
     host.apply(args)
     channel.setMethodCallHandler { [weak self] call, result in
       guard let self else { return result(FlutterMethodNotImplemented) }
@@ -52,17 +55,22 @@ private final class NativeSegmentedControlPlatformView: NSObject, FlutterPlatfor
 }
 
 /// Let UIKit own the entire control: the glass, pressed selection lens, touch
-/// tracking and animation. Do not overlay Flutter labels or a second glass
-/// background; those cannot participate in the system's content magnification.
-private final class SegmentedControlHostView: UIView {
+/// tracking and animation. Flutter supplies the same regular glass backdrop as
+/// adjacent toolbar buttons; labels stay native to participate in the lens.
+private final class SegmentedControlHostView: UIView, UIGestureRecognizerDelegate {
   private struct Item: Equatable {
     let id: String
     let label: String
     let symbol: String?
+    let selectedSymbol: String?
   }
 
   private let scrollView = SegmentedControlScrollView()
   private let control = UISegmentedControl()
+  private lazy var reselectTap = UITapGestureRecognizer(target: self, action: #selector(didTapSelected))
+  private var reselectId: String?
+  private var tapStartedAt: TimeInterval = 0
+  private var allowReselect = false
   private var items: [Item] = []
   private var widths: [CGFloat] = []
   private var normalImages: [UIImage] = []
@@ -75,6 +83,7 @@ private final class SegmentedControlHostView: UIView {
   private var rtl = false
   private var revealSelection = false
   var onSelection: ((String) -> Void)?
+  var onReselection: ((String) -> Void)?
 
   override init(frame: CGRect) {
     super.init(frame: frame)
@@ -91,6 +100,10 @@ private final class SegmentedControlHostView: UIView {
     addSubview(scrollView)
     control.addTarget(self, action: #selector(selectionChanged), for: .valueChanged)
     control.isAccessibilityElement = false
+    reselectTap.cancelsTouchesInView = false
+    reselectTap.delaysTouchesEnded = false
+    reselectTap.delegate = self
+    control.addGestureRecognizer(reselectTap)
   }
 
   @available(*, unavailable)
@@ -102,15 +115,19 @@ private final class SegmentedControlHostView: UIView {
       guard let id = item["id"] as? String, let label = item["label"] as? String else {
         return nil
       }
-      return Item(id: id, label: label, symbol: item["symbol"] as? String)
+      return Item(id: id, label: label, symbol: item["symbol"] as? String,
+        selectedSymbol: item["selectedSymbol"] as? String)
     }
     guard nextItems.count >= 2 else { return }
     let nextFontSize = CGFloat((args["fontSize"] as? NSNumber)?.doubleValue ?? 14)
     let nextNormalColor = (args["foregroundColor"] as? NSNumber)?.int64Value ?? normalColor
     let nextSelectedColor = (args["selectedColor"] as? NSNumber)?.int64Value ?? selectedColor
     let nextRTL = args["rtl"] as? Bool ?? false
-    let itemsChanged = items != nextItems
-    let imagesChanged = itemsChanged || fontSize != nextFontSize
+    let itemsChanged = items.map(\.id) != nextItems.map(\.id)
+      || items.map(\.label) != nextItems.map(\.label)
+    // Include/exclude changes only swap an icon and tint. Rebuilding all
+    // segments here would cancel the lens while sliding away from exclusion.
+    let imagesChanged = items != nextItems || fontSize != nextFontSize
       || normalColor != nextNormalColor || selectedColor != nextSelectedColor || rtl != nextRTL
     let nextId = args["selectedId"] as? String
     let index = nextItems.firstIndex(where: { $0.id == nextId }) ?? 0
@@ -124,6 +141,11 @@ private final class SegmentedControlHostView: UIView {
     selectedColor = nextSelectedColor
     rtl = nextRTL
     selectedId = items[index].id
+    allowReselect = args["allowReselect"] as? Bool ?? false
+    if reselectTap.isEnabled != allowReselect { reselectTap.isEnabled = allowReselect }
+    if let color = args["selectedBackgroundColor"] as? NSNumber {
+      control.selectedSegmentTintColor = GlassHostView.color(argb: color.int64Value)
+    }
     if let dark = args["dark"] as? Bool {
       overrideUserInterfaceStyle = dark ? .dark : .light
     }
@@ -137,14 +159,19 @@ private final class SegmentedControlHostView: UIView {
       buildAccessibilityElements()
     }
     if imagesChanged {
-      normalImages = items.map { image(for: $0, color: normalColor) }
-      selectedImages = items.map { image(for: $0, color: selectedColor) }
+      normalImages = items.map { image(for: $0, symbolName: $0.symbol, color: normalColor) }
+      selectedImages = items.map {
+        image(for: $0, symbolName: $0.selectedSymbol ?? $0.symbol, color: selectedColor)
+      }
     }
     let requestedWidths = args["widths"] as? [NSNumber] ?? []
     let nextWidths = items.indices.map { index in
       let requested = requestedWidths.indices.contains(index)
         ? CGFloat(requestedWidths[index].doubleValue) : 0
-      return max(requested, normalImages[index].size.width + 24)
+      // Reserve the selected icon too, so drag targets do not move underneath
+      // the finger when search selection adds its checkmark.
+      let imageWidth = max(normalImages[index].size.width, selectedImages[index].size.width)
+      return max(requested, imageWidth + 24)
     }
     if itemsChanged || widths != nextWidths {
       widths = nextWidths
@@ -189,6 +216,27 @@ private final class SegmentedControlHostView: UIView {
     DispatchQueue.main.async { [weak self] in self?.setNeedsLayout() }
   }
 
+  func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+    let index = control.selectedSegmentIndex
+    reselectId = items.indices.contains(index) && segmentRect(at: index).contains(touch.location(in: control))
+      ? items[index].id : nil
+    tapStartedAt = ProcessInfo.processInfo.systemUptime
+    return reselectId != nil
+  }
+
+  func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+    shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    // Observe a tap without claiming UIKit's native press/drag selection lens.
+    true
+  }
+
+  @objc private func didTapSelected() {
+    defer { reselectId = nil }
+    guard allowReselect, let id = reselectId, id == selectedId,
+      ProcessInfo.processInfo.systemUptime - tapStartedAt < 0.45 else { return }
+    onReselection?(id)
+  }
+
   private func updateSelectionAppearance() {
     for index in items.indices {
       let selected = index == control.selectedSegmentIndex
@@ -214,8 +262,12 @@ private final class SegmentedControlHostView: UIView {
         guard let self, let index = self.items.firstIndex(where: { $0.id == item.id }) else {
           return false
         }
-        self.control.selectedSegmentIndex = index
-        self.selectionChanged()
+        if self.selectedId == item.id && self.allowReselect {
+          self.onReselection?(item.id)
+        } else {
+          self.control.selectedSegmentIndex = index
+          self.selectionChanged()
+        }
         return true
       }
       return element
@@ -223,14 +275,14 @@ private final class SegmentedControlHostView: UIView {
     control.accessibilityElements = segments
   }
 
-  private func image(for item: Item, color: Int64) -> UIImage {
+  private func image(for item: Item, symbolName: String?, color: Int64) -> UIImage {
     let attributes: [NSAttributedString.Key: Any] = [
       .font: UIFont.systemFont(ofSize: fontSize, weight: .semibold),
       .foregroundColor: GlassHostView.color(argb: color),
     ]
     let title = item.label as NSString
     let textSize = title.size(withAttributes: attributes)
-    let symbol = item.symbol.flatMap {
+    let symbol = symbolName.flatMap {
       UIImage(systemName: $0, withConfiguration: UIImage.SymbolConfiguration(pointSize: 18))?
         .withTintColor(GlassHostView.color(argb: color), renderingMode: .alwaysOriginal)
     }

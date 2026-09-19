@@ -15,3 +15,4 @@ export 'src/glass_group.dart'
     show LiquidGlassGroup, LiquidGlassGroupState, GlassRegion;
 export 'src/glass_style.dart';
 export 'src/segmented_control.dart';
+export 'src/navigation_rail.dart';

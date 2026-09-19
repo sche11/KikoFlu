@@ -14,7 +14,12 @@ KikoFlu includes these local adjustments:
   owns the pressed selection lens and drag tracking; icon/label content and
   accessibility stay native. Stable item IDs synchronize selection with Flutter,
   and a native scroll view accommodates narrow layouts. Other platforms and
-  older iOS versions keep the app's existing controls.
+  older iOS versions keep the app's existing controls. The app supplies its
+  shared toolbar material and selection tint. Optional reselect callbacks and
+  selected symbols retain the search screen's include/exclude gesture.
+- Add an iOS 26+ vertical navigation bridge using public `UIButton` glass
+  configurations, with native press effects, selection colors and update badges.
+  UIKit also handles scrolling when the landscape viewport is too short.
 
 The local mirror can be removed after an upstream release includes equivalent
 behavior.
